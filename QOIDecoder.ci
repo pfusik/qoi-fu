@@ -1,0 +1,123 @@
+// QOIDecoder.ci - decoder of the "Quite OK Image" format
+//
+// Copyright (C) 2021 Piotr Fusik
+//
+// MIT License:
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+public class QOIDecoder
+{
+	int Width;
+	int Height;
+	int[]# Pixels;
+
+	public QOIDecoder()
+	{
+	}
+
+	public bool Decode!(byte[] encoded, int encodedSize)
+	{
+		const int headerSize = 12;
+		const int paddingSize = 4;
+		if (encoded == null
+		 || encodedSize < headerSize + 1 + paddingSize
+		 || encoded[0] != 'q' || encoded[1] != 'o' || encoded[2] != 'i' || encoded[3] != 'f')
+			return false;
+		int dataSize = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];
+		if (headerSize + dataSize != encodedSize)
+			return false;
+		int width = encoded[4] << 8 | encoded[5];
+		int height = encoded[6] << 8 | encoded[7];
+		if (height > 0x7fffffff / width)
+			return false;
+		int pixelsSize = width * height;
+		int[]# pixels = new int[pixelsSize];
+
+		encodedSize -= paddingSize;
+		int encodedOffset = headerSize;
+		int[64] index = 0;
+		int pixel = 0xff << 24;
+		for (int pixelsOffset = 0; pixelsOffset < pixelsSize; ) {
+			if (encodedOffset >= encodedSize)
+				return false;
+			int e = encoded[encodedOffset++];
+			if (e < 0x80) {
+				if (e < 0x40) // 00iiiiii
+					pixels[pixelsOffset++] = pixel = index[e];
+				else { // 01?rrrrr [rrrrrrrr]
+					int run = 1 + (e & 0x1f);
+					if (e >= 0x60) // 011rrrrr rrrrrrrr
+						run += 32 + encoded[encodedOffset++];
+					if (pixelsOffset + run > pixelsSize)
+						return false;
+					pixels.Fill(pixel, pixelsOffset, run);
+					pixelsOffset += run;
+				}
+				continue;
+			}
+			else if (e < 0xe0) {
+				if (e < 0xc0) // 10rrggbb
+					pixel = (pixel & 0xff << 24)
+						| (pixel + ((e >> 4) - 8 - 1 << 16) & 0xff << 16)
+						| (pixel + ((e >> 2 & 3) - 1 << 8) & 0xff << 8)
+						| (pixel + ((e & 3) - 1) & 0xff);
+				else { // 110rrrrr ggggbbbb
+					int d = encoded[encodedOffset++];
+					pixel = (pixel & 0xff << 24)
+						| (pixel + (e - 0xc0 - 15 << 16) & 0xff << 16)
+						| (pixel + ((d >> 4) - 7 << 8) & 0xff << 8)
+						| (pixel + ((d & 0xf) - 7) & 0xff);
+				}
+			}
+			else if (e < 0xf0) { // 1110rrrr rgggggbb bbbaaaaa
+				e = e << 16 | encoded[encodedOffset] << 8 | encoded[encodedOffset + 1];
+				encodedOffset += 2;
+				pixel = (pixel + ((e & 0x1f) - 15 << 24) & 0xff << 24)
+					| (pixel + ((e >> 15) - 0x1c0 - 15 << 16) & 0xff << 16)
+					| (pixel + ((e >> 10 & 0x1f) - 15 << 8) & 0xff << 8)
+					| (pixel + (e >> 5 & 0x1f) - 15 & 0xff);
+			}
+			else { // 1111rgba [rrrrrrrr] [gggggggg] [bbbbbbbb] [aaaaaaaa]
+				if ((e & 8) != 0)
+					pixel = (pixel & ~(0xff << 16)) | encoded[encodedOffset++] << 16;
+				if ((e & 4) != 0)
+					pixel = (pixel & ~(0xff << 8)) | encoded[encodedOffset++] << 8;
+				if ((e & 2) != 0)
+					pixel = (pixel & ~0xff) | encoded[encodedOffset++];
+				if ((e & 1) != 0)
+					pixel = (pixel & ~(0xff << 24)) | encoded[encodedOffset++] << 24;
+			}
+			pixels[pixelsOffset++] = index[((pixel >> 24) ^ (pixel >> 16) ^ (pixel >> 8) ^ pixel) & 0x3f] = pixel;
+		}
+		if (encodedOffset != encodedSize)
+			return false;
+
+		Width = width;
+		Height = height;
+		Pixels = pixels;
+		return true;
+	}
+
+	public int GetWidth() => Width;
+
+	public int GetHeight() => Height;
+
+	public int[] GetPixels() => Pixels;
+}
