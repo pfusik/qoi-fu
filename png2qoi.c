@@ -28,8 +28,7 @@
 #include <string.h>
 #include <png.h>
 
-#include "QOIEncoder.h"
-#include "QOIDecoder.h"
+#include "QOI.h"
 
 static void usage(void)
 {

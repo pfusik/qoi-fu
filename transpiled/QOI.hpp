@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <memory>
 class QOIEncoder;
+class QOIDecoder;
 
 class QOIEncoder
 {
@@ -18,4 +19,22 @@ private:
 	static constexpr int headerSize = 14;
 	std::shared_ptr<uint8_t[]> encoded;
 	int encodedSize;
+};
+
+class QOIDecoder
+{
+public:
+	QOIDecoder();
+	bool decode(uint8_t const * encoded, int encodedSize);
+	int getWidth() const;
+	int getHeight() const;
+	int const * getPixels() const;
+	bool getAlpha() const;
+	int getColorspace() const;
+private:
+	int width;
+	int height;
+	std::shared_ptr<int[]> pixels;
+	bool alpha;
+	int colorspace;
 };
