@@ -7,13 +7,9 @@ public class QOIEncoder
 	{
 	}
 
-	public static final int COLORSPACE_SRGB = 0;
+	static final int HEADER_SIZE = 14;
 
-	public static final int COLORSPACE_SRGB_LINEAR_ALPHA = 1;
-
-	public static final int COLORSPACE_LINEAR = 15;
-
-	private static final int HEADER_SIZE = 14;
+	static final int PADDING_SIZE = 4;
 	private byte[] encoded;
 	private int encodedSize;
 

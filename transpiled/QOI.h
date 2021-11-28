@@ -8,14 +8,14 @@ extern "C" {
 typedef struct QOIEncoder QOIEncoder;
 typedef struct QOIDecoder QOIDecoder;
 
+#define QOIColorspace_SRGB 0
+
+#define QOIColorspace_SRGB_LINEAR_ALPHA 1
+
+#define QOIColorspace_LINEAR 15
+
 QOIEncoder *QOIEncoder_New(void);
 void QOIEncoder_Delete(QOIEncoder *self);
-
-#define QOIEncoder_COLORSPACE_SRGB 0
-
-#define QOIEncoder_COLORSPACE_SRGB_LINEAR_ALPHA 1
-
-#define QOIEncoder_COLORSPACE_LINEAR 15
 
 bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha, int colorspace);
 

@@ -22,16 +22,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+public static class QOIColorspace
+{
+	public const int Srgb = 0x00;
+	public const int SrgbLinearAlpha = 0x01;
+	public const int Linear = 0x0f;
+}
+
 public class QOIEncoder
 {
-	public const int ColorspaceSrgb = 0x00;
-	public const int ColorspaceSrgbLinearAlpha = 0x01;
-	public const int ColorspaceLinear = 0x0f;
+	internal const int HeaderSize = 14;
+	internal const int PaddingSize = 4;
 
 	byte[]# Encoded;
 	int EncodedSize;
-
-	const int HeaderSize = 14;
 
 	public QOIEncoder()
 	{
@@ -39,13 +43,12 @@ public class QOIEncoder
 
 	public bool Encode!(int width, int height, int[] pixels, bool alpha, int colorspace)
 	{
-		const int paddingSize = 4;
 		if (width <= 0 || height <= 0
-		 || height > (0x7fffffff - HeaderSize - paddingSize) / 5 / width
+		 || height > (0x7fffffff - HeaderSize - PaddingSize) / 5 / width
 		 || pixels == null)
 			return false;
 		int pixelsSize = width * height;
-		byte[]# encoded = new byte[HeaderSize + pixelsSize * (alpha ? 5 : 4) + paddingSize];
+		byte[]# encoded = new byte[HeaderSize + pixelsSize * (alpha ? 5 : 4) + PaddingSize];
 		encoded[0] = 'q';
 		encoded[1] = 'o';
 		encoded[2] = 'i';
@@ -134,9 +137,9 @@ public class QOIEncoder
 			}
 		}
 
-		encoded.Fill(0, encodedOffset, paddingSize);
+		encoded.Fill(0, encodedOffset, PaddingSize);
 		Encoded = encoded;
-		EncodedSize = encodedOffset + paddingSize;
+		EncodedSize = encodedOffset + PaddingSize;
 		return true;
 	}
 
@@ -159,10 +162,8 @@ public class QOIDecoder
 
 	public bool Decode!(byte[] encoded, int encodedSize)
 	{
-		const int headerSize = 14;
-		const int paddingSize = 4;
 		if (encoded == null
-		 || encodedSize < headerSize + 1 + paddingSize
+		 || encodedSize < QOIEncoder.HeaderSize + 1 + QOIEncoder.PaddingSize
 		 || encoded[0] != 'q' || encoded[1] != 'o' || encoded[2] != 'i' || encoded[3] != 'f')
 			return false;
 		int width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];
@@ -172,8 +173,8 @@ public class QOIDecoder
 		int pixelsSize = width * height;
 		int[]# pixels = new int[pixelsSize];
 
-		encodedSize -= paddingSize;
-		int encodedOffset = headerSize;
+		encodedSize -= QOIEncoder.PaddingSize;
+		int encodedOffset = QOIEncoder.HeaderSize;
 		int[64] index = 0;
 		int pixel = 0xff << 24;
 		for (int pixelsOffset = 0; pixelsOffset < pixelsSize; ) {

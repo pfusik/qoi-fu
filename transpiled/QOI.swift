@@ -1,18 +1,24 @@
 // Generated automatically with "cito". Do not edit.
 
+public class QOIColorspace
+{
+
+	public static let srgb = 0
+
+	public static let srgbLinearAlpha = 1
+
+	public static let linear = 15
+}
+
 public class QOIEncoder
 {
 	public init()
 	{
 	}
 
-	public static let colorspaceSrgb = 0
+	fileprivate static let headerSize = 14
 
-	public static let colorspaceSrgbLinearAlpha = 1
-
-	public static let colorspaceLinear = 15
-
-	private static let headerSize = 14
+	fileprivate static let paddingSize = 4
 
 	private var encoded : ArrayRef<UInt8>?
 

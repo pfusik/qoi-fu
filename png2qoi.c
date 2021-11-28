@@ -74,7 +74,7 @@ static bool png2qoi(const char *input_file, FILE *f)
 	}
 
 	QOIEncoder *qoi = QOIEncoder_New();
-	if (!QOIEncoder_Encode(qoi, png.width, png.height, pixels, alpha, QOIEncoder_COLORSPACE_SRGB)) {
+	if (!QOIEncoder_Encode(qoi, png.width, png.height, pixels, alpha, QOIColorspace_SRGB)) {
 		QOIEncoder_Delete(qoi);
 		free(pixels);
 		fprintf(stderr, "png2qoi: %s: error encoding\n", input_file);

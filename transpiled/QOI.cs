@@ -1,19 +1,25 @@
 // Generated automatically with "cito". Do not edit.
 using System;
 
+public static class QOIColorspace
+{
+
+	public const int Srgb = 0;
+
+	public const int SrgbLinearAlpha = 1;
+
+	public const int Linear = 15;
+}
+
 public class QOIEncoder
 {
 	public QOIEncoder()
 	{
 	}
 
-	public const int ColorspaceSrgb = 0;
+	internal const int HeaderSize = 14;
 
-	public const int ColorspaceSrgbLinearAlpha = 1;
-
-	public const int ColorspaceLinear = 15;
-
-	const int HeaderSize = 14;
+	internal const int PaddingSize = 4;
 
 	byte[] Encoded;
 

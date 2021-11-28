@@ -2,15 +2,23 @@
 
 "use strict";
 
+function QOIColorspace()
+{
+}
+
+QOIColorspace.SRGB = 0;
+
+QOIColorspace.SRGB_LINEAR_ALPHA = 1;
+
+QOIColorspace.LINEAR = 15;
+
 function QOIEncoder()
 {
 }
 
-QOIEncoder.COLORSPACE_SRGB = 0;
+QOIEncoder.HEADER_SIZE = 14;
 
-QOIEncoder.COLORSPACE_SRGB_LINEAR_ALPHA = 1;
-
-QOIEncoder.COLORSPACE_LINEAR = 15;
+QOIEncoder.PADDING_SIZE = 4;
 
 QOIEncoder.prototype.encode = function(width, height, pixels, alpha, colorspace)
 {

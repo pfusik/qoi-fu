@@ -1,13 +1,19 @@
 # Generated automatically with "cito". Do not edit.
 import array
 
+class QOIColorspace:
+
+	SRGB = 0
+
+	SRGB_LINEAR_ALPHA = 1
+
+	LINEAR = 15
+
 class QOIEncoder:
 
-	COLORSPACE_SRGB = 0
+	_HEADER_SIZE = 14
 
-	COLORSPACE_SRGB_LINEAR_ALPHA = 1
-
-	COLORSPACE_LINEAR = 15
+	_PADDING_SIZE = 4
 
 	def __init__(self):
 		pass

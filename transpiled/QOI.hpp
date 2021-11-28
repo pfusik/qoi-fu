@@ -2,21 +2,31 @@
 #pragma once
 #include <cstdint>
 #include <memory>
+class QOIColorspace;
 class QOIEncoder;
 class QOIDecoder;
+
+class QOIColorspace
+{
+public:
+	static constexpr int srgb = 0;
+	static constexpr int srgbLinearAlpha = 1;
+	static constexpr int linear = 15;
+private:
+	QOIColorspace() = delete;
+};
 
 class QOIEncoder
 {
 public:
 	QOIEncoder();
-	static constexpr int colorspaceSrgb = 0;
-	static constexpr int colorspaceSrgbLinearAlpha = 1;
-	static constexpr int colorspaceLinear = 15;
 	bool encode(int width, int height, int const * pixels, bool alpha, int colorspace);
 	uint8_t const * getEncoded() const;
 	int getEncodedSize() const;
-private:
+public:
 	static constexpr int headerSize = 14;
+	static constexpr int paddingSize = 4;
+private:
 	std::shared_ptr<uint8_t[]> encoded;
 	int encodedSize;
 };
