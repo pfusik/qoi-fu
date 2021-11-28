@@ -8,11 +8,14 @@ class QOIEncoder
 {
 public:
 	QOIEncoder();
-	bool encode(int width, int height, int const * pixels, bool alpha);
+	static constexpr int colorspaceSrgb = 0;
+	static constexpr int colorspaceSrgbLinearAlpha = 1;
+	static constexpr int colorspaceLinear = 15;
+	bool encode(int width, int height, int const * pixels, bool alpha, int colorspace);
 	uint8_t const * getEncoded() const;
 	int getEncodedSize() const;
 private:
-	static constexpr int headerSize = 12;
+	static constexpr int headerSize = 14;
 	std::shared_ptr<uint8_t[]> encoded;
 	int encodedSize;
 };

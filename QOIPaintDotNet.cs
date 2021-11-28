@@ -34,8 +34,8 @@ using PaintDotNet;
 [assembly: AssemblyTitle("Paint.NET Quite OK Image (QOI) plugin")]
 [assembly: AssemblyCompany("Piotr Fusik")]
 [assembly: AssemblyCopyright("Copyright © 2021")]
-[assembly: AssemblyVersion("0.0.1.0")]
-[assembly: AssemblyFileVersion("0.0.1.0")]
+[assembly: AssemblyVersion("0.0.2.0")]
+[assembly: AssemblyFileVersion("0.0.2.0")]
 
 namespace QOI.PaintDotNet
 {
@@ -62,8 +62,9 @@ namespace QOI.PaintDotNet
 			int width = qoi.GetWidth();
 
 			// Pass to Paint.NET
+			PixelFormat pixelFormat = qoi.GetAlpha() ? PixelFormat.Format32bppArgb : PixelFormat.Format32bppRgb;
 			GCHandle pinnedPixels = GCHandle.Alloc(qoi.GetPixels(), GCHandleType.Pinned);
-			using (Bitmap bitmap = new Bitmap(width, qoi.GetHeight(), width << 2, PixelFormat.Format32bppArgb, pinnedPixels.AddrOfPinnedObject())) {
+			using (Bitmap bitmap = new Bitmap(width, qoi.GetHeight(), width << 2, pixelFormat, pinnedPixels.AddrOfPinnedObject())) {
 				pinnedPixels.Free();
 				return Document.FromImage(bitmap);
 			}

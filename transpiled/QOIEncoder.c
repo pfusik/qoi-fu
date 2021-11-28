@@ -85,22 +85,28 @@ void QOIEncoder_Delete(QOIEncoder *self)
 	free(self);
 }
 
-bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha)
+bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha, int colorspace)
 {
-	if (width <= 0 || width >= 65536 || height <= 0 || height >= 65536 || height > 429496726 / width || pixels == NULL)
+	if (width <= 0 || height <= 0 || height > 429496725 / width || pixels == NULL)
 		return false;
 	int pixelsSize = width * height;
-	uint8_t *encoded = (uint8_t *) CiShared_Make(12 + pixelsSize * (alpha ? 5 : 4) + 4, sizeof(uint8_t), NULL, NULL);
+	uint8_t *encoded = (uint8_t *) CiShared_Make(14 + pixelsSize * (alpha ? 5 : 4) + 4, sizeof(uint8_t), NULL, NULL);
 	encoded[0] = 113;
 	encoded[1] = 111;
 	encoded[2] = 105;
 	encoded[3] = 102;
-	encoded[4] = (uint8_t) (width >> 8);
-	encoded[5] = (uint8_t) width;
-	encoded[6] = (uint8_t) (height >> 8);
-	encoded[7] = (uint8_t) height;
+	encoded[4] = (uint8_t) (width >> 24);
+	encoded[5] = (uint8_t) (width >> 16);
+	encoded[6] = (uint8_t) (width >> 8);
+	encoded[7] = (uint8_t) width;
+	encoded[8] = (uint8_t) (height >> 24);
+	encoded[9] = (uint8_t) (height >> 16);
+	encoded[10] = (uint8_t) (height >> 8);
+	encoded[11] = (uint8_t) height;
+	encoded[12] = (uint8_t) (alpha ? 4 : 3);
+	encoded[13] = (uint8_t) colorspace;
 	int index[64] = { 0 };
-	int encodedOffset = 12;
+	int encodedOffset = 14;
 	int lastPixel = -16777216;
 	int run = 0;
 	for (int pixelsOffset = 0; pixelsOffset < pixelsSize;) {
@@ -133,19 +139,19 @@ bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixel
 				int dg = g - (lastPixel >> 8 & 255);
 				int db = b - (lastPixel & 255);
 				int da = a - (lastPixel >> 24 & 255);
-				if (dr >= -15 && dr <= 16 && dg >= -15 && dg <= 16 && db >= -15 && db <= 16 && da >= -15 && da <= 16) {
-					if (da == 0 && dr >= -1 && dr <= 2 && dg >= -1 && dg <= 2 && db >= -1 && db <= 2)
-						encoded[encodedOffset++] = (uint8_t) (149 + (dr << 4) + (dg << 2) + db);
-					else if (da == 0 && dg >= -7 && dg <= 8 && db >= -7 && db <= 8) {
-						encoded[encodedOffset++] = (uint8_t) (207 + dr);
-						encoded[encodedOffset++] = (uint8_t) (119 + (dg << 4) + db);
+				if (dr >= -16 && dr <= 15 && dg >= -16 && dg <= 15 && db >= -16 && db <= 15 && da >= -16 && da <= 15) {
+					if (da == 0 && dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
+						encoded[encodedOffset++] = (uint8_t) (170 + (dr << 4) + (dg << 2) + db);
+					else if (da == 0 && dg >= -8 && dg <= 7 && db >= -8 && db <= 7) {
+						encoded[encodedOffset++] = (uint8_t) (208 + dr);
+						encoded[encodedOffset++] = (uint8_t) (136 + (dg << 4) + db);
 					}
 					else {
-						dr += 15;
+						dr += 16;
 						encoded[encodedOffset++] = (uint8_t) (224 + (dr >> 1));
-						db += 15;
-						encoded[encodedOffset++] = (uint8_t) (((dr & 1) << 7) + ((dg + 15) << 2) + (db >> 3));
-						encoded[encodedOffset++] = (uint8_t) (((db & 7) << 5) + da + 15);
+						db += 16;
+						encoded[encodedOffset++] = (uint8_t) (((dr & 1) << 7) + ((dg + 16) << 2) + (db >> 3));
+						encoded[encodedOffset++] = (uint8_t) (((db & 7) << 5) + da + 16);
 					}
 				}
 				else {
@@ -164,13 +170,8 @@ bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixel
 		}
 	}
 	memset(encoded + encodedOffset, 0, 4 * sizeof(uint8_t));
-	self->encodedSize = encodedOffset + 4;
-	int dataSize = self->encodedSize - 12;
-	encoded[8] = (uint8_t) (dataSize >> 24);
-	encoded[9] = (uint8_t) (dataSize >> 16);
-	encoded[10] = (uint8_t) (dataSize >> 8);
-	encoded[11] = (uint8_t) dataSize;
 	CiShared_Assign((void **) &self->encoded, CiShared_AddRef(encoded));
+	self->encodedSize = encodedOffset + 4;
 	CiShared_Release(encoded);
 	return true;
 }

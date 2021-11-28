@@ -24,20 +24,23 @@
 
 public class QOIEncoder
 {
+	public const int ColorspaceSrgb = 0x00;
+	public const int ColorspaceSrgbLinearAlpha = 0x01;
+	public const int ColorspaceLinear = 0x0f;
+
 	byte[]# Encoded;
 	int EncodedSize;
 
-	const int HeaderSize = 12;
+	const int HeaderSize = 14;
 
 	public QOIEncoder()
 	{
 	}
 
-	public bool Encode!(int width, int height, int[] pixels, bool alpha)
+	public bool Encode!(int width, int height, int[] pixels, bool alpha, int colorspace)
 	{
 		const int paddingSize = 4;
-		if (width <= 0 || width >= 1 << 16
-		 || height <= 0 || height >= 1 << 16
+		if (width <= 0 || height <= 0
 		 || height > (0x7fffffff - HeaderSize - paddingSize) / 5 / width
 		 || pixels == null)
 			return false;
@@ -47,10 +50,16 @@ public class QOIEncoder
 		encoded[1] = 'o';
 		encoded[2] = 'i';
 		encoded[3] = 'f';
-		encoded[4] = width >> 8;
-		encoded[5] = width & 0xff;
-		encoded[6] = height >> 8;
-		encoded[7] = height & 0xff;
+		encoded[4] = width >> 24;
+		encoded[5] = width >> 16 & 0xff;
+		encoded[6] = width >> 8 & 0xff;
+		encoded[7] = width & 0xff;
+		encoded[8] = height >> 24;
+		encoded[9] = height >> 16 & 0xff;
+		encoded[10] = height >> 8 & 0xff;
+		encoded[11] = height & 0xff;
+		encoded[12] = alpha ? 4 : 3;
+		encoded[13] = colorspace;
 
 		int[64] index = 0;
 		int encodedOffset = HeaderSize;
@@ -86,27 +95,27 @@ public class QOIEncoder
 					int dg = g - (lastPixel >> 8 & 0xff);
 					int db = b - (lastPixel & 0xff);
 					int da = a - (lastPixel >> 24 & 0xff);
-					if (dr >= -15 && dr <= 16
-					 && dg >= -15 && dg <= 16
-					 && db >= -15 && db <= 16
-					 && da >= -15 && da <= 16) {
+					if (dr >= -16 && dr <= 15
+					 && dg >= -16 && dg <= 15
+					 && db >= -16 && db <= 15
+					 && da >= -16 && da <= 15) {
 						if (da == 0
-						 && dr >= -1 && dr <= 2
-						 && dg >= -1 && dg <= 2
-						 && db >= -1 && db <= 2)
-							encoded[encodedOffset++] = 0x80 + (1 << 4) + (1 << 2) + 1 + (dr << 4) + (dg << 2) + db;
+						 && dr >= -2 && dr <= 1
+						 && dg >= -2 && dg <= 1
+						 && db >= -2 && db <= 1)
+							encoded[encodedOffset++] = 0x80 + (2 << 4) + (2 << 2) + 2 + (dr << 4) + (dg << 2) + db;
 						else if (da == 0
-						 && dg >= -7 && dg <= 8
-						 && db >= -7 && db <= 8) {
-							encoded[encodedOffset++] = 0xc0 + 15 + dr;
-							encoded[encodedOffset++] = (7 << 4) + 7 + (dg << 4) + db;
+						 && dg >= -8 && dg <= 7
+						 && db >= -8 && db <= 7) {
+							encoded[encodedOffset++] = 0xc0 + 16 + dr;
+							encoded[encodedOffset++] = (8 << 4) + 8 + (dg << 4) + db;
 						}
 						else {
-							dr += 15;
+							dr += 16;
 							encoded[encodedOffset++] = 0xe0 + (dr >> 1);
-							db += 15;
-							encoded[encodedOffset++] = ((dr & 1) << 7) + (dg + 15 << 2) + (db >> 3);
-							encoded[encodedOffset++] = ((db & 7) << 5) + da + 15;
+							db += 16;
+							encoded[encodedOffset++] = ((dr & 1) << 7) + (dg + 16 << 2) + (db >> 3);
+							encoded[encodedOffset++] = ((db & 7) << 5) + da + 16;
 						}
 					}
 					else {
@@ -126,13 +135,8 @@ public class QOIEncoder
 		}
 
 		encoded.Fill(0, encodedOffset, paddingSize);
-		EncodedSize = encodedOffset + paddingSize;
-		int dataSize = EncodedSize - HeaderSize;
-		encoded[8] = dataSize >> 24;
-		encoded[9] = (dataSize >> 16) & 0xff;
-		encoded[10] = (dataSize >> 8) & 0xff;
-		encoded[11] = dataSize & 0xff;
 		Encoded = encoded;
+		EncodedSize = encodedOffset + paddingSize;
 		return true;
 	}
 

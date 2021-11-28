@@ -27,6 +27,8 @@ public class QOIDecoder
 	int Width;
 	int Height;
 	int[]# Pixels;
+	bool Alpha;
+	int Colorspace;
 
 	public QOIDecoder()
 	{
@@ -34,18 +36,15 @@ public class QOIDecoder
 
 	public bool Decode!(byte[] encoded, int encodedSize)
 	{
-		const int headerSize = 12;
+		const int headerSize = 14;
 		const int paddingSize = 4;
 		if (encoded == null
 		 || encodedSize < headerSize + 1 + paddingSize
 		 || encoded[0] != 'q' || encoded[1] != 'o' || encoded[2] != 'i' || encoded[3] != 'f')
 			return false;
-		int dataSize = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];
-		if (headerSize + dataSize != encodedSize)
-			return false;
-		int width = encoded[4] << 8 | encoded[5];
-		int height = encoded[6] << 8 | encoded[7];
-		if (height > 0x7fffffff / width)
+		int width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];
+		int height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];
+		if (width <= 0 || height <= 0 || height > 0x7fffffff / width)
 			return false;
 		int pixelsSize = width * height;
 		int[]# pixels = new int[pixelsSize];
@@ -75,24 +74,24 @@ public class QOIDecoder
 			else if (e < 0xe0) {
 				if (e < 0xc0) // 10rrggbb
 					pixel = (pixel & 0xff << 24)
-						| (pixel + ((e >> 4) - 8 - 1 << 16) & 0xff << 16)
-						| (pixel + ((e >> 2 & 3) - 1 << 8) & 0xff << 8)
-						| (pixel + ((e & 3) - 1) & 0xff);
+						| (pixel + ((e >> 4) - 8 - 2 << 16) & 0xff << 16)
+						| (pixel + ((e >> 2 & 3) - 2 << 8) & 0xff << 8)
+						| (pixel + ((e & 3) - 2) & 0xff);
 				else { // 110rrrrr ggggbbbb
 					int d = encoded[encodedOffset++];
 					pixel = (pixel & 0xff << 24)
-						| (pixel + (e - 0xc0 - 15 << 16) & 0xff << 16)
-						| (pixel + ((d >> 4) - 7 << 8) & 0xff << 8)
-						| (pixel + ((d & 0xf) - 7) & 0xff);
+						| (pixel + (e - 0xc0 - 16 << 16) & 0xff << 16)
+						| (pixel + ((d >> 4) - 8 << 8) & 0xff << 8)
+						| (pixel + ((d & 0xf) - 8) & 0xff);
 				}
 			}
 			else if (e < 0xf0) { // 1110rrrr rgggggbb bbbaaaaa
 				e = e << 16 | encoded[encodedOffset] << 8 | encoded[encodedOffset + 1];
 				encodedOffset += 2;
-				pixel = (pixel + ((e & 0x1f) - 15 << 24) & 0xff << 24)
-					| (pixel + ((e >> 15) - 0x1c0 - 15 << 16) & 0xff << 16)
-					| (pixel + ((e >> 10 & 0x1f) - 15 << 8) & 0xff << 8)
-					| (pixel + (e >> 5 & 0x1f) - 15 & 0xff);
+				pixel = (pixel + ((e & 0x1f) - 16 << 24) & 0xff << 24)
+					| (pixel + ((e >> 15) - 0x1c0 - 16 << 16) & 0xff << 16)
+					| (pixel + ((e >> 10 & 0x1f) - 16 << 8) & 0xff << 8)
+					| (pixel + (e >> 5 & 0x1f) - 16 & 0xff);
 			}
 			else { // 1111rgba [rrrrrrrr] [gggggggg] [bbbbbbbb] [aaaaaaaa]
 				if ((e & 8) != 0)
@@ -112,6 +111,8 @@ public class QOIDecoder
 		Width = width;
 		Height = height;
 		Pixels = pixels;
+		Alpha = encoded[12] == 4;
+		Colorspace = encoded[13];
 		return true;
 	}
 
@@ -120,4 +121,8 @@ public class QOIDecoder
 	public int GetHeight() => Height;
 
 	public int[] GetPixels() => Pixels;
+
+	public bool GetAlpha() => Alpha;
+
+	public int GetColorspace() => Colorspace;
 }

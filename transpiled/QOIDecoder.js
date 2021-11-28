@@ -8,19 +8,16 @@ function QOIDecoder()
 
 QOIDecoder.prototype.decode = function(encoded, encodedSize)
 {
-	if (encoded == null || encodedSize < 17 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
+	if (encoded == null || encodedSize < 19 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
 		return false;
-	let dataSize = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];
-	if (12 + dataSize != encodedSize)
-		return false;
-	let width = encoded[4] << 8 | encoded[5];
-	let height = encoded[6] << 8 | encoded[7];
-	if (height > (2147483647 / width | 0))
+	let width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];
+	let height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];
+	if (width <= 0 || height <= 0 || height > (2147483647 / width | 0))
 		return false;
 	let pixelsSize = width * height;
 	let pixels = new Int32Array(pixelsSize);
 	encodedSize -= 4;
-	let encodedOffset = 12;
+	let encodedOffset = 14;
 	const index = new Int32Array(64);
 	let pixel = -16777216;
 	for (let pixelsOffset = 0; pixelsOffset < pixelsSize;) {
@@ -43,16 +40,16 @@ QOIDecoder.prototype.decode = function(encoded, encodedSize)
 		}
 		else if (e < 224) {
 			if (e < 192)
-				pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 8 - 1) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 1) << 8)) & 65280) | ((pixel + (e & 3) - 1) & 255);
+				pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 8 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255);
 			else {
 				let d = encoded[encodedOffset++];
-				pixel = (pixel & -16777216) | ((pixel + ((e - 192 - 15) << 16)) & 16711680) | ((pixel + (((d >> 4) - 7) << 8)) & 65280) | ((pixel + (d & 15) - 7) & 255);
+				pixel = (pixel & -16777216) | ((pixel + ((e - 192 - 16) << 16)) & 16711680) | ((pixel + (((d >> 4) - 8) << 8)) & 65280) | ((pixel + (d & 15) - 8) & 255);
 			}
 		}
 		else if (e < 240) {
 			e = e << 16 | encoded[encodedOffset] << 8 | encoded[encodedOffset + 1];
 			encodedOffset += 2;
-			pixel = ((pixel + (((e & 31) - 15) << 24)) & -16777216) | ((pixel + (((e >> 15) - 448 - 15) << 16)) & 16711680) | ((pixel + (((e >> 10 & 31) - 15) << 8)) & 65280) | ((pixel + (e >> 5 & 31) - 15) & 255);
+			pixel = ((pixel + (((e & 31) - 16) << 24)) & -16777216) | ((pixel + (((e >> 15) - 448 - 16) << 16)) & 16711680) | ((pixel + (((e >> 10 & 31) - 16) << 8)) & 65280) | ((pixel + (e >> 5 & 31) - 16) & 255);
 		}
 		else {
 			if ((e & 8) != 0)
@@ -71,6 +68,8 @@ QOIDecoder.prototype.decode = function(encoded, encodedSize)
 	this.width = width;
 	this.height = height;
 	this.pixels = pixels;
+	this.alpha = encoded[12] == 4;
+	this.colorspace = encoded[13];
 	return true;
 }
 
@@ -87,4 +86,14 @@ QOIDecoder.prototype.getHeight = function()
 QOIDecoder.prototype.getPixels = function()
 {
 	return this.pixels;
+}
+
+QOIDecoder.prototype.getAlpha = function()
+{
+	return this.alpha;
+}
+
+QOIDecoder.prototype.getColorspace = function()
+{
+	return this.colorspace;
 }

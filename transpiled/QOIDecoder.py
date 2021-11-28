@@ -7,19 +7,16 @@ class QOIDecoder:
 		pass
 
 	def decode(self, encoded, encoded_size):
-		if encoded is None or encoded_size < 17 or encoded[0] != 113 or encoded[1] != 111 or encoded[2] != 105 or encoded[3] != 102:
+		if encoded is None or encoded_size < 19 or encoded[0] != 113 or encoded[1] != 111 or encoded[2] != 105 or encoded[3] != 102:
 			return False
-		data_size = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11]
-		if 12 + data_size != encoded_size:
-			return False
-		width = encoded[4] << 8 | encoded[5]
-		height = encoded[6] << 8 | encoded[7]
-		if height > int(2147483647 / width):
+		width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7]
+		height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11]
+		if width <= 0 or height <= 0 or height > int(2147483647 / width):
 			return False
 		pixels_size = width * height
 		pixels = array.array("i", [ 0 ]) * pixels_size
 		encoded_size -= 4
-		encoded_offset = 12
+		encoded_offset = 14
 		index = array.array("i", [ 0 ]) * 64
 		pixel = -16777216
 		pixels_offset = 0
@@ -44,15 +41,15 @@ class QOIDecoder:
 				continue
 			elif e < 224:
 				if e < 192:
-					pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 8 - 1) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 1) << 8)) & 65280) | ((pixel + (e & 3) - 1) & 255)
+					pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 8 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255)
 				else:
 					d = encoded[encoded_offset]
 					encoded_offset += 1
-					pixel = (pixel & -16777216) | ((pixel + ((e - 192 - 15) << 16)) & 16711680) | ((pixel + (((d >> 4) - 7) << 8)) & 65280) | ((pixel + (d & 15) - 7) & 255)
+					pixel = (pixel & -16777216) | ((pixel + ((e - 192 - 16) << 16)) & 16711680) | ((pixel + (((d >> 4) - 8) << 8)) & 65280) | ((pixel + (d & 15) - 8) & 255)
 			elif e < 240:
 				e = e << 16 | encoded[encoded_offset] << 8 | encoded[encoded_offset + 1]
 				encoded_offset += 2
-				pixel = ((pixel + (((e & 31) - 15) << 24)) & -16777216) | ((pixel + (((e >> 15) - 448 - 15) << 16)) & 16711680) | ((pixel + (((e >> 10 & 31) - 15) << 8)) & 65280) | ((pixel + (e >> 5 & 31) - 15) & 255)
+				pixel = ((pixel + (((e & 31) - 16) << 24)) & -16777216) | ((pixel + (((e >> 15) - 448 - 16) << 16)) & 16711680) | ((pixel + (((e >> 10 & 31) - 16) << 8)) & 65280) | ((pixel + (e >> 5 & 31) - 16) & 255)
 			else:
 				if (e & 8) != 0:
 					pixel = (pixel & -16711681) | encoded[encoded_offset] << 16
@@ -73,6 +70,8 @@ class QOIDecoder:
 		self._width = width
 		self._height = height
 		self._pixels = pixels
+		self._alpha = encoded[12] == 4
+		self._colorspace = encoded[13]
 		return True
 
 	def get_width(self):
@@ -83,3 +82,9 @@ class QOIDecoder:
 
 	def get_pixels(self):
 		return self._pixels
+
+	def get_alpha(self):
+		return self._alpha
+
+	def get_colorspace(self):
+		return self._colorspace

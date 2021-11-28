@@ -12,8 +12,12 @@ public:
 	int getWidth() const;
 	int getHeight() const;
 	int const * getPixels() const;
+	bool getAlpha() const;
+	int getColorspace() const;
 private:
 	int width;
 	int height;
 	std::shared_ptr<int[]> pixels;
+	bool alpha;
+	int colorspace;
 };

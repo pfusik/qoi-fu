@@ -6,22 +6,34 @@ function QOIEncoder()
 {
 }
 
-QOIEncoder.prototype.encode = function(width, height, pixels, alpha)
+QOIEncoder.COLORSPACE_SRGB = 0;
+
+QOIEncoder.COLORSPACE_SRGB_LINEAR_ALPHA = 1;
+
+QOIEncoder.COLORSPACE_LINEAR = 15;
+
+QOIEncoder.prototype.encode = function(width, height, pixels, alpha, colorspace)
 {
-	if (width <= 0 || width >= 65536 || height <= 0 || height >= 65536 || height > (429496726 / width | 0) || pixels == null)
+	if (width <= 0 || height <= 0 || height > (429496725 / width | 0) || pixels == null)
 		return false;
 	let pixelsSize = width * height;
-	let encoded = new Uint8Array(12 + pixelsSize * (alpha ? 5 : 4) + 4);
+	let encoded = new Uint8Array(14 + pixelsSize * (alpha ? 5 : 4) + 4);
 	encoded[0] = 113;
 	encoded[1] = 111;
 	encoded[2] = 105;
 	encoded[3] = 102;
-	encoded[4] = width >> 8;
-	encoded[5] = width & 255;
-	encoded[6] = height >> 8;
-	encoded[7] = height & 255;
+	encoded[4] = width >> 24;
+	encoded[5] = width >> 16 & 255;
+	encoded[6] = width >> 8 & 255;
+	encoded[7] = width & 255;
+	encoded[8] = height >> 24;
+	encoded[9] = height >> 16 & 255;
+	encoded[10] = height >> 8 & 255;
+	encoded[11] = height & 255;
+	encoded[12] = alpha ? 4 : 3;
+	encoded[13] = colorspace;
 	const index = new Int32Array(64);
-	let encodedOffset = 12;
+	let encodedOffset = 14;
 	let lastPixel = -16777216;
 	let run = 0;
 	for (let pixelsOffset = 0; pixelsOffset < pixelsSize;) {
@@ -54,19 +66,19 @@ QOIEncoder.prototype.encode = function(width, height, pixels, alpha)
 				let dg = g - (lastPixel >> 8 & 255);
 				let db = b - (lastPixel & 255);
 				let da = a - (lastPixel >> 24 & 255);
-				if (dr >= -15 && dr <= 16 && dg >= -15 && dg <= 16 && db >= -15 && db <= 16 && da >= -15 && da <= 16) {
-					if (da == 0 && dr >= -1 && dr <= 2 && dg >= -1 && dg <= 2 && db >= -1 && db <= 2)
-						encoded[encodedOffset++] = 149 + (dr << 4) + (dg << 2) + db;
-					else if (da == 0 && dg >= -7 && dg <= 8 && db >= -7 && db <= 8) {
-						encoded[encodedOffset++] = 207 + dr;
-						encoded[encodedOffset++] = 119 + (dg << 4) + db;
+				if (dr >= -16 && dr <= 15 && dg >= -16 && dg <= 15 && db >= -16 && db <= 15 && da >= -16 && da <= 15) {
+					if (da == 0 && dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
+						encoded[encodedOffset++] = 170 + (dr << 4) + (dg << 2) + db;
+					else if (da == 0 && dg >= -8 && dg <= 7 && db >= -8 && db <= 7) {
+						encoded[encodedOffset++] = 208 + dr;
+						encoded[encodedOffset++] = 136 + (dg << 4) + db;
 					}
 					else {
-						dr += 15;
+						dr += 16;
 						encoded[encodedOffset++] = 224 + (dr >> 1);
-						db += 15;
-						encoded[encodedOffset++] = ((dr & 1) << 7) + ((dg + 15) << 2) + (db >> 3);
-						encoded[encodedOffset++] = ((db & 7) << 5) + da + 15;
+						db += 16;
+						encoded[encodedOffset++] = ((dr & 1) << 7) + ((dg + 16) << 2) + (db >> 3);
+						encoded[encodedOffset++] = ((db & 7) << 5) + da + 16;
 					}
 				}
 				else {
@@ -85,13 +97,8 @@ QOIEncoder.prototype.encode = function(width, height, pixels, alpha)
 		}
 	}
 	encoded.fill(0, encodedOffset, encodedOffset + 4);
-	this.encodedSize = encodedOffset + 4;
-	let dataSize = this.encodedSize - 12;
-	encoded[8] = dataSize >> 24;
-	encoded[9] = dataSize >> 16 & 255;
-	encoded[10] = dataSize >> 8 & 255;
-	encoded[11] = dataSize & 255;
 	this.encoded = encoded;
+	this.encodedSize = encodedOffset + 4;
 	return true;
 }
 

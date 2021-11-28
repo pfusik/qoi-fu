@@ -53,6 +53,7 @@ static bool png2qoi(const char *input_file, FILE *f)
 		fprintf(stderr, "png2qoi: %s: %s\n", input_file, png.message);
 		return false;
 	}
+	bool alpha = (png.format & PNG_FORMAT_FLAG_ALPHA) != 0;
 	png.format = PNG_FORMAT_BGRA;
 	void *pixels = malloc(PNG_IMAGE_SIZE(png));
 	if (pixels == NULL) {
@@ -74,7 +75,7 @@ static bool png2qoi(const char *input_file, FILE *f)
 	}
 
 	QOIEncoder *qoi = QOIEncoder_New();
-	if (!QOIEncoder_Encode(qoi, png.width, png.height, pixels, true)) {
+	if (!QOIEncoder_Encode(qoi, png.width, png.height, pixels, alpha, QOIEncoder_COLORSPACE_SRGB)) {
 		QOIEncoder_Delete(qoi);
 		free(pixels);
 		fprintf(stderr, "png2qoi: %s: error encoding\n", input_file);

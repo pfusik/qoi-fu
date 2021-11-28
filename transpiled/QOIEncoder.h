@@ -10,7 +10,13 @@ typedef struct QOIEncoder QOIEncoder;
 QOIEncoder *QOIEncoder_New(void);
 void QOIEncoder_Delete(QOIEncoder *self);
 
-bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha);
+#define QOIEncoder_COLORSPACE_SRGB 0
+
+#define QOIEncoder_COLORSPACE_SRGB_LINEAR_ALPHA 1
+
+#define QOIEncoder_COLORSPACE_LINEAR 15
+
+bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha, int colorspace);
 
 uint8_t const *QOIEncoder_GetEncoded(const QOIEncoder *self);
 

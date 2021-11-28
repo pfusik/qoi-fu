@@ -18,6 +18,10 @@ int QOIDecoder_GetHeight(const QOIDecoder *self);
 
 int const *QOIDecoder_GetPixels(const QOIDecoder *self);
 
+bool QOIDecoder_GetAlpha(const QOIDecoder *self);
+
+int QOIDecoder_GetColorspace(const QOIDecoder *self);
+
 #ifdef __cplusplus
 }
 #endif

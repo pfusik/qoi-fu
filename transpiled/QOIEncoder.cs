@@ -7,28 +7,40 @@ public class QOIEncoder
 	{
 	}
 
-	const int HeaderSize = 12;
+	public const int ColorspaceSrgb = 0;
+
+	public const int ColorspaceSrgbLinearAlpha = 1;
+
+	public const int ColorspaceLinear = 15;
+
+	const int HeaderSize = 14;
 
 	byte[] Encoded;
 
 	int EncodedSize;
 
-	public bool Encode(int width, int height, int[] pixels, bool alpha)
+	public bool Encode(int width, int height, int[] pixels, bool alpha, int colorspace)
 	{
-		if (width <= 0 || width >= 65536 || height <= 0 || height >= 65536 || height > 429496726 / width || pixels == null)
+		if (width <= 0 || height <= 0 || height > 429496725 / width || pixels == null)
 			return false;
 		int pixelsSize = width * height;
-		byte[] encoded = new byte[12 + pixelsSize * (alpha ? 5 : 4) + 4];
+		byte[] encoded = new byte[14 + pixelsSize * (alpha ? 5 : 4) + 4];
 		encoded[0] = 113;
 		encoded[1] = 111;
 		encoded[2] = 105;
 		encoded[3] = 102;
-		encoded[4] = (byte) (width >> 8);
-		encoded[5] = (byte) width;
-		encoded[6] = (byte) (height >> 8);
-		encoded[7] = (byte) height;
+		encoded[4] = (byte) (width >> 24);
+		encoded[5] = (byte) (width >> 16);
+		encoded[6] = (byte) (width >> 8);
+		encoded[7] = (byte) width;
+		encoded[8] = (byte) (height >> 24);
+		encoded[9] = (byte) (height >> 16);
+		encoded[10] = (byte) (height >> 8);
+		encoded[11] = (byte) height;
+		encoded[12] = (byte) (alpha ? 4 : 3);
+		encoded[13] = (byte) colorspace;
 		int[] index = new int[64];
-		int encodedOffset = 12;
+		int encodedOffset = 14;
 		int lastPixel = -16777216;
 		int run = 0;
 		for (int pixelsOffset = 0; pixelsOffset < pixelsSize;) {
@@ -61,19 +73,19 @@ public class QOIEncoder
 					int dg = g - (lastPixel >> 8 & 255);
 					int db = b - (lastPixel & 255);
 					int da = a - (lastPixel >> 24 & 255);
-					if (dr >= -15 && dr <= 16 && dg >= -15 && dg <= 16 && db >= -15 && db <= 16 && da >= -15 && da <= 16) {
-						if (da == 0 && dr >= -1 && dr <= 2 && dg >= -1 && dg <= 2 && db >= -1 && db <= 2)
-							encoded[encodedOffset++] = (byte) (149 + (dr << 4) + (dg << 2) + db);
-						else if (da == 0 && dg >= -7 && dg <= 8 && db >= -7 && db <= 8) {
-							encoded[encodedOffset++] = (byte) (207 + dr);
-							encoded[encodedOffset++] = (byte) (119 + (dg << 4) + db);
+					if (dr >= -16 && dr <= 15 && dg >= -16 && dg <= 15 && db >= -16 && db <= 15 && da >= -16 && da <= 15) {
+						if (da == 0 && dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
+							encoded[encodedOffset++] = (byte) (170 + (dr << 4) + (dg << 2) + db);
+						else if (da == 0 && dg >= -8 && dg <= 7 && db >= -8 && db <= 7) {
+							encoded[encodedOffset++] = (byte) (208 + dr);
+							encoded[encodedOffset++] = (byte) (136 + (dg << 4) + db);
 						}
 						else {
-							dr += 15;
+							dr += 16;
 							encoded[encodedOffset++] = (byte) (224 + (dr >> 1));
-							db += 15;
-							encoded[encodedOffset++] = (byte) (((dr & 1) << 7) + ((dg + 15) << 2) + (db >> 3));
-							encoded[encodedOffset++] = (byte) (((db & 7) << 5) + da + 15);
+							db += 16;
+							encoded[encodedOffset++] = (byte) (((dr & 1) << 7) + ((dg + 16) << 2) + (db >> 3));
+							encoded[encodedOffset++] = (byte) (((db & 7) << 5) + da + 16);
 						}
 					}
 					else {
@@ -92,13 +104,8 @@ public class QOIEncoder
 			}
 		}
 		Array.Clear(encoded, encodedOffset, 4);
-		this.EncodedSize = encodedOffset + 4;
-		int dataSize = this.EncodedSize - 12;
-		encoded[8] = (byte) (dataSize >> 24);
-		encoded[9] = (byte) (dataSize >> 16);
-		encoded[10] = (byte) (dataSize >> 8);
-		encoded[11] = (byte) dataSize;
 		this.Encoded = encoded;
+		this.EncodedSize = encodedOffset + 4;
 		return true;
 	}
 
