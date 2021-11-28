@@ -53,12 +53,12 @@ static bool png2qoi(const char *input_file, FILE *f)
 		fprintf(stderr, "png2qoi: %s: %s\n", input_file, png.message);
 		return false;
 	}
+	png.format = PNG_FORMAT_BGRA;
 	void *pixels = malloc(PNG_IMAGE_SIZE(png));
 	if (pixels == NULL) {
 		fprintf(stderr, "png2qoi: %s: out of memory\n", input_file);
 		return false;
 	}
-	png.format = PNG_FORMAT_BGRA;
 	if (png_image_finish_read(&png, NULL, pixels, 0, NULL) == 0) {
 		free(pixels);
 		fclose(f);
