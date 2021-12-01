@@ -29,6 +29,7 @@
 #include <png.h>
 
 #include "QOI.h"
+#include "QOI-stdio.h"
 
 static void usage(void)
 {
@@ -105,40 +106,11 @@ static bool png2qoi(const char *input_file, FILE *f)
 
 static bool qoi2png(const char *input_file, FILE *f)
 {
-	long encoded_size = ftell(f);
-	if (fseek(f, 0, SEEK_END) != 0
-	 || (encoded_size = ftell(f)) < 0
-	 || fseek(f, 0, SEEK_SET) != 0) {
-		perror(input_file);
-		fclose(f);
+	QOIDecoder *qoi = QOIDecoder_LoadStdio(f);
+	if (qoi == NULL) {
+		fprintf(stderr, "png2qoi: %s: error loading\n", input_file);
 		return false;
 	}
-	if (encoded_size > INT_MAX) {
-		fclose(f);
-		fprintf(stderr, "png2qoi: %s: file too long\n", input_file);
-		return false;
-	}
-	void *encoded = malloc(encoded_size);
-	if (encoded == NULL) {
-		fclose(f);
-		fprintf(stderr, "png2qoi: %s: out of memory\n", input_file);
-		return false;
-	}
-	if (fread(encoded, 1, encoded_size, f) != encoded_size) {
-		fclose(f);
-		fprintf(stderr, "png2qoi: %s: error reading file\n", input_file);
-		return false;
-	}
-	fclose(f);
-
-	QOIDecoder *qoi = QOIDecoder_New();
-	if (!QOIDecoder_Decode(qoi, (uint8_t *) encoded, (int) encoded_size)) {
-		QOIDecoder_Delete(qoi);
-		free(encoded);
-		fprintf(stderr, "png2qoi: %s: error decoding\n", input_file);
-		return false;
-	}
-	free(encoded);
 
 	char output_file[FILENAME_MAX];
 	if (snprintf(output_file, sizeof(output_file), "%s.png", input_file) >= sizeof(output_file)) {
