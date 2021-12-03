@@ -24,9 +24,14 @@ public class QOIEncoder
 
 	private var encodedSize : Int = 0
 
+	public static func canEncode(_ width : Int, _ height : Int, _ alpha : Bool) -> Bool
+	{
+		return width > 0 && height > 0 && height <= 2147483629 / (width * (alpha ? 5 : 4))
+	}
+
 	public func encode(_ width : Int, _ height : Int, _ pixels : ArrayRef<Int>?, _ alpha : Bool, _ colorspace : Int) -> Bool
 	{
-		if width <= 0 || height <= 0 || height > 429496725 / width || pixels === nil {
+		if pixels === nil || !QOIEncoder.canEncode(width, height, alpha) {
 			return false
 		}
 		let pixelsSize : Int = width * height

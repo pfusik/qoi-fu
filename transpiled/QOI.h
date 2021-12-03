@@ -17,6 +17,8 @@ typedef struct QOIDecoder QOIDecoder;
 QOIEncoder *QOIEncoder_New(void);
 void QOIEncoder_Delete(QOIEncoder *self);
 
+bool QOIEncoder_CanEncode(int width, int height, bool alpha);
+
 bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha, int colorspace);
 
 uint8_t const *QOIEncoder_GetEncoded(const QOIEncoder *self);

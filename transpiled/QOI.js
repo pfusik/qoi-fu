@@ -20,9 +20,14 @@ QOIEncoder.HEADER_SIZE = 14;
 
 QOIEncoder.PADDING_SIZE = 4;
 
+QOIEncoder.canEncode = function(width, height, alpha)
+{
+	return width > 0 && height > 0 && height <= (2147483629 / (width * (alpha ? 5 : 4)) | 0);
+}
+
 QOIEncoder.prototype.encode = function(width, height, pixels, alpha, colorspace)
 {
-	if (width <= 0 || height <= 0 || height > (429496725 / width | 0) || pixels == null)
+	if (pixels == null || !QOIEncoder.canEncode(width, height, alpha))
 		return false;
 	let pixelsSize = width * height;
 	let encoded = new Uint8Array(14 + pixelsSize * (alpha ? 5 : 4) + 4);

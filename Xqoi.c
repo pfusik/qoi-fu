@@ -46,6 +46,7 @@
 #endif
 
 #include <stddef.h>
+#include <stdlib.h>
 
 #include "QOI-stdio.h"
 
@@ -81,7 +82,7 @@ DLL_EXPORT BOOL API gfpGetPluginInfo(
 
 	strlcpy(label, "Quite OK Image", label_max_size);
 	strlcpy(extension, "qoi", extension_max_size);
-	*support = GFP_READ;
+	*support = GFP_READ | GFP_WRITE;
 
 	return TRUE;
 }
@@ -98,7 +99,7 @@ DLL_EXPORT BOOL API gfpLoadPictureGetInfo(
 {
 	const QOIDecoder *qoi = (const QOIDecoder *) ptr;
 
-	*pictype = GFP_RGB;
+	*pictype = GFP_BGR;
 	*width = QOIDecoder_GetWidth(qoi);
 	*height = QOIDecoder_GetHeight(qoi);
 	*dpi = 96;
@@ -120,9 +121,9 @@ DLL_EXPORT BOOL API gfpLoadPictureGetLine(void *ptr, INT line, unsigned char *bu
 
 	for (int x = 0; x < width; x++) {
 		int rgb = pixels[x];
-		buffer[x * bytes_per_pixel] = (unsigned char) (rgb >> 16);
+		buffer[x * bytes_per_pixel] = (unsigned char) rgb;
 		buffer[x * bytes_per_pixel + 1] = (unsigned char) (rgb >> 8);
-		buffer[x * bytes_per_pixel + 2] = (unsigned char) rgb;
+		buffer[x * bytes_per_pixel + 2] = (unsigned char) (rgb >> 16);
 		if (bytes_per_pixel == 4)
 			buffer[x * bytes_per_pixel + 3] = (unsigned char) (rgb >> 24);
 	}
@@ -143,23 +144,66 @@ DLL_EXPORT void API gfpLoadPictureExit(void *ptr)
 
 DLL_EXPORT BOOL API gfpSavePictureIsSupported(INT width, INT height, INT bits_per_pixel, BOOL has_colormap)
 {
-	return FALSE;
+	return (bits_per_pixel == 24 || bits_per_pixel == 32)
+		&& !has_colormap
+		&& QOIEncoder_CanEncode(width, height, bits_per_pixel == 32);
 }
+
+typedef struct {
+	int width;
+	int height;
+	bool alpha;
+	FILE *f;
+	int pixels[0];
+} QOIWriter;
 
 DLL_EXPORT void * API gfpSavePictureInit(
 	const char *filename, INT width, INT height, INT bits_per_pixel,
 	INT dpi, INT *picture_type, char *label, INT label_max_size)
 {
-	return NULL;
+	FILE *f = fopen(filename, "wb");
+	if (f == NULL)
+		return NULL;
+	QOIWriter *w = (QOIWriter *) malloc(sizeof(QOIWriter) + width * height * sizeof(int));
+	if (w == NULL) {
+		fclose(f);
+		return NULL;
+	}
+	w->width = width;
+	w->height = height;
+	w->alpha = bits_per_pixel == 32;
+	w->f = f;
+	*picture_type = GFP_BGR;
+	strlcpy(label, "Quite OK Image", label_max_size);
+	return w;
 }
 
 DLL_EXPORT BOOL API gfpSavePicturePutLine(void *ptr, INT line, const unsigned char *buffer)
 {
-	return FALSE;
+	QOIWriter *w = (QOIWriter *) ptr;
+	int width = w->width;
+	bool alpha = w->alpha;
+	int bytes_per_pixel = alpha ? 4 : 3;
+	int *pixels = w->pixels + line * width;
+	for (int x = 0; x < width; x++) {
+		pixels[x] = buffer[x * bytes_per_pixel]
+			| buffer[x * bytes_per_pixel + 1] << 8
+			| buffer[x * bytes_per_pixel + 2] << 16
+			| (alpha ? buffer[x * bytes_per_pixel + 3] : 0xff) << 24;
+	}
+	return TRUE;
 }
 
 DLL_EXPORT void API gfpSavePictureExit(void *ptr)
 {
+	QOIWriter *w = (QOIWriter *) ptr;
+	QOIEncoder *qoi = QOIEncoder_New();
+	if (QOIEncoder_Encode(qoi, w->width, w->height, w->pixels, w->alpha, QOIColorspace_SRGB))
+		QOIEncoder_SaveStdio(qoi, w->f);
+	else
+		fclose(w->f);
+	QOIEncoder_Delete(qoi);
+	free(w);
 }
 
 #ifdef WIN32

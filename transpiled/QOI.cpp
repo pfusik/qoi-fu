@@ -6,9 +6,14 @@ QOIEncoder::QOIEncoder()
 {
 }
 
+bool QOIEncoder::canEncode(int width, int height, bool alpha)
+{
+	return width > 0 && height > 0 && height <= 2147483629 / (width * (alpha ? 5 : 4));
+}
+
 bool QOIEncoder::encode(int width, int height, int const * pixels, bool alpha, int colorspace)
 {
-	if (width <= 0 || height <= 0 || height > 429496725 / width || pixels == nullptr)
+	if (pixels == nullptr || !canEncode(width, height, alpha))
 		return false;
 	int pixelsSize = width * height;
 	std::shared_ptr<uint8_t[]> encoded = std::make_shared<uint8_t[]>(14 + pixelsSize * (alpha ? 5 : 4) + 4);

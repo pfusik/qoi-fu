@@ -22,9 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "QOI.h"
 
+bool QOIEncoder_SaveStdio(const QOIEncoder *qoi, FILE *f);
 QOIDecoder *QOIDecoder_LoadStdio(FILE *f);
 QOIDecoder *QOIDecoder_LoadFile(const char *filename);

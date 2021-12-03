@@ -41,11 +41,12 @@ public class QOIEncoder
 	{
 	}
 
+	public static bool CanEncode(int width, int height, bool alpha)
+		=> width > 0 && height > 0 && height <= (0x7fffffff - HeaderSize - PaddingSize) / (width * (alpha ? 5  : 4));
+
 	public bool Encode!(int width, int height, int[] pixels, bool alpha, int colorspace)
 	{
-		if (width <= 0 || height <= 0
-		 || height > (0x7fffffff - HeaderSize - PaddingSize) / 5 / width
-		 || pixels == null)
+		if (pixels == null || !CanEncode(width, height, alpha))
 			return false;
 		int pixelsSize = width * height;
 		byte[]# encoded = new byte[HeaderSize + pixelsSize * (alpha ? 5 : 4) + PaddingSize];

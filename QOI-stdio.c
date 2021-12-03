@@ -27,6 +27,14 @@
 
 #include "QOI-stdio.h"
 
+bool QOIEncoder_SaveStdio(const QOIEncoder *qoi, FILE *f)
+{
+	int size = QOIEncoder_GetEncodedSize(qoi);
+	size_t writeResult = fwrite(QOIEncoder_GetEncoded(qoi), 1, size, f);
+	int closeResult = fclose(f);
+	return writeResult == size && closeResult == 0;
+}
+
 QOIDecoder *QOIDecoder_LoadStdio(FILE *f)
 {
 	long encoded_size;

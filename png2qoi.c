@@ -82,7 +82,6 @@ static bool png2qoi(const char *input_file, FILE *f)
 		return false;
 	}
 	free(pixels);
-	int size = QOIEncoder_GetEncodedSize(qoi);
 
 	f = fopen(output_file, "wb");
 	if (f == NULL) {
@@ -90,17 +89,12 @@ static bool png2qoi(const char *input_file, FILE *f)
 		QOIEncoder_Delete(qoi);
 		return false;
 	}
-	if (fwrite(QOIEncoder_GetEncoded(qoi), 1, size, f) != size) {
+	if (!QOIEncoder_SaveStdio(qoi, f)) {
 		perror(output_file);
-		fclose(f);
 		QOIEncoder_Delete(qoi);
 		return false;
 	}
 	QOIEncoder_Delete(qoi);
-	if (fclose(f) != 0) {
-		perror(output_file);
-		return false;
-	}
 	return true;
 }
 

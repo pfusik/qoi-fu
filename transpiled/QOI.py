@@ -18,8 +18,12 @@ class QOIEncoder:
 	def __init__(self):
 		pass
 
+	@staticmethod
+	def can_encode(width, height, alpha):
+		return width > 0 and height > 0 and height <= int(2147483629 / (width * (5 if alpha else 4)))
+
 	def encode(self, width, height, pixels, alpha, colorspace):
-		if width <= 0 or height <= 0 or height > int(429496725 / width) or pixels is None:
+		if pixels is None or not QOIEncoder.can_encode(width, height, alpha):
 			return False
 		pixels_size = width * height
 		encoded = bytearray(14 + pixels_size * (5 if alpha else 4) + 4)

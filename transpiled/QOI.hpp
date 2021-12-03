@@ -20,6 +20,7 @@ class QOIEncoder
 {
 public:
 	QOIEncoder();
+	static bool canEncode(int width, int height, bool alpha);
 	bool encode(int width, int height, int const * pixels, bool alpha, int colorspace);
 	uint8_t const * getEncoded() const;
 	int getEncodedSize() const;

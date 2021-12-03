@@ -25,9 +25,14 @@ public class QOIEncoder
 
 	int EncodedSize;
 
+	public static bool CanEncode(int width, int height, bool alpha)
+	{
+		return width > 0 && height > 0 && height <= 2147483629 / (width * (alpha ? 5 : 4));
+	}
+
 	public bool Encode(int width, int height, int[] pixels, bool alpha, int colorspace)
 	{
-		if (width <= 0 || height <= 0 || height > 429496725 / width || pixels == null)
+		if (pixels == null || !CanEncode(width, height, alpha))
 			return false;
 		int pixelsSize = width * height;
 		byte[] encoded = new byte[14 + pixelsSize * (alpha ? 5 : 4) + 4];
