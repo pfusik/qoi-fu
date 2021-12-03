@@ -15,6 +15,9 @@ file-qoi: file-qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 file-qoi.exe: file-qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 	$(CC) $(CFLAGS) -I transpiled `gimptool-2.0 --cflags` -o $@ file-qoi.c QOI-stdio.c transpiled/QOI.c -Wl,-subsystem,windows `gimptool-2.0 --libs`
 
+Xqoi.usr: Xqoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
+	$(CC) $(CFLAGS) -I transpiled -o $@ Xqoi.c QOI-stdio.c transpiled/QOI.c -shared
+
 QOIPaintDotNet.dll: QOIPaintDotNet.cs transpiled/QOI.cs
 	$(CSC) -o+ -out:$@ -t:library $^ -nostdlib -r:"$(PAINT_NET_DIR)/PaintDotNet.Data.dll" -r:"$(PAINT_NET_DIR)/System.Drawing.Common.dll" -r:"$(DOTNET_REF_DIR)/System.Drawing.dll" -r:"$(DOTNET_REF_DIR)/System.Runtime.dll"
 
@@ -22,6 +25,6 @@ $(TRANSPILED): QOI.ci
 	mkdir -p $(@D) && cito -o $@ $^
 
 clean:
-	$(RM) png2qoi file-qoi file-qoi.exe QOIPaintDotNet.dll $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIColorspace.java transpiled/QOIEncoder.java
+	$(RM) png2qoi file-qoi file-qoi.exe Xqoi.usr QOIPaintDotNet.dll $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIColorspace.java transpiled/QOIEncoder.java
 
 .PHONY: all clean
