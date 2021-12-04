@@ -151,9 +151,11 @@ QOIDecoder.prototype.decode = function(encoded, encodedSize)
 			if (e < 64)
 				pixels[pixelsOffset++] = pixel = index[e];
 			else {
-				let run = 1 + (e & 31);
-				if (e >= 96)
-					run += 32 + encoded[encodedOffset++];
+				let run;
+				if (e < 96)
+					run = e - 63;
+				else
+					run = 33 + ((e - 96) << 8) + encoded[encodedOffset++];
 				if (pixelsOffset + run > pixelsSize)
 					return false;
 				pixels.fill(pixel, pixelsOffset, pixelsOffset + run);

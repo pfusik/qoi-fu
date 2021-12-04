@@ -34,9 +34,11 @@ public class QOIDecoder
 				if (e < 64)
 					pixels[pixelsOffset++] = pixel = index[e];
 				else {
-					int run = 1 + (e & 31);
-					if (e >= 96)
-						run += 32 + (encoded[encodedOffset++] & 0xff);
+					int run;
+					if (e < 96)
+						run = e - 63;
+					else
+						run = 33 + ((e - 96) << 8) + (encoded[encodedOffset++] & 0xff);
 					if (pixelsOffset + run > pixelsSize)
 						return false;
 					Arrays.fill(pixels, pixelsOffset, pixelsOffset + run, pixel);

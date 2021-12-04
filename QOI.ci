@@ -185,10 +185,12 @@ public class QOIDecoder
 			if (e < 0x80) {
 				if (e < 0x40) // 00iiiiii
 					pixels[pixelsOffset++] = pixel = index[e];
-				else { // 01?rrrrr [rrrrrrrr]
-					int run = 1 + (e & 0x1f);
-					if (e >= 0x60) // 011rrrrr rrrrrrrr
-						run += 32 + encoded[encodedOffset++];
+				else {
+					int run;
+					if (e < 0x60) // // 010rrrrr
+						run = e - (0x40 - 1);
+					else // 011rrrrr rrrrrrrr
+						run = 33 + (e - 0x60 << 8) + encoded[encodedOffset++];
 					if (pixelsOffset + run > pixelsSize)
 						return false;
 					pixels.Fill(pixel, pixelsOffset, run);

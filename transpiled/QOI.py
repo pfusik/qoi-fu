@@ -153,9 +153,10 @@ class QOIDecoder:
 					pixels[pixels_offset] = pixel = index[e]
 					pixels_offset += 1
 				else:
-					run = 1 + (e & 31)
-					if e >= 96:
-						run += 32 + encoded[encoded_offset]
+					if e < 96:
+						run = e - 63
+					else:
+						run = 33 + ((e - 96) << 8) + encoded[encoded_offset]
 						encoded_offset += 1
 					if pixels_offset + run > pixels_size:
 						return False

@@ -204,9 +204,12 @@ public class QOIDecoder
 					pixelsOffset += 1
 				}
 				else {
-					var run : Int = 1 + e & 31
-					if e >= 96 {
-						run += 32 + Int(encoded![encodedOffset])
+					var run : Int
+					if e < 96 {
+						run = e - 63
+					}
+					else {
+						run = 33 + (e - 96) << 8 + Int(encoded![encodedOffset])
 						encodedOffset += 1
 					}
 					if pixelsOffset + run > pixelsSize {
