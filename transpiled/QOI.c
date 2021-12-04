@@ -97,7 +97,7 @@ void QOIEncoder_Delete(QOIEncoder *self)
 
 bool QOIEncoder_CanEncode(int width, int height, bool alpha)
 {
-	return width > 0 && height > 0 && height <= 2147483629 / (width * (alpha ? 5 : 4));
+	return width > 0 && height > 0 && height <= 2147483629 / width / (alpha ? 5 : 4);
 }
 
 bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha, int colorspace)

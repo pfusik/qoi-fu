@@ -15,7 +15,7 @@ public class QOIEncoder
 
 	public static boolean canEncode(int width, int height, boolean alpha)
 	{
-		return width > 0 && height > 0 && height <= 2147483629 / (width * (alpha ? 5 : 4));
+		return width > 0 && height > 0 && height <= 2147483629 / width / (alpha ? 5 : 4);
 	}
 
 	public final boolean encode(int width, int height, int[] pixels, boolean alpha, int colorspace)

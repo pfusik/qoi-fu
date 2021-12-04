@@ -22,7 +22,7 @@ QOIEncoder.PADDING_SIZE = 4;
 
 QOIEncoder.canEncode = function(width, height, alpha)
 {
-	return width > 0 && height > 0 && height <= (2147483629 / (width * (alpha ? 5 : 4)) | 0);
+	return width > 0 && height > 0 && height <= ((2147483629 / width | 0) / (alpha ? 5 : 4) | 0);
 }
 
 QOIEncoder.prototype.encode = function(width, height, pixels, alpha, colorspace)

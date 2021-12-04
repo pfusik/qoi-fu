@@ -42,7 +42,7 @@ public class QOIEncoder
 	}
 
 	public static bool CanEncode(int width, int height, bool alpha)
-		=> width > 0 && height > 0 && height <= (0x7fffffff - HeaderSize - PaddingSize) / (width * (alpha ? 5  : 4));
+		=> width > 0 && height > 0 && height <= (0x7fffffff - HeaderSize - PaddingSize) / width / (alpha ? 5  : 4);
 
 	public bool Encode!(int width, int height, int[] pixels, bool alpha, int colorspace)
 	{

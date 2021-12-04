@@ -26,7 +26,7 @@ public class QOIEncoder
 
 	public static func canEncode(_ width : Int, _ height : Int, _ alpha : Bool) -> Bool
 	{
-		return width > 0 && height > 0 && height <= 2147483629 / (width * (alpha ? 5 : 4))
+		return width > 0 && height > 0 && height <= 2147483629 / width / (alpha ? 5 : 4)
 	}
 
 	public func encode(_ width : Int, _ height : Int, _ pixels : ArrayRef<Int>?, _ alpha : Bool, _ colorspace : Int) -> Bool
