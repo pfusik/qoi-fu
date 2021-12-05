@@ -38,10 +38,13 @@ endif
 install-xnview: Xqoi.usr
 	$(SUDO) cp $< "$(XNVIEW_DIR)/Plugins/Xqoi.usr"
 
+install-paint.net: QOIPaintDotNet.dll
+	$(SUDO) cp $< "$(PAINT_NET_DIR)/FileTypes/QOIPaintDotNet.dll"
+
 $(TRANSPILED): QOI.ci
 	mkdir -p $(@D) && cito -o $@ $^
 
 clean:
 	$(RM) png2qoi file-qoi$(EXEEXT) Xqoi.usr QOIPaintDotNet.dll $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIColorspace.java transpiled/QOIEncoder.java
 
-.PHONY: all install-gimp install-xnview clean
+.PHONY: all install-gimp install-xnview install-paint.net clean
