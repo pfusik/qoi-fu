@@ -83,13 +83,7 @@ static bool png2qoi(const char *input_file, FILE *f)
 	}
 	free(pixels);
 
-	f = fopen(output_file, "wb");
-	if (f == NULL) {
-		perror(output_file);
-		QOIEncoder_Delete(qoi);
-		return false;
-	}
-	if (!QOIEncoder_SaveStdio(qoi, f)) {
+	if (!QOIEncoder_SaveFile(qoi, output_file)) {
 		perror(output_file);
 		QOIEncoder_Delete(qoi);
 		return false;

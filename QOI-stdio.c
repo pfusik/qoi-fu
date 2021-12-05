@@ -35,6 +35,12 @@ bool QOIEncoder_SaveStdio(const QOIEncoder *qoi, FILE *f)
 	return writeResult == size && closeResult == 0;
 }
 
+bool QOIEncoder_SaveFile(const QOIEncoder *qoi, const char *filename)
+{
+	FILE *f = fopen(filename, "wb");
+	return f != NULL && QOIEncoder_SaveStdio(qoi, f);
+}
+
 QOIDecoder *QOIDecoder_LoadStdio(FILE *f)
 {
 	long encoded_size;

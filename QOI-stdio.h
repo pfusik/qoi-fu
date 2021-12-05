@@ -28,5 +28,6 @@
 #include "QOI.h"
 
 bool QOIEncoder_SaveStdio(const QOIEncoder *qoi, FILE *f);
+bool QOIEncoder_SaveFile(const QOIEncoder *qoi, const char *filename);
 QOIDecoder *QOIDecoder_LoadStdio(FILE *f);
 QOIDecoder *QOIDecoder_LoadFile(const char *filename);
