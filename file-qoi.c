@@ -38,7 +38,12 @@
 static const Babl *get_format(void)
 {
 	return babl_format_new(babl_model("R'G'B'A"), babl_type("u8"),
-		babl_component("B'"), babl_component("G'"), babl_component("R'"), babl_component("A"), NULL);
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+		babl_component("B'"), babl_component("G'"), babl_component("R'"), babl_component("A"),
+#else
+		babl_component("A"), babl_component("R'"), babl_component("G'"), babl_component("B'"),
+#endif
+		NULL);
 }
 
 static gint32 load_image(const gchar *filename)
