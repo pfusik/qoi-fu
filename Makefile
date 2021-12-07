@@ -13,7 +13,7 @@ PAINT_NET_DIR = C:/Program Files/paint.net
 DOTNET_REF_DIR = C:/Program Files/dotnet/packs/Microsoft.NETCore.App.Ref/6.0.0/ref/net6.0
 TRANSPILED = $(addprefix transpiled/QOI., c cpp cs js py swift) transpiled/QOIDecoder.java
 
-all: png2qoi $(TRANSPILED)
+all: png2qoi Xqoi.usr $(TRANSPILED)
 
 png2qoi: png2qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 	$(CC) $(CFLAGS) -I transpiled -o $@ png2qoi.c QOI-stdio.c transpiled/QOI.c -lpng
