@@ -194,6 +194,11 @@ DLL_EXPORT BOOL API gfpSavePicturePutLine(void *ptr, INT line, const unsigned ch
 	return TRUE;
 }
 
+DLL_EXPORT BOOL API gfpSavePicturePutColormap(void *ptr, const GFP_COLORMAP *cmap)
+{
+	return FALSE;
+}
+
 DLL_EXPORT void API gfpSavePictureExit(void *ptr)
 {
 	QOIWriter *w = (QOIWriter *) ptr;
