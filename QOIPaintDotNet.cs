@@ -23,25 +23,24 @@
 // SOFTWARE.
 
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
 using PaintDotNet;
+using PaintDotNet.Rendering;
 
 [assembly: AssemblyTitle("Paint.NET Quite OK Image (QOI) plugin")]
 [assembly: AssemblyCompany("Piotr Fusik")]
 [assembly: AssemblyCopyright("Copyright © 2021")]
-[assembly: AssemblyVersion("0.0.2.0")]
-[assembly: AssemblyFileVersion("0.0.2.0")]
+[assembly: AssemblyVersion("0.0.3.0")]
+[assembly: AssemblyFileVersion("0.0.3.0")]
 
 namespace QOI.PaintDotNet
 {
 	class QOIFileType : FileType
 	{
-		public QOIFileType() : base("Quite OK Image", new FileTypeOptions { LoadExtensions = new string[] { ".qoi" } })
+		public QOIFileType() : base("Quite OK Image", new FileTypeOptions { LoadExtensions = new string[] { ".qoi" }, SaveExtensions = new string[] { ".qoi" } })
 		{
 		}
 
@@ -58,16 +57,42 @@ namespace QOI.PaintDotNet
 			// Decode
 			QOIDecoder qoi = new QOIDecoder();
 			if (!qoi.Decode(encoded, encodedLength))
-				throw new Exception("Decoding error");
+				throw new Exception("Error decoding QOI");
 			int width = qoi.GetWidth();
+			int height = qoi.GetHeight();
+			int[] pixels = qoi.GetPixels();
 
 			// Pass to Paint.NET
-			PixelFormat pixelFormat = qoi.GetAlpha() ? PixelFormat.Format32bppArgb : PixelFormat.Format32bppRgb;
-			GCHandle pinnedPixels = GCHandle.Alloc(qoi.GetPixels(), GCHandleType.Pinned);
-			using (Bitmap bitmap = new Bitmap(width, qoi.GetHeight(), width << 2, pixelFormat, pinnedPixels.AddrOfPinnedObject())) {
-				pinnedPixels.Free();
-				return Document.FromImage(bitmap);
+			Document document = new Document(width, height);
+			BitmapLayer layer = Layer.CreateBackgroundLayer(width, height);
+			Surface surface = layer.Surface;
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++)
+					surface[x, y] = ColorBgra.FromUInt32((uint) pixels[y * width + x]);
 			}
+			document.Layers.Add(layer);
+			return document;
+		}
+
+		protected override void OnSave(Document input, Stream output, SaveConfigToken token, Surface scratchSurface, ProgressEventHandler callback)
+		{
+			// Fetch from Paint.NET
+			input.CreateRenderer().Render(scratchSurface, Point2Int32.Zero);
+			int width = input.Width;
+			int height = input.Height;
+			int[] pixels = new int[width * height];
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++)
+					pixels[y * width + x] = (int) (uint) scratchSurface[x, y];
+			}
+
+			// Encode
+			QOIEncoder qoi = new QOIEncoder();
+			if (!qoi.Encode(width, height, pixels, true, QOIColorspace.Srgb))
+				throw new Exception("Error encoding QOI");
+
+			// Write
+			output.Write(qoi.GetEncoded(), 0, qoi.GetEncodedSize());
 		}
 	}
 
