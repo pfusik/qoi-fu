@@ -2,27 +2,54 @@
 import array
 
 class QOIColorspace:
+	"""QOI color space metadata.
+
+	Saved in the file header, but doesn't affect encoding or decoding in any way."""
 
 	SRGB = 0
+	"""sRGBA."""
 
 	SRGB_LINEAR_ALPHA = 1
+	"""sRGB with linear alpha."""
 
 	LINEAR = 15
+	"""Linear RGBA."""
 
 class QOIEncoder:
+	"""Encoder of the "Quite OK Image" (QOI) format.
+
+	Losslessly compresses an image to a byte array."""
 
 	_HEADER_SIZE = 14
 
 	_PADDING_SIZE = 4
 
 	def __init__(self):
-		pass
+		"""Constructs the encoder.
+
+		The encoder can be used for several images, one after another."""
 
 	@staticmethod
 	def can_encode(width, height, alpha):
+		"""Determines if an image of given size can be encoded.
+
+		:param width: Image width in pixels.
+		:param height: Image height in pixels.
+		:param alpha: Whether the image has the alpha channel (transparency).
+		"""
 		return width > 0 and height > 0 and height <= int(int(2147483629 / width) / (5 if alpha else 4))
 
 	def encode(self, width, height, pixels, alpha, colorspace):
+		"""Encodes the given image.
+
+		Returns `true` if encoded successfully.
+
+		:param width: Image width in pixels.
+		:param height: Image height in pixels.
+		:param pixels: Pixels of the image, top-down, left-to-right.
+		:param alpha: `false` specifies that all pixels are opaque. High bytes of `pixels` elements are ignored then.
+		:param colorspace: Specifies the color space. See `QOIColorspace`.
+		"""
 		if pixels is None or not QOIEncoder.can_encode(width, height, alpha):
 			return False
 		pixels_size = width * height
@@ -119,17 +146,33 @@ class QOIEncoder:
 		return True
 
 	def get_encoded(self):
+		"""Returns the encoded file contents.
+
+		This method can only be called after `Encode` returned `true`.
+		The allocated array is usually larger than the encoded data.
+		Call `GetEncodedSize` to retrieve the number of leading bytes that are significant."""
 		return self._encoded
 
 	def get_encoded_size(self):
+		"""Returns the encoded file length."""
 		return self._encoded_size
 
 class QOIDecoder:
+	"""Decoder of the "Quite OK Image" (QOI) format."""
 
 	def __init__(self):
-		pass
+		"""Constructs the decoder.
+
+		The decoder can be used for several images, one after another."""
 
 	def decode(self, encoded, encoded_size):
+		"""Decodes the given QOI file contents.
+
+		Returns `true` if decoded successfully.
+
+		:param encoded: QOI file contents. Only the first `encodedSize` bytes are accessed.
+		:param encoded_size: QOI file length.
+		"""
 		if encoded is None or encoded_size < 19 or encoded[0] != 113 or encoded[1] != 111 or encoded[2] != 105 or encoded[3] != 102:
 			return False
 		width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7]
@@ -199,16 +242,25 @@ class QOIDecoder:
 		return True
 
 	def get_width(self):
+		"""Returns the width of the decoded image in pixels."""
 		return self._width
 
 	def get_height(self):
+		"""Returns the height of the decoded image in pixels."""
 		return self._height
 
 	def get_pixels(self):
+		"""Returns the pixels of the decoded image, top-down, left-to-right.
+
+		Each pixel is a 32-bit integer 0xAARRGGBB."""
 		return self._pixels
 
 	def get_alpha(self):
+		"""Returns the information about the alpha channel from the file header."""
 		return self._alpha
 
 	def get_colorspace(self):
+		"""Returns the color space information from the file header.
+
+		See `QOIColorspace`."""
 		return self._colorspace

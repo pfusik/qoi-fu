@@ -52,6 +52,10 @@ static void CiShared_Assign(void **ptr, void *value)
 	*ptr = value;
 }
 
+/**
+ * Encoder of the "Quite OK Image" (QOI) format.
+ * Losslessly compresses an image to a byte array.
+ */
 struct QOIEncoder {
 	uint8_t *encoded;
 	int encodedSize;
@@ -59,6 +63,9 @@ struct QOIEncoder {
 static void QOIEncoder_Construct(QOIEncoder *self);
 static void QOIEncoder_Destruct(QOIEncoder *self);
 
+/**
+ * Decoder of the "Quite OK Image" (QOI) format.
+ */
 struct QOIDecoder {
 	int width;
 	int height;
@@ -260,7 +267,7 @@ bool QOIDecoder_Decode(QOIDecoder *self, uint8_t const *encoded, int encodedSize
 					CiShared_Release(pixels);
 					return false;
 				}
-				for (size_t _i = 0; _i < run; _i++)
+				for (int _i = 0; _i < run; _i++)
 					pixels[pixelsOffset + _i] = pixel;
 				pixelsOffset += run;
 			}

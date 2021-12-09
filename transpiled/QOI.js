@@ -2,16 +2,33 @@
 
 "use strict";
 
+/**
+ * QOI color space metadata.
+ * Saved in the file header, but doesn't affect encoding or decoding in any way.
+ */
 function QOIColorspace()
 {
 }
 
+/**
+ * sRGBA.
+ */
 QOIColorspace.SRGB = 0;
 
+/**
+ * sRGB with linear alpha.
+ */
 QOIColorspace.SRGB_LINEAR_ALPHA = 1;
 
+/**
+ * Linear RGBA.
+ */
 QOIColorspace.LINEAR = 15;
 
+/**
+ * Encoder of the "Quite OK Image" (QOI) format.
+ * Losslessly compresses an image to a byte array.
+ */
 function QOIEncoder()
 {
 }
@@ -20,11 +37,26 @@ QOIEncoder.HEADER_SIZE = 14;
 
 QOIEncoder.PADDING_SIZE = 4;
 
+/**
+ * Determines if an image of given size can be encoded.
+ * @param width Image width in pixels.
+ * @param height Image height in pixels.
+ * @param alpha Whether the image has the alpha channel (transparency).
+ */
 QOIEncoder.canEncode = function(width, height, alpha)
 {
 	return width > 0 && height > 0 && height <= ((2147483629 / width | 0) / (alpha ? 5 : 4) | 0);
 }
 
+/**
+ * Encodes the given image.
+ * Returns <code>true</code> if encoded successfully.
+ * @param width Image width in pixels.
+ * @param height Image height in pixels.
+ * @param pixels Pixels of the image, top-down, left-to-right.
+ * @param alpha <code>false</code> specifies that all pixels are opaque. High bytes of <code>pixels</code> elements are ignored then.
+ * @param colorspace Specifies the color space. See <code>QOIColorspace</code>.
+ */
 QOIEncoder.prototype.encode = function(width, height, pixels, alpha, colorspace)
 {
 	if (pixels == null || !QOIEncoder.canEncode(width, height, alpha))
@@ -115,20 +147,38 @@ QOIEncoder.prototype.encode = function(width, height, pixels, alpha, colorspace)
 	return true;
 }
 
+/**
+ * Returns the encoded file contents.
+ * This method can only be called after <code>Encode</code> returned <code>true</code>.
+ * The allocated array is usually larger than the encoded data.
+ * Call <code>GetEncodedSize</code> to retrieve the number of leading bytes that are significant.
+ */
 QOIEncoder.prototype.getEncoded = function()
 {
 	return this.encoded;
 }
 
+/**
+ * Returns the encoded file length.
+ */
 QOIEncoder.prototype.getEncodedSize = function()
 {
 	return this.encodedSize;
 }
 
+/**
+ * Decoder of the "Quite OK Image" (QOI) format.
+ */
 function QOIDecoder()
 {
 }
 
+/**
+ * Decodes the given QOI file contents.
+ * Returns <code>true</code> if decoded successfully.
+ * @param encoded QOI file contents. Only the first <code>encodedSize</code> bytes are accessed.
+ * @param encodedSize QOI file length.
+ */
 QOIDecoder.prototype.decode = function(encoded, encodedSize)
 {
 	if (encoded == null || encodedSize < 19 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
@@ -198,26 +248,43 @@ QOIDecoder.prototype.decode = function(encoded, encodedSize)
 	return true;
 }
 
+/**
+ * Returns the width of the decoded image in pixels.
+ */
 QOIDecoder.prototype.getWidth = function()
 {
 	return this.width;
 }
 
+/**
+ * Returns the height of the decoded image in pixels.
+ */
 QOIDecoder.prototype.getHeight = function()
 {
 	return this.height;
 }
 
+/**
+ * Returns the pixels of the decoded image, top-down, left-to-right.
+ * Each pixel is a 32-bit integer 0xAARRGGBB.
+ */
 QOIDecoder.prototype.getPixels = function()
 {
 	return this.pixels;
 }
 
+/**
+ * Returns the information about the alpha channel from the file header.
+ */
 QOIDecoder.prototype.getAlpha = function()
 {
 	return this.alpha;
 }
 
+/**
+ * Returns the color space information from the file header.
+ * See <code>QOIColorspace</code>.
+ */
 QOIDecoder.prototype.getColorspace = function()
 {
 	return this.colorspace;

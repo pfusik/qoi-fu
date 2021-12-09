@@ -1,8 +1,15 @@
 // Generated automatically with "cito". Do not edit.
 import java.util.Arrays;
 
+/**
+ * Decoder of the "Quite OK Image" (QOI) format.
+ */
 public class QOIDecoder
 {
+	/**
+	 * Constructs the decoder.
+	 * The decoder can be used for several images, one after another.
+	 */
 	public QOIDecoder()
 	{
 	}
@@ -12,6 +19,12 @@ public class QOIDecoder
 	private boolean alpha;
 	private int colorspace;
 
+	/**
+	 * Decodes the given QOI file contents.
+	 * Returns <code>true</code> if decoded successfully.
+	 * @param encoded QOI file contents. Only the first <code>encodedSize</code> bytes are accessed.
+	 * @param encodedSize QOI file length.
+	 */
 	public final boolean decode(byte[] encoded, int encodedSize)
 	{
 		if (encoded == null || encodedSize < 19 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
@@ -81,26 +94,43 @@ public class QOIDecoder
 		return true;
 	}
 
+	/**
+	 * Returns the width of the decoded image in pixels.
+	 */
 	public final int getWidth()
 	{
 		return this.width;
 	}
 
+	/**
+	 * Returns the height of the decoded image in pixels.
+	 */
 	public final int getHeight()
 	{
 		return this.height;
 	}
 
+	/**
+	 * Returns the pixels of the decoded image, top-down, left-to-right.
+	 * Each pixel is a 32-bit integer 0xAARRGGBB.
+	 */
 	public final int[] getPixels()
 	{
 		return this.pixels;
 	}
 
+	/**
+	 * Returns the information about the alpha channel from the file header.
+	 */
 	public final boolean getAlpha()
 	{
 		return this.alpha;
 	}
 
+	/**
+	 * Returns the color space information from the file header.
+	 * See <code>QOIColorspace</code>.
+	 */
 	public final int getColorspace()
 	{
 		return this.colorspace;

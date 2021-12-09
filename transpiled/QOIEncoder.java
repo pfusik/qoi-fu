@@ -1,8 +1,16 @@
 // Generated automatically with "cito". Do not edit.
 import java.util.Arrays;
 
+/**
+ * Encoder of the "Quite OK Image" (QOI) format.
+ * Losslessly compresses an image to a byte array.
+ */
 public class QOIEncoder
 {
+	/**
+	 * Constructs the encoder.
+	 * The encoder can be used for several images, one after another.
+	 */
 	public QOIEncoder()
 	{
 	}
@@ -13,11 +21,26 @@ public class QOIEncoder
 	private byte[] encoded;
 	private int encodedSize;
 
+	/**
+	 * Determines if an image of given size can be encoded.
+	 * @param width Image width in pixels.
+	 * @param height Image height in pixels.
+	 * @param alpha Whether the image has the alpha channel (transparency).
+	 */
 	public static boolean canEncode(int width, int height, boolean alpha)
 	{
 		return width > 0 && height > 0 && height <= 2147483629 / width / (alpha ? 5 : 4);
 	}
 
+	/**
+	 * Encodes the given image.
+	 * Returns <code>true</code> if encoded successfully.
+	 * @param width Image width in pixels.
+	 * @param height Image height in pixels.
+	 * @param pixels Pixels of the image, top-down, left-to-right.
+	 * @param alpha <code>false</code> specifies that all pixels are opaque. High bytes of <code>pixels</code> elements are ignored then.
+	 * @param colorspace Specifies the color space. See <code>QOIColorspace</code>.
+	 */
 	public final boolean encode(int width, int height, int[] pixels, boolean alpha, int colorspace)
 	{
 		if (pixels == null || !canEncode(width, height, alpha))
@@ -108,11 +131,20 @@ public class QOIEncoder
 		return true;
 	}
 
+	/**
+	 * Returns the encoded file contents.
+	 * This method can only be called after <code>Encode</code> returned <code>true</code>.
+	 * The allocated array is usually larger than the encoded data.
+	 * Call <code>GetEncodedSize</code> to retrieve the number of leading bytes that are significant.
+	 */
 	public final byte[] getEncoded()
 	{
 		return this.encoded;
 	}
 
+	/**
+	 * Returns the encoded file length.
+	 */
 	public final int getEncodedSize()
 	{
 		return this.encodedSize;

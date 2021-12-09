@@ -1,17 +1,26 @@
 // Generated automatically with "cito". Do not edit.
 
+/// QOI color space metadata.
+/// Saved in the file header, but doesn't affect encoding or decoding in any way.
 public class QOIColorspace
 {
 
+	/// sRGBA.
 	public static let srgb = 0
 
+	/// sRGB with linear alpha.
 	public static let srgbLinearAlpha = 1
 
+	/// Linear RGBA.
 	public static let linear = 15
 }
 
+/// Encoder of the "Quite OK Image" (QOI) format.
+/// Losslessly compresses an image to a byte array.
 public class QOIEncoder
 {
+	/// Constructs the encoder.
+	/// The encoder can be used for several images, one after another.
 	public init()
 	{
 	}
@@ -24,11 +33,22 @@ public class QOIEncoder
 
 	private var encodedSize : Int = 0
 
+	/// Determines if an image of given size can be encoded.
+	/// - parameter width Image width in pixels.
+	/// - parameter height Image height in pixels.
+	/// - parameter alpha Whether the image has the alpha channel (transparency).
 	public static func canEncode(_ width : Int, _ height : Int, _ alpha : Bool) -> Bool
 	{
 		return width > 0 && height > 0 && height <= 2147483629 / width / (alpha ? 5 : 4)
 	}
 
+	/// Encodes the given image.
+	/// Returns `true` if encoded successfully.
+	/// - parameter width Image width in pixels.
+	/// - parameter height Image height in pixels.
+	/// - parameter pixels Pixels of the image, top-down, left-to-right.
+	/// - parameter alpha `false` specifies that all pixels are opaque. High bytes of `pixels` elements are ignored then.
+	/// - parameter colorspace Specifies the color space. See `QOIColorspace`.
 	public func encode(_ width : Int, _ height : Int, _ pixels : ArrayRef<Int>?, _ alpha : Bool, _ colorspace : Int) -> Bool
 	{
 		if pixels === nil || !QOIEncoder.canEncode(width, height, alpha) {
@@ -146,19 +166,27 @@ public class QOIEncoder
 		return true
 	}
 
+	/// Returns the encoded file contents.
+	/// This method can only be called after `Encode` returned `true`.
+	/// The allocated array is usually larger than the encoded data.
+	/// Call `GetEncodedSize` to retrieve the number of leading bytes that are significant.
 	public func getEncoded() -> ArrayRef<UInt8>?
 	{
 		return self.encoded
 	}
 
+	/// Returns the encoded file length.
 	public func getEncodedSize() -> Int
 	{
 		return self.encodedSize
 	}
 }
 
+/// Decoder of the "Quite OK Image" (QOI) format.
 public class QOIDecoder
 {
+	/// Constructs the decoder.
+	/// The decoder can be used for several images, one after another.
 	public init()
 	{
 	}
@@ -173,6 +201,10 @@ public class QOIDecoder
 
 	private var colorspace : Int = 0
 
+	/// Decodes the given QOI file contents.
+	/// Returns `true` if decoded successfully.
+	/// - parameter encoded QOI file contents. Only the first `encodedSize` bytes are accessed.
+	/// - parameter encodedSize QOI file length.
 	public func decode(_ encoded : ArrayRef<UInt8>?, _ ciParamEncodedSize : Int) -> Bool
 	{
 		var encodedSize : Int = ciParamEncodedSize
@@ -268,26 +300,33 @@ public class QOIDecoder
 		return true
 	}
 
+	/// Returns the width of the decoded image in pixels.
 	public func getWidth() -> Int
 	{
 		return self.width
 	}
 
+	/// Returns the height of the decoded image in pixels.
 	public func getHeight() -> Int
 	{
 		return self.height
 	}
 
+	/// Returns the pixels of the decoded image, top-down, left-to-right.
+	/// Each pixel is a 32-bit integer 0xAARRGGBB.
 	public func getPixels() -> ArrayRef<Int>?
 	{
 		return self.pixels
 	}
 
+	/// Returns the information about the alpha channel from the file header.
 	public func getAlpha() -> Bool
 	{
 		return self.alpha
 	}
 
+	/// Returns the color space information from the file header.
+	/// See `QOIColorspace`.
 	public func getColorspace() -> Int
 	{
 		return self.colorspace

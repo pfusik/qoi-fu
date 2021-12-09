@@ -1,18 +1,27 @@
 // Generated automatically with "cito". Do not edit.
 using System;
 
+/// <summary>QOI color space metadata.</summary>
+/// <remarks>Saved in the file header, but doesn't affect encoding or decoding in any way.</remarks>
 public static class QOIColorspace
 {
 
+	/// <summary>sRGBA.</summary>
 	public const int Srgb = 0;
 
+	/// <summary>sRGB with linear alpha.</summary>
 	public const int SrgbLinearAlpha = 1;
 
+	/// <summary>Linear RGBA.</summary>
 	public const int Linear = 15;
 }
 
+/// <summary>Encoder of the "Quite OK Image" (QOI) format.</summary>
+/// <remarks>Losslessly compresses an image to a byte array.</remarks>
 public class QOIEncoder
 {
+	/// <summary>Constructs the encoder.</summary>
+	/// <remarks>The encoder can be used for several images, one after another.</remarks>
 	public QOIEncoder()
 	{
 	}
@@ -25,11 +34,22 @@ public class QOIEncoder
 
 	int EncodedSize;
 
+	/// <summary>Determines if an image of given size can be encoded.</summary>
+	/// <param name="width">Image width in pixels.</param>
+	/// <param name="height">Image height in pixels.</param>
+	/// <param name="alpha">Whether the image has the alpha channel (transparency).</param>
 	public static bool CanEncode(int width, int height, bool alpha)
 	{
 		return width > 0 && height > 0 && height <= 2147483629 / width / (alpha ? 5 : 4);
 	}
 
+	/// <summary>Encodes the given image.</summary>
+	/// <remarks>Returns <see langword="true" /> if encoded successfully.</remarks>
+	/// <param name="width">Image width in pixels.</param>
+	/// <param name="height">Image height in pixels.</param>
+	/// <param name="pixels">Pixels of the image, top-down, left-to-right.</param>
+	/// <param name="alpha"><see langword="false" /> specifies that all pixels are opaque. High bytes of <c>pixels</c> elements are ignored then.</param>
+	/// <param name="colorspace">Specifies the color space. See <c>QOIColorspace</c>.</param>
 	public bool Encode(int width, int height, int[] pixels, bool alpha, int colorspace)
 	{
 		if (pixels == null || !CanEncode(width, height, alpha))
@@ -120,19 +140,27 @@ public class QOIEncoder
 		return true;
 	}
 
+	/// <summary>Returns the encoded file contents.</summary>
+	/// <remarks>This method can only be called after <c>Encode</c> returned <see langword="true" />.
+	/// The allocated array is usually larger than the encoded data.
+	/// Call <c>GetEncodedSize</c> to retrieve the number of leading bytes that are significant.</remarks>
 	public byte[] GetEncoded()
 	{
 		return this.Encoded;
 	}
 
+	/// <summary>Returns the encoded file length.</summary>
 	public int GetEncodedSize()
 	{
 		return this.EncodedSize;
 	}
 }
 
+/// <summary>Decoder of the "Quite OK Image" (QOI) format.</summary>
 public class QOIDecoder
 {
+	/// <summary>Constructs the decoder.</summary>
+	/// <remarks>The decoder can be used for several images, one after another.</remarks>
 	public QOIDecoder()
 	{
 	}
@@ -147,6 +175,10 @@ public class QOIDecoder
 
 	int Colorspace;
 
+	/// <summary>Decodes the given QOI file contents.</summary>
+	/// <remarks>Returns <see langword="true" /> if decoded successfully.</remarks>
+	/// <param name="encoded">QOI file contents. Only the first <c>encodedSize</c> bytes are accessed.</param>
+	/// <param name="encodedSize">QOI file length.</param>
 	public bool Decode(byte[] encoded, int encodedSize)
 	{
 		if (encoded == null || encodedSize < 19 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
@@ -216,26 +248,33 @@ public class QOIDecoder
 		return true;
 	}
 
+	/// <summary>Returns the width of the decoded image in pixels.</summary>
 	public int GetWidth()
 	{
 		return this.Width;
 	}
 
+	/// <summary>Returns the height of the decoded image in pixels.</summary>
 	public int GetHeight()
 	{
 		return this.Height;
 	}
 
+	/// <summary>Returns the pixels of the decoded image, top-down, left-to-right.</summary>
+	/// <remarks>Each pixel is a 32-bit integer 0xAARRGGBB.</remarks>
 	public int[] GetPixels()
 	{
 		return this.Pixels;
 	}
 
+	/// <summary>Returns the information about the alpha channel from the file header.</summary>
 	public bool GetAlpha()
 	{
 		return this.Alpha;
 	}
 
+	/// <summary>Returns the color space information from the file header.</summary>
+	/// <remarks>See <c>QOIColorspace</c>.</remarks>
 	public int GetColorspace()
 	{
 		return this.Colorspace;
