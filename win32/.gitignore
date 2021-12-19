@@ -1,2 +1,3 @@
 *.wixobj
-
+signed
+signed-msi
