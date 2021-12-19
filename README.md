@@ -4,7 +4,10 @@ in the [Ć programming language](https://github.com/pfusik/cito).
 Ć can be automatically translated to pure C, C++, C#, Java, JavaScript,
 Python and Swift with no additional dependencies.
 
-This is work in progress!
+Included are plugins for:
+- [GIMP](https://www.gimp.org) - Windows/macOS/Linux
+- [Paint.NET](https://www.getpaint.net) - Windows
+- [XnView MP](https://www.xnview.com/) - Windows/macOS/Linux
 
 License
 -------
