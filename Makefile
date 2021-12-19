@@ -48,3 +48,5 @@ clean:
 	$(RM) png2qoi file-qoi$(EXEEXT) Xqoi.usr QOIPaintDotNet.dll $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIColorspace.java transpiled/QOIEncoder.java
 
 .PHONY: all install-gimp install-xnview install-paint.net clean
+
+include win32/win32.mk

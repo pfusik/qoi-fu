@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+
+	<Product Id="*" Name="Quite OK Image plugins $(var.VERSION)" Language="1033"
+		Version="$(var.VERSION)" Manufacturer="Piotr Fusik" UpgradeCode="1A810837-9D9D-42ED-A5D3-AE9AC2CFF0FD">
+
+		<Package Description="Quite OK Image plugins" Manufacturer="Piotr Fusik" InstallerVersion="200" Compressed="yes" />
+		<MajorUpgrade DowngradeErrorMessage="Newer version of Quite OK Image plugins is already installed!" />
+		<Media Id="1" Cabinet="qoici.cab" EmbedCab="yes" CompressionLevel="high" />
+
+		<Property Id="ARPHELPLINK" Value="https://github.com/pfusik/qoi-ci" />
+		<WixVariable Id="WixUILicenseRtf" Value="win32/license.rtf" />
+
+		<UI Id="MyWixUI_FeatureTree">
+			<!-- customized WixUI_FeatureTree from Wix 3.0 - my changes commented -->
+			<TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+			<TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+			<TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+
+			<Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+			<Property Id="WixUI_Mode" Value="FeatureTree" />
+
+			<DialogRef Id="ErrorDlg" />
+			<DialogRef Id="FatalError" />
+			<DialogRef Id="FilesInUse" />
+			<DialogRef Id="MsiRMFilesInUse" />
+			<DialogRef Id="PrepareDlg" />
+			<DialogRef Id="ProgressDlg" />
+			<DialogRef Id="ResumeDlg" />
+			<DialogRef Id="UserExit" />
+
+			<Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="MyLicenseAgreementDlg">1</Publish>
+
+			<Publish Dialog="MyLicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+			<Publish Dialog="MyLicenseAgreementDlg" Control="Next" Event="NewDialog" Value="MyCustomizeDlg">1</Publish>
+
+			<Publish Dialog="MyCustomizeDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="1">Installed</Publish>
+			<Publish Dialog="MyCustomizeDlg" Control="Back" Event="NewDialog" Value="MyLicenseAgreementDlg" Order="2">NOT Installed</Publish>
+			<Publish Dialog="MyCustomizeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MyCustomizeDlg" Order="1">NOT Installed OR WixUI_InstallMode = "Change"</Publish>
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed</Publish>
+
+			<Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+
+			<Publish Dialog="MaintenanceTypeDlg" Control="ChangeButton" Event="NewDialog" Value="MyCustomizeDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+
+			<Dialog Id="MyLicenseAgreementDlg" Width="370" Height="270" Title="!(loc.LicenseAgreementDlg_Title)">
+				<!-- removed the checkbox and replaced the "Next" button with "I Accept" -->
+				<Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="I &amp;Accept">
+					<!-- http://www.joyofsetup.com/2010/05/20/its-time-to-experiment/
+					<Publish Event="SpawnWaitDialog" Value="WaitForCostingDlg">CostingComplete = 1</Publish>
+					-->
+				</Control>
+				<Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+				<Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+					<Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+				</Control>
+				<Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.LicenseAgreementDlgBannerBitmap)" />
+				<!-- higher license box because of the removed checkbox -->
+				<Control Id="LicenseText" Type="ScrollableText" X="20" Y="60" Width="330" Height="155" Sunken="yes" TabSkip="no">
+					<Text SourceFile="!(wix.WixUILicenseRtf)" />
+				</Control>
+				<!-- removed the "Print" button -->
+				<Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+				<Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+				<Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.LicenseAgreementDlgDescription)" />
+				<Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.LicenseAgreementDlgTitle)" />
+			</Dialog>
+
+			<Dialog Id="MyCustomizeDlg" Width="370" Height="270" Title="!(loc.CustomizeDlg_Title)" TrackDiskSpace="yes">
+				<!-- wider and higher selection tree so it doesn't need scrollbars -->
+				<Control Id="Tree" Type="SelectionTree" X="10" Y="75" Width="190" Height="125" Property="_BrowseProperty" Sunken="yes" TabSkip="no" Text="!(loc.CustomizeDlgTree)" />
+				<Control Id="Browse" Type="PushButton" X="294" Y="210" Width="66" Height="17" Text="!(loc.CustomizeDlgBrowse)">
+					<Publish Event="SelectionBrowse" Value="BrowseDlg">1</Publish>
+					<Condition Action="hide">Installed</Condition>
+					<Condition Action="disable">Installed</Condition>
+				</Control>
+				<!-- removed the "Reset" and "Disk Cost" buttons, moved the "Back" and "Next" buttons to their position in other dialogs -->
+				<Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+				<Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)">
+					<Subscribe Event="SelectionNoItems" Attribute="Enabled" />
+				</Control>
+				<Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+					<Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+				</Control>
+				<Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.CustomizeDlgBannerBitmap)" />
+				<Control Id="Text" Type="Text" X="25" Y="55" Width="320" Height="20" Text="!(loc.CustomizeDlgText)" />
+				<Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+				<Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+				<Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.CustomizeDlgDescription)" />
+				<Control Id="Title" Type="Text" X="15" Y="6" Width="210" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.CustomizeDlgTitle)" />
+				<Control Id="Box" Type="GroupBox" X="210" Y="71" Width="150" Height="128" />
+				<Control Id="ItemDescription" Type="Text" X="215" Y="90" Width="131" Height="50" Text="!(loc.CustomizeDlgItemDescription)">
+					<Subscribe Event="SelectionDescription" Attribute="Text" />
+				</Control>
+				<Control Id="ItemSize" Type="Text" X="215" Y="140" Width="131" Height="50" Text="!(loc.CustomizeDlgItemSize)">
+					<Subscribe Event="SelectionSize" Attribute="Text" />
+				</Control>
+				<Control Id="Location" Type="Text" X="90" Y="210" Width="200" Height="20" Text="!(loc.CustomizeDlgLocation)">
+					<Subscribe Event="SelectionPath" Attribute="Text" />
+					<Subscribe Event="SelectionPathOn" Attribute="Visible" />
+					<Condition Action="hide">Installed</Condition>
+				</Control>
+				<Control Id="LocationLabel" Type="Text" X="25" Y="210" Width="65" Height="10" Text="!(loc.CustomizeDlgLocationLabel)">
+					<Subscribe Event="SelectionPathOn" Attribute="Visible" />
+					<Condition Action="hide">Installed</Condition>
+				</Control>
+			</Dialog>
+		</UI>
+		<UIRef Id="WixUI_Common" />
+
+		<Property Id="GIMP.DIR">
+			<RegistrySearch Id="gimp.installdir" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GIMP-2_is1" Name="InstallLocation" Type="directory" />
+		</Property>
+
+		<Property Id="PAINTDOTNET.DIR">
+			<RegistrySearch Id="paintdotnet.dir" Root="HKLM" Key="SOFTWARE\Paint.NET" Name="TARGETDIR" Type="directory" />
+		</Property>
+
+		<Property Id="XNVIEWMP.DIR">
+			<RegistrySearch Id="xnviewmp.installdir" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\XnViewMP_is1" Name="InstallLocation" Type="directory" />
+		</Property>
+		<Property Id="XNVIEWMP.EXE">
+			<RegistrySearch Id="xnviewmp.exe" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\XnViewMP_is1" Name="InstallLocation" Type="directory">
+				<FileSearch Name="xnviewmp.exe" />
+			</RegistrySearch>
+		</Property>
+
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="GIMP.DIR" Name="GIMP 2">
+					<Directory Id="GIMPLIB.DIR" Name="lib">
+						<Directory Id="GIMPGIMP.DIR" Name="gimp">
+							<Directory Id="GIMP20.DIR" Name="2.0">
+								<Directory Id="GIMPPLUG.DIR" Name="plug-ins">
+									<Directory Id="GIMPQOI.DIR" Name="file-qoi">
+										<Component Id="fileqoi.exe">
+											<File Name="file-qoi.exe" Source="file-qoi.exe" Checksum="yes" KeyPath="yes" />
+										</Component>
+									</Directory>
+								</Directory>
+							</Directory>
+						</Directory>
+					</Directory>
+				</Directory>
+
+				<Directory Id="PAINTDOTNET.DIR" Name="Paint.NET">
+					<Directory Id="PAINTDOTNETFILETYPES.DIR" Name="FileTypes">
+						<Component Id="QOIPaintDotNet.dll">
+							<File Source="QOIPaintDotNet.dll" Checksum="yes" KeyPath="yes" />
+						</Component>
+					</Directory>
+				</Directory>
+
+				<Directory Id="XNVIEWMP.DIR" Name="XnViewMP">
+					<Directory Id="XNVIEWMPPLUG.DIR" Name="plugins">
+						<Component Id="Xqoi.usr">
+							<File Source="Xqoi.usr" Checksum="yes" KeyPath="yes" />
+						</Component>
+					</Directory>
+				</Directory>
+			</Directory>
+		</Directory>
+
+		<Feature Id="gimp" Title="GIMP plugin" Level="9" ConfigurableDirectory="GIMPQOI.DIR" Description="Plugin for GIMP." AllowAdvertise="no">
+			<Condition Level="1">GIMP.DIR</Condition>
+			<ComponentRef Id="fileqoi.exe" />
+		</Feature>
+		<Feature Id="paintdotnet" Title="Paint.NET plugin" Level="9" ConfigurableDirectory="PAINTDOTNETFILETYPES.DIR" Description="Plugin for Paint.NET" AllowAdvertise="no">
+			<Condition Level="1">PAINTDOTNET.DIR</Condition>
+			<ComponentRef Id="QOIPaintDotNet.dll" />
+		</Feature>
+		<Feature Id="xnviewmp" Title="XnViewMP plugin" Level="9" ConfigurableDirectory="XNVIEWMPPLUG.DIR" Description="Plugin for XnViewMP." AllowAdvertise="no">
+			<Condition Level="1">XNVIEWMP.DIR</Condition>
+			<ComponentRef Id="Xqoi.usr" />
+		</Feature>
+	</Product>
+</Wix>
