@@ -3,29 +3,6 @@
 "use strict";
 
 /**
- * QOI color space metadata.
- * Saved in the file header, but doesn't affect encoding or decoding in any way.
- */
-function QOIColorspace()
-{
-}
-
-/**
- * sRGBA.
- */
-QOIColorspace.SRGB = 0;
-
-/**
- * sRGB with linear alpha.
- */
-QOIColorspace.SRGB_LINEAR_ALPHA = 1;
-
-/**
- * Linear RGBA.
- */
-QOIColorspace.LINEAR = 15;
-
-/**
  * Encoder of the "Quite OK Image" (QOI) format.
  * Losslessly compresses an image to a byte array.
  */
@@ -35,7 +12,7 @@ function QOIEncoder()
 
 QOIEncoder.HEADER_SIZE = 14;
 
-QOIEncoder.PADDING_SIZE = 4;
+QOIEncoder.PADDING_SIZE = 8;
 
 /**
  * Determines if an image of given size can be encoded.
@@ -45,7 +22,7 @@ QOIEncoder.PADDING_SIZE = 4;
  */
 QOIEncoder.canEncode = function(width, height, alpha)
 {
-	return width > 0 && height > 0 && height <= ((2147483629 / width | 0) / (alpha ? 5 : 4) | 0);
+	return width > 0 && height > 0 && height <= ((2147483625 / width | 0) / (alpha ? 5 : 4) | 0);
 }
 
 /**
@@ -55,14 +32,14 @@ QOIEncoder.canEncode = function(width, height, alpha)
  * @param height Image height in pixels.
  * @param pixels Pixels of the image, top-down, left-to-right.
  * @param alpha <code>false</code> specifies that all pixels are opaque. High bytes of <code>pixels</code> elements are ignored then.
- * @param colorspace Specifies the color space. See <code>QOIColorspace</code>.
+ * @param linearColorspace Specifies the color space.
  */
-QOIEncoder.prototype.encode = function(width, height, pixels, alpha, colorspace)
+QOIEncoder.prototype.encode = function(width, height, pixels, alpha, linearColorspace)
 {
 	if (pixels == null || !QOIEncoder.canEncode(width, height, alpha))
 		return false;
 	let pixelsSize = width * height;
-	let encoded = new Uint8Array(14 + pixelsSize * (alpha ? 5 : 4) + 4);
+	let encoded = new Uint8Array(14 + pixelsSize * (alpha ? 5 : 4) + 8);
 	encoded[0] = 113;
 	encoded[1] = 111;
 	encoded[2] = 105;
@@ -76,7 +53,7 @@ QOIEncoder.prototype.encode = function(width, height, pixels, alpha, colorspace)
 	encoded[10] = height >> 8 & 255;
 	encoded[11] = height & 255;
 	encoded[12] = alpha ? 4 : 3;
-	encoded[13] = colorspace;
+	encoded[13] = linearColorspace ? 1 : 0;
 	const index = new Int32Array(64);
 	let encodedOffset = 14;
 	let lastPixel = -16777216;
@@ -85,20 +62,18 @@ QOIEncoder.prototype.encode = function(width, height, pixels, alpha, colorspace)
 		let pixel = pixels[pixelsOffset++];
 		if (!alpha)
 			pixel |= -16777216;
-		if (pixel == lastPixel)
-			run++;
-		if (run > 0 && (pixel != lastPixel || run == 8224 || pixelsOffset >= pixelsSize)) {
-			if (run <= 32)
-				encoded[encodedOffset++] = 64 + run - 1;
-			else {
-				run -= 33;
-				encoded[encodedOffset++] = 96 + (run >> 8);
-				encoded[encodedOffset++] = run & 255;
+		if (pixel == lastPixel) {
+			if (++run == 62 || pixelsOffset >= pixelsSize) {
+				encoded[encodedOffset++] = 191 + run;
+				run = 0;
 			}
-			run = 0;
 		}
-		if (pixel != lastPixel) {
-			let indexOffset = (pixel >> 24 ^ pixel >> 16 ^ pixel >> 8 ^ pixel) & 63;
+		else {
+			if (run > 0) {
+				encoded[encodedOffset++] = 191 + run;
+				run = 0;
+			}
+			let indexOffset = ((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63;
 			if (pixel == index[indexOffset])
 				encoded[encodedOffset++] = indexOffset;
 			else {
@@ -107,43 +82,45 @@ QOIEncoder.prototype.encode = function(width, height, pixels, alpha, colorspace)
 				let g = pixel >> 8 & 255;
 				let b = pixel & 255;
 				let a = pixel >> 24 & 255;
-				let dr = r - (lastPixel >> 16 & 255);
-				let dg = g - (lastPixel >> 8 & 255);
-				let db = b - (lastPixel & 255);
-				let da = a - (lastPixel >> 24 & 255);
-				if (dr >= -16 && dr <= 15 && dg >= -16 && dg <= 15 && db >= -16 && db <= 15 && da >= -16 && da <= 15) {
-					if (da == 0 && dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
-						encoded[encodedOffset++] = 170 + (dr << 4) + (dg << 2) + db;
-					else if (da == 0 && dg >= -8 && dg <= 7 && db >= -8 && db <= 7) {
-						encoded[encodedOffset++] = 208 + dr;
-						encoded[encodedOffset++] = 136 + (dg << 4) + db;
-					}
-					else {
-						dr += 16;
-						encoded[encodedOffset++] = 224 + (dr >> 1);
-						db += 16;
-						encoded[encodedOffset++] = ((dr & 1) << 7) + ((dg + 16) << 2) + (db >> 3);
-						encoded[encodedOffset++] = ((db & 7) << 5) + da + 16;
-					}
+				if ((pixel ^ lastPixel) >> 24 != 0) {
+					encoded[encodedOffset] = 255;
+					encoded[encodedOffset + 1] = r;
+					encoded[encodedOffset + 2] = g;
+					encoded[encodedOffset + 3] = b;
+					encoded[encodedOffset + 4] = a;
+					encodedOffset += 5;
 				}
 				else {
-					encoded[encodedOffset++] = 240 | (dr != 0 ? 8 : 0) | (dg != 0 ? 4 : 0) | (db != 0 ? 2 : 0) | (da != 0 ? 1 : 0);
-					if (dr != 0)
-						encoded[encodedOffset++] = r;
-					if (dg != 0)
-						encoded[encodedOffset++] = g;
-					if (db != 0)
-						encoded[encodedOffset++] = b;
-					if (da != 0)
-						encoded[encodedOffset++] = a;
+					let dr = r - (lastPixel >> 16 & 255);
+					let dg = g - (lastPixel >> 8 & 255);
+					let db = b - (lastPixel & 255);
+					if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
+						encoded[encodedOffset++] = 106 + (dr << 4) + (dg << 2) + db;
+					else {
+						dr -= dg;
+						db -= dg;
+						if (dr >= -8 && dr <= 7 && dg >= -32 && dg <= 31 && db >= -8 && db <= 7) {
+							encoded[encodedOffset] = 160 + dg;
+							encoded[encodedOffset + 1] = 136 + (dr << 4) + db;
+							encodedOffset += 2;
+						}
+						else {
+							encoded[encodedOffset] = 254;
+							encoded[encodedOffset + 1] = r;
+							encoded[encodedOffset + 2] = g;
+							encoded[encodedOffset + 3] = b;
+							encodedOffset += 4;
+						}
+					}
 				}
 			}
 			lastPixel = pixel;
 		}
 	}
-	encoded.fill(0, encodedOffset, encodedOffset + 4);
+	encoded.fill(0, encodedOffset, encodedOffset + 7);
+	encoded[encodedOffset + 8 - 1] = 1;
 	this.encoded = encoded;
-	this.encodedSize = encodedOffset + 4;
+	this.encodedSize = encodedOffset + 8;
 	return true;
 }
 
@@ -181,15 +158,35 @@ function QOIDecoder()
  */
 QOIDecoder.prototype.decode = function(encoded, encodedSize)
 {
-	if (encoded == null || encodedSize < 19 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
+	if (encoded == null || encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
 		return false;
 	let width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];
 	let height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];
 	if (width <= 0 || height <= 0 || height > (2147483647 / width | 0))
 		return false;
+	switch (encoded[12]) {
+	case 3:
+		this.alpha = false;
+		break;
+	case 4:
+		this.alpha = true;
+		break;
+	default:
+		return false;
+	}
+	switch (encoded[13]) {
+	case 0:
+		this.linearColorspace = false;
+		break;
+	case 1:
+		this.linearColorspace = true;
+		break;
+	default:
+		return false;
+	}
 	let pixelsSize = width * height;
 	let pixels = new Int32Array(pixelsSize);
-	encodedSize -= 4;
+	encodedSize -= 8;
 	let encodedOffset = 14;
 	const index = new Int32Array(64);
 	let pixel = -16777216;
@@ -197,54 +194,44 @@ QOIDecoder.prototype.decode = function(encoded, encodedSize)
 		if (encodedOffset >= encodedSize)
 			return false;
 		let e = encoded[encodedOffset++];
-		if (e < 128) {
-			if (e < 64)
-				pixels[pixelsOffset++] = pixel = index[e];
-			else {
-				let run;
-				if (e < 96)
-					run = e - 63;
-				else
-					run = 33 + ((e - 96) << 8) + encoded[encodedOffset++];
-				if (pixelsOffset + run > pixelsSize)
-					return false;
-				pixels.fill(pixel, pixelsOffset, pixelsOffset + run);
-				pixelsOffset += run;
-			}
+		switch (e >> 6) {
+		case 0:
+			pixels[pixelsOffset++] = pixel = index[e];
 			continue;
-		}
-		else if (e < 224) {
-			if (e < 192)
-				pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 8 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255);
-			else {
-				let d = encoded[encodedOffset++];
-				pixel = (pixel & -16777216) | ((pixel + ((e - 192 - 16) << 16)) & 16711680) | ((pixel + (((d >> 4) - 8) << 8)) & 65280) | ((pixel + (d & 15) - 8) & 255);
+		case 1:
+			pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 4 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255);
+			break;
+		case 2:
+			e -= 160;
+			let rb = encoded[encodedOffset++];
+			pixel = (pixel & -16777216) | ((pixel + ((e + (rb >> 4) - 8) << 16)) & 16711680) | ((pixel + (e << 8)) & 65280) | ((pixel + e + (rb & 15) - 8) & 255);
+			break;
+		default:
+			if (e < 254) {
+				e -= 191;
+				if (pixelsOffset + e > pixelsSize)
+					return false;
+				pixels.fill(pixel, pixelsOffset, pixelsOffset + e);
+				pixelsOffset += e;
+				continue;
 			}
+			if (e == 254) {
+				pixel = (pixel & -16777216) | encoded[encodedOffset] << 16 | encoded[encodedOffset + 1] << 8 | encoded[encodedOffset + 2];
+				encodedOffset += 3;
+			}
+			else {
+				pixel = encoded[encodedOffset + 3] << 24 | encoded[encodedOffset] << 16 | encoded[encodedOffset + 1] << 8 | encoded[encodedOffset + 2];
+				encodedOffset += 4;
+			}
+			break;
 		}
-		else if (e < 240) {
-			e = e << 16 | encoded[encodedOffset] << 8 | encoded[encodedOffset + 1];
-			encodedOffset += 2;
-			pixel = ((pixel + (((e & 31) - 16) << 24)) & -16777216) | ((pixel + (((e >> 15) - 448 - 16) << 16)) & 16711680) | ((pixel + (((e >> 10 & 31) - 16) << 8)) & 65280) | ((pixel + (e >> 5 & 31) - 16) & 255);
-		}
-		else {
-			if ((e & 8) != 0)
-				pixel = (pixel & -16711681) | encoded[encodedOffset++] << 16;
-			if ((e & 4) != 0)
-				pixel = (pixel & -65281) | encoded[encodedOffset++] << 8;
-			if ((e & 2) != 0)
-				pixel = (pixel & -256) | encoded[encodedOffset++];
-			if ((e & 1) != 0)
-				pixel = (pixel & 16777215) | encoded[encodedOffset++] << 24;
-		}
-		pixels[pixelsOffset++] = index[(pixel >> 24 ^ pixel >> 16 ^ pixel >> 8 ^ pixel) & 63] = pixel;
+		pixels[pixelsOffset++] = index[((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63] = pixel;
 	}
 	if (encodedOffset != encodedSize)
 		return false;
 	this.width = width;
 	this.height = height;
 	this.pixels = pixels;
-	this.alpha = encoded[12] == 4;
-	this.colorspace = encoded[13];
 	return true;
 }
 
@@ -276,16 +263,16 @@ QOIDecoder.prototype.getPixels = function()
 /**
  * Returns the information about the alpha channel from the file header.
  */
-QOIDecoder.prototype.getAlpha = function()
+QOIDecoder.prototype.hasAlpha = function()
 {
 	return this.alpha;
 }
 
 /**
  * Returns the color space information from the file header.
- * See <code>QOIColorspace</code>.
+ * <code>false</code> = sRGB with linear alpha channel.<code>true</code> = all channels linear.
  */
-QOIDecoder.prototype.getColorspace = function()
+QOIDecoder.prototype.isLinearColorspace = function()
 {
-	return this.colorspace;
+	return this.linearColorspace;
 }

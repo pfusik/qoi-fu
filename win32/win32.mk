@@ -1,4 +1,4 @@
-VERSION = 0.3.0
+VERSION = 1.0.0
 
 DO_SIGN = signtool sign -d "Quite OK Image plugins $(VERSION)" -n "Open Source Developer, Piotr Fusik" -tr http://time.certum.pl -fd sha256 -td sha256 $^ && touch $@
 

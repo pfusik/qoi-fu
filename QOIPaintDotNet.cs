@@ -33,8 +33,8 @@ using PaintDotNet.Rendering;
 [assembly: AssemblyTitle("Paint.NET Quite OK Image (QOI) plugin")]
 [assembly: AssemblyCompany("Piotr Fusik")]
 [assembly: AssemblyCopyright("Copyright © 2021")]
-[assembly: AssemblyVersion("0.0.3.0")]
-[assembly: AssemblyFileVersion("0.0.3.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
 
 namespace QOI.PaintDotNet
 {
@@ -88,7 +88,7 @@ namespace QOI.PaintDotNet
 
 			// Encode
 			QOIEncoder qoi = new QOIEncoder();
-			if (!qoi.Encode(width, height, pixels, true, QOIColorspace.Srgb))
+			if (!qoi.Encode(width, height, pixels, true, false))
 				throw new Exception("Error encoding QOI");
 
 			// Write

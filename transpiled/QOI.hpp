@@ -2,32 +2,8 @@
 #pragma once
 #include <cstdint>
 #include <memory>
-class QOIColorspace;
 class QOIEncoder;
 class QOIDecoder;
-
-/**
- * QOI color space metadata.
- * Saved in the file header, but doesn't affect encoding or decoding in any way.
- */
-class QOIColorspace
-{
-public:
-	/**
-	 * sRGBA.
-	 */
-	static constexpr int srgb = 0;
-	/**
-	 * sRGB with linear alpha.
-	 */
-	static constexpr int srgbLinearAlpha = 1;
-	/**
-	 * Linear RGBA.
-	 */
-	static constexpr int linear = 15;
-private:
-	QOIColorspace() = delete;
-};
 
 /**
  * Encoder of the "Quite OK Image" (QOI) format.
@@ -55,9 +31,9 @@ public:
 	 * @param height Image height in pixels.
 	 * @param pixels Pixels of the image, top-down, left-to-right.
 	 * @param alpha <code>false</code> specifies that all pixels are opaque. High bytes of <code>pixels</code> elements are ignored then.
-	 * @param colorspace Specifies the color space. See <code>QOIColorspace</code>.
+	 * @param linearColorspace Specifies the color space.
 	 */
-	bool encode(int width, int height, int const * pixels, bool alpha, int colorspace);
+	bool encode(int width, int height, int const * pixels, bool alpha, bool linearColorspace);
 	/**
 	 * Returns the encoded file contents.
 	 * This method can only be called after <code>Encode</code> returned <code>true</code>.
@@ -71,7 +47,7 @@ public:
 	int getEncodedSize() const;
 public:
 	static constexpr int headerSize = 14;
-	static constexpr int paddingSize = 4;
+	static constexpr int paddingSize = 8;
 private:
 	std::shared_ptr<uint8_t[]> encoded;
 	int encodedSize;
@@ -111,16 +87,16 @@ public:
 	/**
 	 * Returns the information about the alpha channel from the file header.
 	 */
-	bool getAlpha() const;
+	bool hasAlpha() const;
 	/**
 	 * Returns the color space information from the file header.
-	 * See <code>QOIColorspace</code>.
+	 * <code>false</code> = sRGB with linear alpha channel.<code>true</code> = all channels linear.
 	 */
-	int getColorspace() const;
+	bool isLinearColorspace() const;
 private:
 	int width;
 	int height;
 	std::shared_ptr<int[]> pixels;
 	bool alpha;
-	int colorspace;
+	bool linearColorspace;
 };

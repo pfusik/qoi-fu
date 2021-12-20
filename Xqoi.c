@@ -103,7 +103,7 @@ DLL_EXPORT BOOL API gfpLoadPictureGetInfo(
 	*width = QOIDecoder_GetWidth(qoi);
 	*height = QOIDecoder_GetHeight(qoi);
 	*dpi = 96;
-	int bytes_per_pixel = QOIDecoder_GetAlpha(qoi) ? 4 : 3;
+	int bytes_per_pixel = QOIDecoder_HasAlpha(qoi) ? 4 : 3;
 	*bits_per_pixel = bytes_per_pixel << 3;
 	*bytes_per_line = *width * bytes_per_pixel;
 	*has_colormap = FALSE;
@@ -117,7 +117,7 @@ DLL_EXPORT BOOL API gfpLoadPictureGetLine(void *ptr, INT line, unsigned char *bu
 	const QOIDecoder *qoi = (const QOIDecoder *) ptr;
 	int width = QOIDecoder_GetWidth(qoi);
 	const int *pixels = QOIDecoder_GetPixels(qoi) + line * width;
-	int bytes_per_pixel = QOIDecoder_GetAlpha(qoi) ? 4 : 3;
+	int bytes_per_pixel = QOIDecoder_HasAlpha(qoi) ? 4 : 3;
 
 	for (int x = 0; x < width; x++) {
 		int rgb = pixels[x];
@@ -203,7 +203,7 @@ DLL_EXPORT void API gfpSavePictureExit(void *ptr)
 {
 	QOIWriter *w = (QOIWriter *) ptr;
 	QOIEncoder *qoi = QOIEncoder_New();
-	if (QOIEncoder_Encode(qoi, w->width, w->height, w->pixels, w->alpha, QOIColorspace_SRGB))
+	if (QOIEncoder_Encode(qoi, w->width, w->height, w->pixels, w->alpha, false))
 		QOIEncoder_SaveStdio(qoi, w->f);
 	else
 		fclose(w->f);

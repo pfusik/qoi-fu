@@ -58,7 +58,7 @@ static gint32 load_image(const gchar *filename)
 	if (image != -1) {
 		gimp_image_set_filename(image, filename);
 		gint32 layer = gimp_layer_new(image, "Background", width, height,
-			QOIDecoder_GetAlpha(qoi) ? GIMP_RGBA_IMAGE : GIMP_RGB_IMAGE, 100, GIMP_NORMAL_MODE);
+			QOIDecoder_HasAlpha(qoi) ? GIMP_RGBA_IMAGE : GIMP_RGB_IMAGE, 100, GIMP_NORMAL_MODE);
 		gimp_image_insert_layer(image, layer, -1, 0);
 		GeglBuffer *buffer = gimp_drawable_get_buffer(layer);
 		gegl_buffer_set(buffer, NULL, 0, get_format(), QOIDecoder_GetPixels(qoi), GEGL_AUTO_ROWSTRIDE);
@@ -83,7 +83,7 @@ static bool save_image(const gchar *filename, gint32 image, gint32 drawable)
 	bool alpha = gimp_drawable_has_alpha(drawable);
 
 	QOIEncoder *qoi = QOIEncoder_New();
-	bool ok = QOIEncoder_Encode(qoi, width, height, pixels, alpha, QOIColorspace_SRGB);
+	bool ok = QOIEncoder_Encode(qoi, width, height, pixels, alpha, false);
 	free(pixels);
 	if (ok)
 		ok = QOIEncoder_SaveFile(qoi, filename);

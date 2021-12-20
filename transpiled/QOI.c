@@ -71,7 +71,7 @@ struct QOIDecoder {
 	int height;
 	int *pixels;
 	bool alpha;
-	int colorspace;
+	bool linearColorspace;
 };
 static void QOIDecoder_Construct(QOIDecoder *self);
 static void QOIDecoder_Destruct(QOIDecoder *self);
@@ -104,15 +104,15 @@ void QOIEncoder_Delete(QOIEncoder *self)
 
 bool QOIEncoder_CanEncode(int width, int height, bool alpha)
 {
-	return width > 0 && height > 0 && height <= 2147483629 / width / (alpha ? 5 : 4);
+	return width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? 5 : 4);
 }
 
-bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha, int colorspace)
+bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha, bool linearColorspace)
 {
 	if (pixels == NULL || !QOIEncoder_CanEncode(width, height, alpha))
 		return false;
 	int pixelsSize = width * height;
-	uint8_t *encoded = (uint8_t *) CiShared_Make(14 + pixelsSize * (alpha ? 5 : 4) + 4, sizeof(uint8_t), NULL, NULL);
+	uint8_t *encoded = (uint8_t *) CiShared_Make(14 + pixelsSize * (alpha ? 5 : 4) + 8, sizeof(uint8_t), NULL, NULL);
 	encoded[0] = 113;
 	encoded[1] = 111;
 	encoded[2] = 105;
@@ -126,7 +126,7 @@ bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixel
 	encoded[10] = (uint8_t) (height >> 8);
 	encoded[11] = (uint8_t) height;
 	encoded[12] = (uint8_t) (alpha ? 4 : 3);
-	encoded[13] = (uint8_t) colorspace;
+	encoded[13] = (uint8_t) (linearColorspace ? 1 : 0);
 	int index[64] = { 0 };
 	int encodedOffset = 14;
 	int lastPixel = -16777216;
@@ -135,20 +135,18 @@ bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixel
 		int pixel = pixels[pixelsOffset++];
 		if (!alpha)
 			pixel |= -16777216;
-		if (pixel == lastPixel)
-			run++;
-		if (run > 0 && (pixel != lastPixel || run == 8224 || pixelsOffset >= pixelsSize)) {
-			if (run <= 32)
-				encoded[encodedOffset++] = (uint8_t) (64 + run - 1);
-			else {
-				run -= 33;
-				encoded[encodedOffset++] = (uint8_t) (96 + (run >> 8));
-				encoded[encodedOffset++] = (uint8_t) run;
+		if (pixel == lastPixel) {
+			if (++run == 62 || pixelsOffset >= pixelsSize) {
+				encoded[encodedOffset++] = (uint8_t) (191 + run);
+				run = 0;
 			}
-			run = 0;
 		}
-		if (pixel != lastPixel) {
-			int indexOffset = (pixel >> 24 ^ pixel >> 16 ^ pixel >> 8 ^ pixel) & 63;
+		else {
+			if (run > 0) {
+				encoded[encodedOffset++] = (uint8_t) (191 + run);
+				run = 0;
+			}
+			int indexOffset = ((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63;
 			if (pixel == index[indexOffset])
 				encoded[encodedOffset++] = (uint8_t) indexOffset;
 			else {
@@ -157,43 +155,45 @@ bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixel
 				int g = pixel >> 8 & 255;
 				int b = pixel & 255;
 				int a = pixel >> 24 & 255;
-				int dr = r - (lastPixel >> 16 & 255);
-				int dg = g - (lastPixel >> 8 & 255);
-				int db = b - (lastPixel & 255);
-				int da = a - (lastPixel >> 24 & 255);
-				if (dr >= -16 && dr <= 15 && dg >= -16 && dg <= 15 && db >= -16 && db <= 15 && da >= -16 && da <= 15) {
-					if (da == 0 && dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
-						encoded[encodedOffset++] = (uint8_t) (170 + (dr << 4) + (dg << 2) + db);
-					else if (da == 0 && dg >= -8 && dg <= 7 && db >= -8 && db <= 7) {
-						encoded[encodedOffset++] = (uint8_t) (208 + dr);
-						encoded[encodedOffset++] = (uint8_t) (136 + (dg << 4) + db);
-					}
-					else {
-						dr += 16;
-						encoded[encodedOffset++] = (uint8_t) (224 + (dr >> 1));
-						db += 16;
-						encoded[encodedOffset++] = (uint8_t) (((dr & 1) << 7) + ((dg + 16) << 2) + (db >> 3));
-						encoded[encodedOffset++] = (uint8_t) (((db & 7) << 5) + da + 16);
-					}
+				if ((pixel ^ lastPixel) >> 24 != 0) {
+					encoded[encodedOffset] = 255;
+					encoded[encodedOffset + 1] = (uint8_t) r;
+					encoded[encodedOffset + 2] = (uint8_t) g;
+					encoded[encodedOffset + 3] = (uint8_t) b;
+					encoded[encodedOffset + 4] = (uint8_t) a;
+					encodedOffset += 5;
 				}
 				else {
-					encoded[encodedOffset++] = (uint8_t) (240 | (dr != 0 ? 8 : 0) | (dg != 0 ? 4 : 0) | (db != 0 ? 2 : 0) | (da != 0 ? 1 : 0));
-					if (dr != 0)
-						encoded[encodedOffset++] = (uint8_t) r;
-					if (dg != 0)
-						encoded[encodedOffset++] = (uint8_t) g;
-					if (db != 0)
-						encoded[encodedOffset++] = (uint8_t) b;
-					if (da != 0)
-						encoded[encodedOffset++] = (uint8_t) a;
+					int dr = r - (lastPixel >> 16 & 255);
+					int dg = g - (lastPixel >> 8 & 255);
+					int db = b - (lastPixel & 255);
+					if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
+						encoded[encodedOffset++] = (uint8_t) (106 + (dr << 4) + (dg << 2) + db);
+					else {
+						dr -= dg;
+						db -= dg;
+						if (dr >= -8 && dr <= 7 && dg >= -32 && dg <= 31 && db >= -8 && db <= 7) {
+							encoded[encodedOffset] = (uint8_t) (160 + dg);
+							encoded[encodedOffset + 1] = (uint8_t) (136 + (dr << 4) + db);
+							encodedOffset += 2;
+						}
+						else {
+							encoded[encodedOffset] = 254;
+							encoded[encodedOffset + 1] = (uint8_t) r;
+							encoded[encodedOffset + 2] = (uint8_t) g;
+							encoded[encodedOffset + 3] = (uint8_t) b;
+							encodedOffset += 4;
+						}
+					}
 				}
 			}
 			lastPixel = pixel;
 		}
 	}
-	memset(encoded + encodedOffset, 0, 4 * sizeof(uint8_t));
+	memset(encoded + encodedOffset, 0, 7 * sizeof(uint8_t));
+	encoded[encodedOffset + 8 - 1] = 1;
 	CiShared_Assign((void **) &self->encoded, CiShared_AddRef(encoded));
-	self->encodedSize = encodedOffset + 4;
+	self->encodedSize = encodedOffset + 8;
 	CiShared_Release(encoded);
 	return true;
 }
@@ -236,15 +236,35 @@ void QOIDecoder_Delete(QOIDecoder *self)
 
 bool QOIDecoder_Decode(QOIDecoder *self, uint8_t const *encoded, int encodedSize)
 {
-	if (encoded == NULL || encodedSize < 19 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
+	if (encoded == NULL || encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
 		return false;
 	int width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];
 	int height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];
 	if (width <= 0 || height <= 0 || height > 2147483647 / width)
 		return false;
+	switch (encoded[12]) {
+	case 3:
+		self->alpha = false;
+		break;
+	case 4:
+		self->alpha = true;
+		break;
+	default:
+		return false;
+	}
+	switch (encoded[13]) {
+	case 0:
+		self->linearColorspace = false;
+		break;
+	case 1:
+		self->linearColorspace = true;
+		break;
+	default:
+		return false;
+	}
 	int pixelsSize = width * height;
 	int *pixels = (int *) CiShared_Make(pixelsSize, sizeof(int), NULL, NULL);
-	encodedSize -= 4;
+	encodedSize -= 8;
 	int encodedOffset = 14;
 	int index[64] = { 0 };
 	int pixel = -16777216;
@@ -254,49 +274,41 @@ bool QOIDecoder_Decode(QOIDecoder *self, uint8_t const *encoded, int encodedSize
 			return false;
 		}
 		int e = encoded[encodedOffset++];
-		if (e < 128) {
-			if (e < 64)
-				pixels[pixelsOffset++] = pixel = index[e];
-			else {
-				int run;
-				if (e < 96)
-					run = e - 63;
-				else
-					run = 33 + ((e - 96) << 8) + encoded[encodedOffset++];
-				if (pixelsOffset + run > pixelsSize) {
+		switch (e >> 6) {
+		case 0:
+			pixels[pixelsOffset++] = pixel = index[e];
+			continue;
+		case 1:
+			pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 4 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255);
+			break;
+		case 2:
+			e -= 160;
+			int rb = encoded[encodedOffset++];
+			pixel = (pixel & -16777216) | ((pixel + ((e + (rb >> 4) - 8) << 16)) & 16711680) | ((pixel + (e << 8)) & 65280) | ((pixel + e + (rb & 15) - 8) & 255);
+			break;
+		default:
+			if (e < 254) {
+				e -= 191;
+				if (pixelsOffset + e > pixelsSize) {
 					CiShared_Release(pixels);
 					return false;
 				}
-				for (int _i = 0; _i < run; _i++)
+				for (int _i = 0; _i < e; _i++)
 					pixels[pixelsOffset + _i] = pixel;
-				pixelsOffset += run;
+				pixelsOffset += e;
+				continue;
 			}
-			continue;
-		}
-		else if (e < 224) {
-			if (e < 192)
-				pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 8 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255);
+			if (e == 254) {
+				pixel = (pixel & -16777216) | encoded[encodedOffset] << 16 | encoded[encodedOffset + 1] << 8 | encoded[encodedOffset + 2];
+				encodedOffset += 3;
+			}
 			else {
-				int d = encoded[encodedOffset++];
-				pixel = (pixel & -16777216) | ((pixel + ((e - 192 - 16) << 16)) & 16711680) | ((pixel + (((d >> 4) - 8) << 8)) & 65280) | ((pixel + (d & 15) - 8) & 255);
+				pixel = encoded[encodedOffset + 3] << 24 | encoded[encodedOffset] << 16 | encoded[encodedOffset + 1] << 8 | encoded[encodedOffset + 2];
+				encodedOffset += 4;
 			}
+			break;
 		}
-		else if (e < 240) {
-			e = e << 16 | encoded[encodedOffset] << 8 | encoded[encodedOffset + 1];
-			encodedOffset += 2;
-			pixel = ((pixel + (((e & 31) - 16) << 24)) & -16777216) | ((pixel + (((e >> 15) - 448 - 16) << 16)) & 16711680) | ((pixel + (((e >> 10 & 31) - 16) << 8)) & 65280) | ((pixel + (e >> 5 & 31) - 16) & 255);
-		}
-		else {
-			if ((e & 8) != 0)
-				pixel = (pixel & -16711681) | encoded[encodedOffset++] << 16;
-			if ((e & 4) != 0)
-				pixel = (pixel & -65281) | encoded[encodedOffset++] << 8;
-			if ((e & 2) != 0)
-				pixel = (pixel & -256) | encoded[encodedOffset++];
-			if ((e & 1) != 0)
-				pixel = (pixel & 16777215) | encoded[encodedOffset++] << 24;
-		}
-		pixels[pixelsOffset++] = index[(pixel >> 24 ^ pixel >> 16 ^ pixel >> 8 ^ pixel) & 63] = pixel;
+		pixels[pixelsOffset++] = index[((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63] = pixel;
 	}
 	if (encodedOffset != encodedSize) {
 		CiShared_Release(pixels);
@@ -305,8 +317,6 @@ bool QOIDecoder_Decode(QOIDecoder *self, uint8_t const *encoded, int encodedSize
 	self->width = width;
 	self->height = height;
 	CiShared_Assign((void **) &self->pixels, CiShared_AddRef(pixels));
-	self->alpha = encoded[12] == 4;
-	self->colorspace = encoded[13];
 	CiShared_Release(pixels);
 	return true;
 }
@@ -326,12 +336,12 @@ int const *QOIDecoder_GetPixels(const QOIDecoder *self)
 	return self->pixels;
 }
 
-bool QOIDecoder_GetAlpha(const QOIDecoder *self)
+bool QOIDecoder_HasAlpha(const QOIDecoder *self)
 {
 	return self->alpha;
 }
 
-int QOIDecoder_GetColorspace(const QOIDecoder *self)
+bool QOIDecoder_IsLinearColorspace(const QOIDecoder *self)
 {
-	return self->colorspace;
+	return self->linearColorspace;
 }

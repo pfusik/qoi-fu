@@ -1,21 +1,6 @@
 // Generated automatically with "cito". Do not edit.
 using System;
 
-/// <summary>QOI color space metadata.</summary>
-/// <remarks>Saved in the file header, but doesn't affect encoding or decoding in any way.</remarks>
-public static class QOIColorspace
-{
-
-	/// <summary>sRGBA.</summary>
-	public const int Srgb = 0;
-
-	/// <summary>sRGB with linear alpha.</summary>
-	public const int SrgbLinearAlpha = 1;
-
-	/// <summary>Linear RGBA.</summary>
-	public const int Linear = 15;
-}
-
 /// <summary>Encoder of the "Quite OK Image" (QOI) format.</summary>
 /// <remarks>Losslessly compresses an image to a byte array.</remarks>
 public class QOIEncoder
@@ -28,7 +13,7 @@ public class QOIEncoder
 
 	internal const int HeaderSize = 14;
 
-	internal const int PaddingSize = 4;
+	internal const int PaddingSize = 8;
 
 	byte[] Encoded;
 
@@ -40,7 +25,7 @@ public class QOIEncoder
 	/// <param name="alpha">Whether the image has the alpha channel (transparency).</param>
 	public static bool CanEncode(int width, int height, bool alpha)
 	{
-		return width > 0 && height > 0 && height <= 2147483629 / width / (alpha ? 5 : 4);
+		return width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? 5 : 4);
 	}
 
 	/// <summary>Encodes the given image.</summary>
@@ -49,13 +34,13 @@ public class QOIEncoder
 	/// <param name="height">Image height in pixels.</param>
 	/// <param name="pixels">Pixels of the image, top-down, left-to-right.</param>
 	/// <param name="alpha"><see langword="false" /> specifies that all pixels are opaque. High bytes of <c>pixels</c> elements are ignored then.</param>
-	/// <param name="colorspace">Specifies the color space. See <c>QOIColorspace</c>.</param>
-	public bool Encode(int width, int height, int[] pixels, bool alpha, int colorspace)
+	/// <param name="linearColorspace">Specifies the color space.</param>
+	public bool Encode(int width, int height, int[] pixels, bool alpha, bool linearColorspace)
 	{
 		if (pixels == null || !CanEncode(width, height, alpha))
 			return false;
 		int pixelsSize = width * height;
-		byte[] encoded = new byte[14 + pixelsSize * (alpha ? 5 : 4) + 4];
+		byte[] encoded = new byte[14 + pixelsSize * (alpha ? 5 : 4) + 8];
 		encoded[0] = 113;
 		encoded[1] = 111;
 		encoded[2] = 105;
@@ -69,7 +54,7 @@ public class QOIEncoder
 		encoded[10] = (byte) (height >> 8);
 		encoded[11] = (byte) height;
 		encoded[12] = (byte) (alpha ? 4 : 3);
-		encoded[13] = (byte) colorspace;
+		encoded[13] = (byte) (linearColorspace ? 1 : 0);
 		int[] index = new int[64];
 		int encodedOffset = 14;
 		int lastPixel = -16777216;
@@ -78,20 +63,18 @@ public class QOIEncoder
 			int pixel = pixels[pixelsOffset++];
 			if (!alpha)
 				pixel |= -16777216;
-			if (pixel == lastPixel)
-				run++;
-			if (run > 0 && (pixel != lastPixel || run == 8224 || pixelsOffset >= pixelsSize)) {
-				if (run <= 32)
-					encoded[encodedOffset++] = (byte) (64 + run - 1);
-				else {
-					run -= 33;
-					encoded[encodedOffset++] = (byte) (96 + (run >> 8));
-					encoded[encodedOffset++] = (byte) run;
+			if (pixel == lastPixel) {
+				if (++run == 62 || pixelsOffset >= pixelsSize) {
+					encoded[encodedOffset++] = (byte) (191 + run);
+					run = 0;
 				}
-				run = 0;
 			}
-			if (pixel != lastPixel) {
-				int indexOffset = (pixel >> 24 ^ pixel >> 16 ^ pixel >> 8 ^ pixel) & 63;
+			else {
+				if (run > 0) {
+					encoded[encodedOffset++] = (byte) (191 + run);
+					run = 0;
+				}
+				int indexOffset = ((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63;
 				if (pixel == index[indexOffset])
 					encoded[encodedOffset++] = (byte) indexOffset;
 				else {
@@ -100,43 +83,45 @@ public class QOIEncoder
 					int g = pixel >> 8 & 255;
 					int b = pixel & 255;
 					int a = pixel >> 24 & 255;
-					int dr = r - (lastPixel >> 16 & 255);
-					int dg = g - (lastPixel >> 8 & 255);
-					int db = b - (lastPixel & 255);
-					int da = a - (lastPixel >> 24 & 255);
-					if (dr >= -16 && dr <= 15 && dg >= -16 && dg <= 15 && db >= -16 && db <= 15 && da >= -16 && da <= 15) {
-						if (da == 0 && dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
-							encoded[encodedOffset++] = (byte) (170 + (dr << 4) + (dg << 2) + db);
-						else if (da == 0 && dg >= -8 && dg <= 7 && db >= -8 && db <= 7) {
-							encoded[encodedOffset++] = (byte) (208 + dr);
-							encoded[encodedOffset++] = (byte) (136 + (dg << 4) + db);
-						}
-						else {
-							dr += 16;
-							encoded[encodedOffset++] = (byte) (224 + (dr >> 1));
-							db += 16;
-							encoded[encodedOffset++] = (byte) (((dr & 1) << 7) + ((dg + 16) << 2) + (db >> 3));
-							encoded[encodedOffset++] = (byte) (((db & 7) << 5) + da + 16);
-						}
+					if ((pixel ^ lastPixel) >> 24 != 0) {
+						encoded[encodedOffset] = 255;
+						encoded[encodedOffset + 1] = (byte) r;
+						encoded[encodedOffset + 2] = (byte) g;
+						encoded[encodedOffset + 3] = (byte) b;
+						encoded[encodedOffset + 4] = (byte) a;
+						encodedOffset += 5;
 					}
 					else {
-						encoded[encodedOffset++] = (byte) (240 | (dr != 0 ? 8 : 0) | (dg != 0 ? 4 : 0) | (db != 0 ? 2 : 0) | (da != 0 ? 1 : 0));
-						if (dr != 0)
-							encoded[encodedOffset++] = (byte) r;
-						if (dg != 0)
-							encoded[encodedOffset++] = (byte) g;
-						if (db != 0)
-							encoded[encodedOffset++] = (byte) b;
-						if (da != 0)
-							encoded[encodedOffset++] = (byte) a;
+						int dr = r - (lastPixel >> 16 & 255);
+						int dg = g - (lastPixel >> 8 & 255);
+						int db = b - (lastPixel & 255);
+						if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
+							encoded[encodedOffset++] = (byte) (106 + (dr << 4) + (dg << 2) + db);
+						else {
+							dr -= dg;
+							db -= dg;
+							if (dr >= -8 && dr <= 7 && dg >= -32 && dg <= 31 && db >= -8 && db <= 7) {
+								encoded[encodedOffset] = (byte) (160 + dg);
+								encoded[encodedOffset + 1] = (byte) (136 + (dr << 4) + db);
+								encodedOffset += 2;
+							}
+							else {
+								encoded[encodedOffset] = 254;
+								encoded[encodedOffset + 1] = (byte) r;
+								encoded[encodedOffset + 2] = (byte) g;
+								encoded[encodedOffset + 3] = (byte) b;
+								encodedOffset += 4;
+							}
+						}
 					}
 				}
 				lastPixel = pixel;
 			}
 		}
-		Array.Clear(encoded, encodedOffset, 4);
+		Array.Clear(encoded, encodedOffset, 7);
+		encoded[encodedOffset + 8 - 1] = 1;
 		this.Encoded = encoded;
-		this.EncodedSize = encodedOffset + 4;
+		this.EncodedSize = encodedOffset + 8;
 		return true;
 	}
 
@@ -173,7 +158,7 @@ public class QOIDecoder
 
 	bool Alpha;
 
-	int Colorspace;
+	bool LinearColorspace;
 
 	/// <summary>Decodes the given QOI file contents.</summary>
 	/// <remarks>Returns <see langword="true" /> if decoded successfully.</remarks>
@@ -181,15 +166,35 @@ public class QOIDecoder
 	/// <param name="encodedSize">QOI file length.</param>
 	public bool Decode(byte[] encoded, int encodedSize)
 	{
-		if (encoded == null || encodedSize < 19 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
+		if (encoded == null || encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
 			return false;
 		int width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];
 		int height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];
 		if (width <= 0 || height <= 0 || height > 2147483647 / width)
 			return false;
+		switch (encoded[12]) {
+		case 3:
+			this.Alpha = false;
+			break;
+		case 4:
+			this.Alpha = true;
+			break;
+		default:
+			return false;
+		}
+		switch (encoded[13]) {
+		case 0:
+			this.LinearColorspace = false;
+			break;
+		case 1:
+			this.LinearColorspace = true;
+			break;
+		default:
+			return false;
+		}
 		int pixelsSize = width * height;
 		int[] pixels = new int[pixelsSize];
-		encodedSize -= 4;
+		encodedSize -= 8;
 		int encodedOffset = 14;
 		int[] index = new int[64];
 		int pixel = -16777216;
@@ -197,54 +202,44 @@ public class QOIDecoder
 			if (encodedOffset >= encodedSize)
 				return false;
 			int e = encoded[encodedOffset++];
-			if (e < 128) {
-				if (e < 64)
-					pixels[pixelsOffset++] = pixel = index[e];
-				else {
-					int run;
-					if (e < 96)
-						run = e - 63;
-					else
-						run = 33 + ((e - 96) << 8) + encoded[encodedOffset++];
-					if (pixelsOffset + run > pixelsSize)
-						return false;
-					Array.Fill(pixels, pixel, pixelsOffset, run);
-					pixelsOffset += run;
-				}
+			switch (e >> 6) {
+			case 0:
+				pixels[pixelsOffset++] = pixel = index[e];
 				continue;
-			}
-			else if (e < 224) {
-				if (e < 192)
-					pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 8 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255);
-				else {
-					int d = encoded[encodedOffset++];
-					pixel = (pixel & -16777216) | ((pixel + ((e - 192 - 16) << 16)) & 16711680) | ((pixel + (((d >> 4) - 8) << 8)) & 65280) | ((pixel + (d & 15) - 8) & 255);
+			case 1:
+				pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 4 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255);
+				break;
+			case 2:
+				e -= 160;
+				int rb = encoded[encodedOffset++];
+				pixel = (pixel & -16777216) | ((pixel + ((e + (rb >> 4) - 8) << 16)) & 16711680) | ((pixel + (e << 8)) & 65280) | ((pixel + e + (rb & 15) - 8) & 255);
+				break;
+			default:
+				if (e < 254) {
+					e -= 191;
+					if (pixelsOffset + e > pixelsSize)
+						return false;
+					Array.Fill(pixels, pixel, pixelsOffset, e);
+					pixelsOffset += e;
+					continue;
 				}
+				if (e == 254) {
+					pixel = (pixel & -16777216) | encoded[encodedOffset] << 16 | encoded[encodedOffset + 1] << 8 | encoded[encodedOffset + 2];
+					encodedOffset += 3;
+				}
+				else {
+					pixel = encoded[encodedOffset + 3] << 24 | encoded[encodedOffset] << 16 | encoded[encodedOffset + 1] << 8 | encoded[encodedOffset + 2];
+					encodedOffset += 4;
+				}
+				break;
 			}
-			else if (e < 240) {
-				e = e << 16 | encoded[encodedOffset] << 8 | encoded[encodedOffset + 1];
-				encodedOffset += 2;
-				pixel = ((pixel + (((e & 31) - 16) << 24)) & -16777216) | ((pixel + (((e >> 15) - 448 - 16) << 16)) & 16711680) | ((pixel + (((e >> 10 & 31) - 16) << 8)) & 65280) | ((pixel + (e >> 5 & 31) - 16) & 255);
-			}
-			else {
-				if ((e & 8) != 0)
-					pixel = (pixel & -16711681) | encoded[encodedOffset++] << 16;
-				if ((e & 4) != 0)
-					pixel = (pixel & -65281) | encoded[encodedOffset++] << 8;
-				if ((e & 2) != 0)
-					pixel = (pixel & -256) | encoded[encodedOffset++];
-				if ((e & 1) != 0)
-					pixel = (pixel & 16777215) | encoded[encodedOffset++] << 24;
-			}
-			pixels[pixelsOffset++] = index[(pixel >> 24 ^ pixel >> 16 ^ pixel >> 8 ^ pixel) & 63] = pixel;
+			pixels[pixelsOffset++] = index[((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63] = pixel;
 		}
 		if (encodedOffset != encodedSize)
 			return false;
 		this.Width = width;
 		this.Height = height;
 		this.Pixels = pixels;
-		this.Alpha = encoded[12] == 4;
-		this.Colorspace = encoded[13];
 		return true;
 	}
 
@@ -268,15 +263,15 @@ public class QOIDecoder
 	}
 
 	/// <summary>Returns the information about the alpha channel from the file header.</summary>
-	public bool GetAlpha()
+	public bool HasAlpha()
 	{
 		return this.Alpha;
 	}
 
 	/// <summary>Returns the color space information from the file header.</summary>
-	/// <remarks>See <c>QOIColorspace</c>.</remarks>
-	public int GetColorspace()
+	/// <remarks><see langword="false" /> = sRGB with linear alpha channel.<see langword="true" /> = all channels linear.</remarks>
+	public bool IsLinearColorspace()
 	{
-		return this.Colorspace;
+		return this.LinearColorspace;
 	}
 }

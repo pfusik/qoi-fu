@@ -10,12 +10,12 @@ XNVIEW_DIR = /opt/XnView
 endif
 CSC = "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/Roslyn/csc.exe" -nologo
 PAINT_NET_DIR = C:/Program Files/paint.net
-DOTNET_REF_DIR = C:/Program Files/dotnet/packs/Microsoft.NETCore.App.Ref/6.0.0/ref/net6.0
+DOTNET_REF_DIR = C:/Program Files/dotnet/packs/Microsoft.NETCore.App.Ref/6.0.1/ref/net6.0
 TRANSPILED = $(addprefix transpiled/QOI., c cpp cs js py swift) transpiled/QOIDecoder.java
 
-all: png2qoi Xqoi.usr $(TRANSPILED)
+all: png2qoi$(EXEEXT) Xqoi.usr $(TRANSPILED)
 
-png2qoi: png2qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
+png2qoi$(EXEEXT): png2qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 	$(CC) $(CFLAGS) -I transpiled -o $@ png2qoi.c QOI-stdio.c transpiled/QOI.c -lpng
 
 file-qoi$(EXEEXT): file-qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
@@ -45,7 +45,7 @@ $(TRANSPILED): QOI.ci
 	mkdir -p $(@D) && cito -o $@ $^
 
 clean:
-	$(RM) png2qoi file-qoi$(EXEEXT) Xqoi.usr QOIPaintDotNet.dll $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIColorspace.java transpiled/QOIEncoder.java
+	$(RM) png2qoi$(EXEEXT) file-qoi$(EXEEXT) Xqoi.usr QOIPaintDotNet.dll $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIColorspace.java transpiled/QOIEncoder.java
 
 .PHONY: all install-gimp install-xnview install-paint.net clean
 

@@ -8,21 +8,6 @@ extern "C" {
 typedef struct QOIEncoder QOIEncoder;
 typedef struct QOIDecoder QOIDecoder;
 
-/**
- * sRGBA.
- */
-#define QOIColorspace_SRGB 0
-
-/**
- * sRGB with linear alpha.
- */
-#define QOIColorspace_SRGB_LINEAR_ALPHA 1
-
-/**
- * Linear RGBA.
- */
-#define QOIColorspace_LINEAR 15
-
 QOIEncoder *QOIEncoder_New(void);
 void QOIEncoder_Delete(QOIEncoder *self);
 
@@ -42,9 +27,9 @@ bool QOIEncoder_CanEncode(int width, int height, bool alpha);
  * @param height Image height in pixels.
  * @param pixels Pixels of the image, top-down, left-to-right.
  * @param alpha <code>false</code> specifies that all pixels are opaque. High bytes of <code>pixels</code> elements are ignored then.
- * @param colorspace Specifies the color space. See <code>QOIColorspace</code>.
+ * @param linearColorspace Specifies the color space.
  */
-bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha, int colorspace);
+bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixels, bool alpha, bool linearColorspace);
 
 /**
  * Returns the encoded file contents.
@@ -96,14 +81,14 @@ int const *QOIDecoder_GetPixels(const QOIDecoder *self);
  * Returns the information about the alpha channel from the file header.
  * @param self This <code>QOIDecoder</code>.
  */
-bool QOIDecoder_GetAlpha(const QOIDecoder *self);
+bool QOIDecoder_HasAlpha(const QOIDecoder *self);
 
 /**
  * Returns the color space information from the file header.
- * See <code>QOIColorspace</code>.
+ * <code>false</code> = sRGB with linear alpha channel.<code>true</code> = all channels linear.
  * @param self This <code>QOIDecoder</code>.
  */
-int QOIDecoder_GetColorspace(const QOIDecoder *self);
+bool QOIDecoder_IsLinearColorspace(const QOIDecoder *self);
 
 #ifdef __cplusplus
 }
