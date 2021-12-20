@@ -8,9 +8,6 @@ SUDO = elevate
 else
 XNVIEW_DIR = /opt/XnView
 endif
-CSC = "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/Roslyn/csc.exe" -nologo
-PAINT_NET_DIR = C:/Program Files/paint.net
-DOTNET_REF_DIR = C:/Program Files/dotnet/packs/Microsoft.NETCore.App.Ref/6.0.1/ref/net6.0
 TRANSPILED = $(addprefix transpiled/QOI., c cpp cs js py swift) transpiled/QOIDecoder.java
 
 all: png2qoi$(EXEEXT) Xqoi.usr $(TRANSPILED)
@@ -24,9 +21,6 @@ file-qoi$(EXEEXT): file-qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 Xqoi.usr: Xqoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 	$(CC) $(CFLAGS) -I transpiled -o $@ Xqoi.c QOI-stdio.c transpiled/QOI.c -shared
 
-QOIPaintDotNet.dll: QOIPaintDotNet.cs transpiled/QOI.cs
-	$(CSC) -o+ -out:$@ -t:library $^ -nostdlib -r:"$(PAINT_NET_DIR)/PaintDotNet.Base.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Core.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Data.dll" -r:"$(DOTNET_REF_DIR)/System.Runtime.dll"
-
 install-gimp: file-qoi$(EXEEXT)
 ifeq ($(OS),Windows_NT)
 	# gimptool-2.0 broken on mingw64
@@ -38,15 +32,13 @@ endif
 install-xnview: Xqoi.usr
 	$(SUDO) cp $< "$(XNVIEW_DIR)/Plugins/Xqoi.usr"
 
-install-paint.net: QOIPaintDotNet.dll
-	$(SUDO) cp $< "$(PAINT_NET_DIR)/FileTypes/QOIPaintDotNet.dll"
-
 $(TRANSPILED): QOI.ci
 	mkdir -p $(@D) && cito -o $@ $^
 
+CLEAN = png2qoi$(EXEEXT) file-qoi$(EXEEXT) Xqoi.usr $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIEncoder.java
 clean:
-	$(RM) png2qoi$(EXEEXT) file-qoi$(EXEEXT) Xqoi.usr QOIPaintDotNet.dll $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIEncoder.java
+	$(RM) $(CLEAN)
 
-.PHONY: all install-gimp install-xnview install-paint.net clean
+.PHONY: all install-gimp install-xnview clean
 
 include win32/win32.mk

@@ -141,7 +141,7 @@
 								<Directory Id="GIMPPLUG.DIR" Name="plug-ins">
 									<Directory Id="GIMPQOI.DIR" Name="file-qoi">
 										<Component Id="fileqoi.exe">
-											<File Name="file-qoi.exe" Source="file-qoi.exe" Checksum="yes" KeyPath="yes" />
+											<File Source="file-qoi.exe" Checksum="yes" KeyPath="yes" />
 										</Component>
 									</Directory>
 								</Directory>
@@ -153,7 +153,7 @@
 				<Directory Id="PAINTDOTNET.DIR" Name="Paint.NET">
 					<Directory Id="PAINTDOTNETFILETYPES.DIR" Name="FileTypes">
 						<Component Id="QOIPaintDotNet.dll">
-							<File Source="QOIPaintDotNet.dll" Checksum="yes" KeyPath="yes" />
+							<File Source="win32/QOIPaintDotNet.dll" Checksum="yes" KeyPath="yes" />
 						</Component>
 					</Directory>
 				</Directory>
