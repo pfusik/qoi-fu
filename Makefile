@@ -45,7 +45,7 @@ $(TRANSPILED): QOI.ci
 	mkdir -p $(@D) && cito -o $@ $^
 
 clean:
-	$(RM) png2qoi$(EXEEXT) file-qoi$(EXEEXT) Xqoi.usr QOIPaintDotNet.dll $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIColorspace.java transpiled/QOIEncoder.java
+	$(RM) png2qoi$(EXEEXT) file-qoi$(EXEEXT) Xqoi.usr QOIPaintDotNet.dll $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIEncoder.java
 
 .PHONY: all install-gimp install-xnview install-paint.net clean
 
