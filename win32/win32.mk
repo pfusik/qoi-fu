@@ -18,13 +18,14 @@ install-imagine: win32/QOI.plg64
 install-paint.net: win32/QOIPaintDotNet.dll
 	$(SUDO) cp $< "$(PAINT_NET_DIR)/FileTypes/QOIPaintDotNet.dll"
 
-../qoi-ci-$(VERSION)-win64.msi: win32/qoi-ci.wixobj win32/license.rtf file-qoi.exe win32/QOI.plg64 win32/QOIPaintDotNet.dll Xqoi.usr win32/signed
+../qoi-ci-$(VERSION)-win64.msi: win32/setup/qoi-ci.wixobj win32/setup/qoi.ico win32/setup/license.rtf win32/setup/dialog.jpg win32/setup/banner.jpg \
+	file-qoi.exe win32/QOI.plg64 win32/QOIPaintDotNet.dll Xqoi.usr win32/signed
 	light -nologo -o $@ -spdb -ext WixUIExtension -sice:ICE69 -sice:ICE80 $<
 
-win32/qoi-ci.wixobj: win32/qoi-ci.wxs
+win32/setup/qoi-ci.wixobj: win32/setup/qoi-ci.wxs
 	candle -nologo -o $@ -dVERSION=$(VERSION) -arch x64 $<
 
-win32/signed-msi: ../qoi-ci-$(VERSION)-win64.msi
+win32/setup/signed: ../qoi-ci-$(VERSION)-win64.msi
 	$(DO_SIGN)
 
 win32/signed: file-qoi.exe win32/QOI.plg64 win32/QOIPaintDotNet.dll Xqoi.usr
@@ -37,6 +38,6 @@ deb64:
 	scp vm:qoi-ci-gimp_$(VERSION)-1_amd64.deb ..
 	scp vm:qoi-ci-xnview_$(VERSION)-1_amd64.deb ..
 
-CLEAN += win32/QOI.plg64 win32/QOIPaintDotNet.dll win32/signed-msi win32/signed
+CLEAN += win32/QOI.plg64 win32/QOIPaintDotNet.dll win32/setup/qoi-ci.wixobj win32/setup/signed win32/signed
 
 .PHONY: install-imagine install-paint.net deb64

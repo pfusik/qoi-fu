@@ -8,8 +8,12 @@
 		<MajorUpgrade DowngradeErrorMessage="Newer version of Quite OK Image plugins is already installed!" />
 		<Media Id="1" Cabinet="qoici.cab" EmbedCab="yes" CompressionLevel="high" />
 
+		<Icon Id="qoi.ico" SourceFile="win32/setup/qoi.ico" />
 		<Property Id="ARPHELPLINK" Value="https://github.com/pfusik/qoi-ci" />
-		<WixVariable Id="WixUILicenseRtf" Value="win32/license.rtf" />
+		<Property Id="ARPPRODUCTICON" Value="qoi.ico" />
+		<WixVariable Id="WixUILicenseRtf" Value="win32/setup/license.rtf" />
+		<WixVariable Id="WixUIDialogBmp" Value="win32/setup/dialog.jpg" />
+		<WixVariable Id="WixUIBannerBmp" Value="win32/setup/banner.jpg" />
 
 		<UI Id="MyWixUI_FeatureTree">
 			<!-- customized WixUI_FeatureTree from Wix 3.0 - my changes commented -->
