@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+# skip "make clean" to avoid dependency on cito
+override_dh_auto_clean:
+
+override_dh_auto_install:
+	$(MAKE) libdir=$$(pwd)/debian/tmp/usr/lib XNVIEW_DIR=$$(pwd)/debian/tmp/opt/XnView BUILDING_PACKAGE=1 install-gimp install-xnview

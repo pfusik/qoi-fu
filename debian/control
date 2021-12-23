@@ -1,0 +1,16 @@
+Source: qoi-ci
+Maintainer: Piotr Fusik <fox@scene.pl>
+Section: graphics
+Priority: optional
+Standards-Version: 4.6.0
+Build-Depends: debhelper (>= 7), gcc, libgimp2.0-dev
+
+Package: qoi-ci-gimp
+Architecture: any
+Depends: gimp, ${shlibs:Depends}
+Description: GIMP plugin for the Quite OK Image (QOI) format.
+
+Package: qoi-ci-xnview
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: XnView MP plugin for the Quite OK Image (QOI) format.

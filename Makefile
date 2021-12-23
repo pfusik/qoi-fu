@@ -25,12 +25,14 @@ install-gimp: file-qoi$(EXEEXT)
 ifeq ($(OS),Windows_NT)
 	# gimptool-2.0 broken on mingw64
 	install -D $< `gimptool-2.0 --gimpplugindir`/plug-ins/file-qoi.exe
+else ifdef BUILDING_PACKAGE
+	install -D $< $(libdir)/gimp/2.0/plug-ins/file-qoi/file-qoi
 else
 	gimptool-2.0 --install-admin-bin $<
 endif
 
 install-xnview: Xqoi.usr
-	$(SUDO) cp $< "$(XNVIEW_DIR)/Plugins/Xqoi.usr"
+	$(SUDO) install -D -m 644 $< "$(XNVIEW_DIR)/Plugins/Xqoi.usr"
 
 $(TRANSPILED): QOI.ci
 	mkdir -p $(@D) && cito -o $@ $^
@@ -39,6 +41,9 @@ CLEAN = png2qoi$(EXEEXT) file-qoi$(EXEEXT) Xqoi.usr $(TRANSPILED) transpiled/QOI
 clean:
 	$(RM) $(CLEAN)
 
-.PHONY: all install-gimp install-xnview clean
+deb:
+	debuild -b -us -uc
+
+.PHONY: all install-gimp install-xnview clean deb
 
 include win32/win32.mk

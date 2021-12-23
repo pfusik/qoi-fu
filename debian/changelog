@@ -1,0 +1,5 @@
+qoi-ci (1.1.0-1) UNRELEASED; urgency=low
+
+  * First deb packaging.
+
+ -- Piotr Fusik <fox@scene.pl>  Thu, 23 Dec 2021 16:58:42 +0100

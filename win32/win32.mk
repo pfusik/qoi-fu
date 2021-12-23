@@ -1,4 +1,4 @@
-VERSION = 1.0.0
+VERSION = 1.1.0
 
 CSC = "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/Roslyn/csc.exe" -nologo
 PAINT_NET_DIR = C:/Program Files/paint.net
@@ -23,6 +23,13 @@ win32/signed-msi: ../qoi-ci-$(VERSION)-win64.msi
 win32/signed: file-qoi.exe win32/QOIPaintDotNet.dll Xqoi.usr
 	$(DO_SIGN)
 
+deb64:
+	/usr/bin/tar czf ../qoi-ci-$(VERSION).tar.gz --numeric-owner --owner=0 --group=0 --mode=644 --transform=s,,qoi-ci-$(VERSION)/, `git ls-files`
+	scp ../qoi-ci-$(VERSION).tar.gz vm:qoi-ci-$(VERSION).tar
+	ssh vm 'rm -rf qoi-ci-$(VERSION) && tar xf qoi-ci-$(VERSION).tar && make -C qoi-ci-$(VERSION) deb'
+	scp vm:qoi-ci-gimp_$(VERSION)-1_amd64.deb ..
+	scp vm:qoi-ci-xnview_$(VERSION)-1_amd64.deb ..
+
 CLEAN += win32/QOIPaintDotNet.dll win32/signed-msi win32/signed
 
-.PHONY: install-paint.net
+.PHONY: install-paint.net deb64
