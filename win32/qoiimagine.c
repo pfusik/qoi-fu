@@ -26,7 +26,7 @@
 #include <windows.h>
 
 #include "ImagPlug.h"
-#include "QOI-stdio.h"
+#include "QOI.h"
 
 static BOOL IMAGINEAPI checkFile(IMAGINEPLUGINFILEINFOTABLE *fileInfoTable, IMAGINELOADPARAM *loadParam, int flags)
 {
@@ -39,14 +39,13 @@ static LPIMAGINEBITMAP IMAGINEAPI loadFile(IMAGINEPLUGINFILEINFOTABLE *fileInfoT
 	if (iface == NULL)
 		return NULL;
 
-	FILE *f = _wfopen((LPCWSTR) loadParam->fileName, L"rb");
-	if (f == NULL) {
-		loadParam->errorCode = IMAGINEERROR_FILENOTFOUND;
+	QOIDecoder *qoi = QOIDecoder_New();
+	if (qoi == NULL) {
+		loadParam->errorCode = IMAGINEERROR_OUTOFMEMORY;
 		return NULL;
 	}
-
-	QOIDecoder *qoi = QOIDecoder_LoadStdio(f);
-	if (qoi == NULL) {
+	if (!QOIDecoder_Decode(qoi, loadParam->buffer, loadParam->length)) {
+		QOIDecoder_Delete(qoi);
 		loadParam->errorCode = IMAGINEERROR_UNSUPPORTEDTYPE;
 		return NULL;
 	}
