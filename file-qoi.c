@@ -35,15 +35,23 @@
 #define LOAD_PROC "file-qoi-load"
 #define SAVE_PROC "file-qoi-save"
 
-static const Babl *get_format(void)
+static const Babl *get_format(bool linear)
 {
-	return babl_format_new(babl_model("R'G'B'A"), babl_type("u8"),
+	return linear
+		? babl_format_new(babl_model("RGBA"), babl_type("u8"),
 #if G_BYTE_ORDER == G_LITTLE_ENDIAN
-		babl_component("B'"), babl_component("G'"), babl_component("R'"), babl_component("A"),
+			babl_component("B"), babl_component("G"), babl_component("R"), babl_component("A"),
 #else
-		babl_component("A"), babl_component("R'"), babl_component("G'"), babl_component("B'"),
+			babl_component("A"), babl_component("R"), babl_component("G"), babl_component("B"),
 #endif
-		NULL);
+			NULL)
+		: babl_format_new(babl_model("R'G'B'A"), babl_type("u8"),
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+			babl_component("B'"), babl_component("G'"), babl_component("R'"), babl_component("A"),
+#else
+			babl_component("A"), babl_component("R'"), babl_component("G'"), babl_component("B'"),
+#endif
+			NULL);
 }
 
 static gint32 load_image(const gchar *filename)
@@ -54,14 +62,16 @@ static gint32 load_image(const gchar *filename)
 	gegl_init(NULL, NULL);
 	int width = QOIDecoder_GetWidth(qoi);
 	int height = QOIDecoder_GetHeight(qoi);
-	gint32 image = gimp_image_new(width, height, GIMP_RGB);
+	bool linear = QOIDecoder_IsLinearColorspace(qoi);
+	gint32 image = gimp_image_new_with_precision(width, height, GIMP_RGB,
+		linear ? GIMP_PRECISION_U8_LINEAR : GIMP_PRECISION_U8_GAMMA);
 	if (image != -1) {
 		gimp_image_set_filename(image, filename);
 		gint32 layer = gimp_layer_new(image, "Background", width, height,
 			QOIDecoder_HasAlpha(qoi) ? GIMP_RGBA_IMAGE : GIMP_RGB_IMAGE, 100, GIMP_NORMAL_MODE);
 		gimp_image_insert_layer(image, layer, -1, 0);
 		GeglBuffer *buffer = gimp_drawable_get_buffer(layer);
-		gegl_buffer_set(buffer, NULL, 0, get_format(), QOIDecoder_GetPixels(qoi), GEGL_AUTO_ROWSTRIDE);
+		gegl_buffer_set(buffer, NULL, 0, get_format(linear), QOIDecoder_GetPixels(qoi), GEGL_AUTO_ROWSTRIDE);
 		g_object_unref(buffer);
 	}
 	QOIDecoder_Delete(qoi);
@@ -78,7 +88,8 @@ static bool save_image(const gchar *filename, gint32 image, gint32 drawable)
 		g_object_unref(buffer);
 		return false;
 	}
-	gegl_buffer_get(buffer, NULL, 1, get_format(), pixels, GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
+	const Babl *format = get_format(gimp_image_get_precision(image) == GIMP_PRECISION_U8_LINEAR);
+	gegl_buffer_get(buffer, NULL, 1, format, pixels, GEGL_AUTO_ROWSTRIDE, GEGL_ABYSS_NONE);
 	g_object_unref(buffer);
 	bool alpha = gimp_drawable_has_alpha(drawable);
 
