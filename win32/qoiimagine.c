@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
+#include <string.h>
 #include <windows.h>
 
 #include "ImagPlug.h"
@@ -30,7 +30,7 @@
 
 static BOOL IMAGINEAPI checkFile(IMAGINEPLUGINFILEINFOTABLE *fileInfoTable, IMAGINELOADPARAM *loadParam, int flags)
 {
-	return TRUE; // TODO
+	return loadParam->length > 4 && memcmp(loadParam->buffer, "qoif", 4) == 0;
 }
 
 static LPIMAGINEBITMAP IMAGINEAPI loadFile(IMAGINEPLUGINFILEINFOTABLE *fileInfoTable, IMAGINELOADPARAM *loadParam, int flags)
