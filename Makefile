@@ -1,5 +1,6 @@
 CFLAGS = -O2 -Wall
 GIMP_LDFLAGS = `gimptool-2.0 --libs`
+GIMP_PLUGINS_MACOS_DIR = /Applications/GIMP-2.10.app/Contents/Resources/lib/gimp/2.0/plug-ins
 ifeq ($(OS),Windows_NT)
 EXEEXT = .exe
 GIMP_LDFLAGS += -Wl,-subsystem,windows
@@ -27,6 +28,8 @@ ifeq ($(OS),Windows_NT)
 	install -D $< `gimptool-2.0 --gimpplugindir`/plug-ins/file-qoi.exe
 else ifdef BUILDING_PACKAGE
 	install -D $< $(libdir)/gimp/2.0/plug-ins/file-qoi/file-qoi
+else ifneq ($(wildcard $(GIMP_PLUGINS_MACOS_DIR)),)
+	cp $< $(GIMP_PLUGINS_MACOS_DIR)/file-qoi
 else
 	gimptool-2.0 --install-admin-bin $<
 endif
