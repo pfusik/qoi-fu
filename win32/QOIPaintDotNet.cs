@@ -1,6 +1,6 @@
 ﻿// QOIPaintDotNet.cs - QOI Paint.NET plugin
 //
-// Copyright (C) 2021 Piotr Fusik
+// Copyright (C) 2021-2022 Piotr Fusik
 //
 // MIT License:
 //
@@ -25,16 +25,15 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 using PaintDotNet;
 using PaintDotNet.Rendering;
 
 [assembly: AssemblyTitle("Paint.NET Quite OK Image (QOI) plugin")]
 [assembly: AssemblyCompany("Piotr Fusik")]
-[assembly: AssemblyCopyright("Copyright © 2021")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyCopyright("Copyright © 2021-2022")]
+[assembly: AssemblyVersion("1.1.1.0")]
+[assembly: AssemblyFileVersion("1.1.1.0")]
 
 namespace QOI.PaintDotNet
 {
@@ -77,7 +76,7 @@ namespace QOI.PaintDotNet
 		protected override void OnSave(Document input, Stream output, SaveConfigToken token, Surface scratchSurface, ProgressEventHandler callback)
 		{
 			// Fetch from Paint.NET
-			input.CreateRenderer().Render(scratchSurface, Point2Int32.Zero);
+			input.CreateRenderer().Render(scratchSurface);
 			int width = input.Width;
 			int height = input.Height;
 			int[] pixels = new int[width * height];
