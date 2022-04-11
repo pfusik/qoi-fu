@@ -7,7 +7,7 @@ GIMP_LDFLAGS += -Wl,-subsystem,windows
 XNVIEW_DIR = C:/Program Files/XnViewMP
 SUDO = elevate
 else ifneq ($(wildcard $(GIMP_MACOS_LIBDIR)),)
-GIMP_LDFLAGS = -L $(GIMP_MACOS_LIBDIR) -lgimpui-2.0.0 -lgimp-2.0.0 -lgegl-0.4.0 -lbabl-0.1.0 -lgobject-2.0.0
+GIMP_LDFLAGS = -rpath @executable_path/../../../ -L $(GIMP_MACOS_LIBDIR) -lgimpui-2.0.0 -lgimp-2.0.0 -lgegl-0.4.0 -lbabl-0.1.0 -lgobject-2.0.0
 else
 XNVIEW_DIR = /opt/XnView
 endif
