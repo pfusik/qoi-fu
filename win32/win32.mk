@@ -38,6 +38,12 @@ deb64:
 	scp vm:qoi-ci-gimp_$(VERSION)-1_amd64.deb ..
 	scp vm:qoi-ci-xnview_$(VERSION)-1_amd64.deb ..
 
+rpm64:
+	/usr/bin/tar czf ../qoi-ci-$(VERSION).tar.gz --numeric-owner --owner=0 --group=0 --mode=644 --transform=s,,qoi-ci-$(VERSION)/, `git ls-files`
+	scp ../qoi-ci-$(VERSION).tar.gz vm:.
+	ssh vm 'rpmbuild -tb qoi-ci-$(VERSION).tar.gz'
+	scp vm:rpmbuild/RPMS/x86_64/qoi-ci-gimp-$(VERSION)-1.x86_64.rpm ..
+
 CLEAN += win32/QOI.plg64 win32/QOIPaintDotNet.dll win32/setup/qoi-ci.wixobj win32/setup/signed win32/signed
 
-.PHONY: install-imagine install-paint.net deb64
+.PHONY: install-imagine install-paint.net deb64 rpm64
