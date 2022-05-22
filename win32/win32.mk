@@ -3,7 +3,7 @@ VERSION = 1.1.1
 IMAGINE_DIR = $(LOCALAPPDATA)/Imagine
 CSC = "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/Roslyn/csc.exe" -nologo
 PAINT_NET_DIR = C:/Program Files/paint.net
-DOTNET_REF_DIR = C:/Program Files/dotnet/packs/Microsoft.NETCore.App.Ref/6.0.3/ref/net6.0
+DOTNET_REF_DIR = `echo C:/Program\ Files/dotnet/packs/Microsoft.NETCore.App.Ref/6.0.*/ref/net6.0`
 DO_SIGN = signtool sign -d "Quite OK Image plugins $(VERSION)" -n "Open Source Developer, Piotr Fusik" -tr http://time.certum.pl -fd sha256 -td sha256 $^ && touch $@
 
 win32/QOI.plg64: win32/qoiimagine.c transpiled/QOI.c
