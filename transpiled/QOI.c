@@ -113,10 +113,10 @@ bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixel
 		return false;
 	int pixelsSize = width * height;
 	uint8_t *encoded = (uint8_t *) CiShared_Make(14 + pixelsSize * (alpha ? 5 : 4) + 8, sizeof(uint8_t), NULL, NULL);
-	encoded[0] = 113;
-	encoded[1] = 111;
-	encoded[2] = 105;
-	encoded[3] = 102;
+	encoded[0] = 'q';
+	encoded[1] = 'o';
+	encoded[2] = 'i';
+	encoded[3] = 'f';
 	encoded[4] = (uint8_t) (width >> 24);
 	encoded[5] = (uint8_t) (width >> 16);
 	encoded[6] = (uint8_t) (width >> 8);
@@ -236,7 +236,7 @@ void QOIDecoder_Delete(QOIDecoder *self)
 
 bool QOIDecoder_Decode(QOIDecoder *self, uint8_t const *encoded, int encodedSize)
 {
-	if (encoded == NULL || encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
+	if (encoded == NULL || encodedSize < 23 || encoded[0] != 'q' || encoded[1] != 'o' || encoded[2] != 'i' || encoded[3] != 'f')
 		return false;
 	int width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];
 	int height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];

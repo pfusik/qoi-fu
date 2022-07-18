@@ -47,10 +47,10 @@ public class QOIEncoder
 			return false;
 		int pixelsSize = width * height;
 		byte[] encoded = new byte[14 + pixelsSize * (alpha ? 5 : 4) + 8];
-		encoded[0] = 113;
-		encoded[1] = 111;
-		encoded[2] = 105;
-		encoded[3] = 102;
+		encoded[0] = 'q';
+		encoded[1] = 'o';
+		encoded[2] = 'i';
+		encoded[3] = 'f';
 		encoded[4] = (byte) (width >> 24);
 		encoded[5] = (byte) (width >> 16);
 		encoded[6] = (byte) (width >> 8);
