@@ -1,3 +1,5 @@
+VERSION = 1.1.1
+
 CFLAGS = -O2 -Wall
 GIMP_LDFLAGS = `gimptool-2.0 --libs`
 GIMP_MACOS_LIBDIR = /Applications/GIMP-2.10.app/Contents/Resources/lib

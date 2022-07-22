@@ -1,5 +1,3 @@
-VERSION = 1.1.1
-
 IMAGINE_DIR = $(LOCALAPPDATA)/Imagine
 CSC = "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/Roslyn/csc.exe" -nologo
 PAINT_NET_DIR = C:/Program Files/paint.net
@@ -47,8 +45,8 @@ rpm64:
 mac:
 	/usr/bin/tar czf ../qoi-ci-$(VERSION).tar.gz --numeric-owner --owner=0 --group=0 --mode=644 --transform=s,,qoi-ci-$(VERSION)/, `git ls-files`
 	scp ../qoi-ci-$(VERSION).tar.gz mac:.
-	ssh mac 'security unlock-keychain ~/Library/Keychains/login.keychain && rm -rf qoi-ci-$(VERSION) && tar xf qoi-ci-$(VERSION).tar.gz && PATH=/usr/local/bin:$$PATH make -C qoi-ci-$(VERSION) macos/bin/file-qoi'
-	scp mac:qoi-ci-$(VERSION)/macos/bin/file-qoi ..
+	ssh mac 'security unlock-keychain ~/Library/Keychains/login.keychain && rm -rf qoi-ci-$(VERSION) && tar xf qoi-ci-$(VERSION).tar.gz && PATH=/usr/local/bin:$$PATH make -C qoi-ci-$(VERSION) macos/qoi-ci-$(VERSION)-macos.dmg'
+	scp mac:qoi-ci-$(VERSION)/macos/qoi-ci-$(VERSION)-macos.dmg ..
 
 CLEAN += win32/QOI.plg64 win32/QOIPaintDotNet.dll win32/setup/qoi-ci.wixobj win32/setup/signed win32/signed
 
