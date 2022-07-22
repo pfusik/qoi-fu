@@ -51,4 +51,5 @@ deb:
 
 .PHONY: all install-gimp install-xnview clean deb
 
+include macos/macos.mk
 include win32/win32.mk
