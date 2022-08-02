@@ -1,4 +1,7 @@
 IMAGINE_DIR = $(LOCALAPPDATA)/Imagine
+IMAGINE32_DIR = $(LOCALAPPDATA)/Imagine32
+XNVIEW32_DIR = C:/Program Files (x86)/XnView
+CC32 = i686-w64-mingw32-gcc
 CSC = "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/Roslyn/csc.exe" -nologo
 PAINT_NET_DIR = C:/Program Files/paint.net
 DOTNET_REF_DIR = `echo C:/Program\ Files/dotnet/packs/Microsoft.NETCore.App.Ref/6.0.*/ref/net6.0`
@@ -7,11 +10,23 @@ DO_SIGN = signtool sign -d "Quite OK Image plugins $(VERSION)" -n "Open Source D
 win32/QOI.plg64: win32/qoiimagine.c transpiled/QOI.c
 	$(CC) $(CFLAGS) -I . -I transpiled -o $@ win32/qoiimagine.c transpiled/QOI.c -shared
 
+win32/QOI.plg: win32/qoiimagine.c transpiled/QOI.c
+	$(CC32) $(CFLAGS) -I . -I transpiled -o $@ win32/qoiimagine.c transpiled/QOI.c -shared -Wl,--kill-at
+
+win32/Xqoi32.usr: Xqoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
+	$(CC32) $(CFLAGS) -I transpiled -o $@ Xqoi.c QOI-stdio.c transpiled/QOI.c -shared -Wl,--kill-at
+
 win32/QOIPaintDotNet.dll: win32/QOIPaintDotNet.cs transpiled/QOI.cs
 	$(CSC) -o+ -out:$@ -t:library $^ -nostdlib -r:"$(PAINT_NET_DIR)/PaintDotNet.Base.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Core.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Data.dll" -r:"$(DOTNET_REF_DIR)/System.Runtime.dll"
 
 install-imagine: win32/QOI.plg64
-	$(SUDO) cp $< "$(IMAGINE_DIR)/Plugin/QOI.plg64"
+	cp $< "$(IMAGINE_DIR)/Plugin/QOI.plg64"
+
+install-imagine32: win32/QOI.plg
+	cp $< "$(IMAGINE32_DIR)/Plugin/QOI.plg"
+
+install-xnview32: win32/Xqoi32.usr
+	$(SUDO) cp $< "$(XNVIEW32_DIR)/PlugIns/Xqoi32.usr"
 
 install-paint.net: win32/QOIPaintDotNet.dll
 	$(SUDO) cp $< "$(PAINT_NET_DIR)/FileTypes/QOIPaintDotNet.dll"
@@ -26,7 +41,7 @@ win32/setup/qoi-ci.wixobj: win32/setup/qoi-ci.wxs
 win32/setup/signed: ../qoi-ci-$(VERSION)-win64.msi
 	$(DO_SIGN)
 
-win32/signed: file-qoi.exe win32/QOI.plg64 win32/QOIPaintDotNet.dll Xqoi.usr
+win32/signed: file-qoi.exe win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr
 	$(DO_SIGN)
 
 deb64:
@@ -48,6 +63,6 @@ mac:
 	ssh mac 'security unlock-keychain ~/Library/Keychains/login.keychain && rm -rf qoi-ci-$(VERSION) && tar xf qoi-ci-$(VERSION).tar.gz && PATH=/usr/local/bin:$$PATH make -C qoi-ci-$(VERSION) macos/qoi-ci-$(VERSION)-macos.dmg'
 	scp mac:qoi-ci-$(VERSION)/macos/qoi-ci-$(VERSION)-macos.dmg ..
 
-CLEAN += win32/QOI.plg64 win32/QOIPaintDotNet.dll win32/setup/qoi-ci.wixobj win32/setup/signed win32/signed
+CLEAN += win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll win32/setup/qoi-ci.wixobj win32/setup/signed win32/signed
 
-.PHONY: install-imagine install-paint.net deb64 rpm64 mac
+.PHONY: install-imagine install-imagine32 install-xnview32 install-paint.net deb64 rpm64 mac
