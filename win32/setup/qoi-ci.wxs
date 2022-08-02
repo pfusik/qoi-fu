@@ -124,7 +124,18 @@
 		</Property>
 
 		<Property Id="IMAGINE.DIR">
+			<!-- apparently there is no Wow6432Node for this key, hence no IMAGINE64.DIR -->
 			<RegistrySearch Id="imagine.dir" Root="HKCU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Imagine" Name="InstallLocation" Type="directory" />
+		</Property>
+		<Property Id="IMAGINE64.EXE">
+			<RegistrySearch Id="imagine64.exe" Root="HKCU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Imagine" Name="InstallLocation" Type="directory">
+				<FileSearch Name="Imagine64.exe" />
+			</RegistrySearch>
+		</Property>
+		<Property Id="IMAGINE.EXE">
+			<RegistrySearch Id="imagine.exe" Root="HKCU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Imagine" Name="InstallLocation" Type="directory">
+				<FileSearch Name="Imagine.exe" />
+			</RegistrySearch>
 		</Property>
 
 		<Property Id="PAINTDOTNET.DIR">
@@ -137,6 +148,15 @@
 		<Property Id="XNVIEWMP.EXE">
 			<RegistrySearch Id="xnviewmp.exe" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\XnViewMP_is1" Name="InstallLocation" Type="directory">
 				<FileSearch Name="xnviewmp.exe" />
+			</RegistrySearch>
+		</Property>
+
+		<Property Id="XNVIEW.DIR">
+			<RegistrySearch Id="xnview.installdir" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\XnView_is1" Name="InstallLocation" Type="directory" Win64="no" />
+		</Property>
+		<Property Id="XNVIEW.EXE">
+			<RegistrySearch Id="xnview.exe" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\XnView_is1" Name="InstallLocation" Type="directory" Win64="no">
+				<FileSearch Name="xnview.exe" />
 			</RegistrySearch>
 		</Property>
 
@@ -164,6 +184,11 @@
 							<File Source="win32/QOI.plg64" Checksum="yes" KeyPath="yes" />
 						</Component>
 					</Directory>
+					<Directory Id="IMAGINE32PLUG.DIR" Name="Plugin">
+						<Component Id="QOI.plg" Win64="no">
+							<File Source="win32/QOI.plg" Checksum="yes" KeyPath="yes" />
+						</Component>
+					</Directory>
 				</Directory>
 
 				<Directory Id="PAINTDOTNET.DIR" Name="Paint.NET">
@@ -181,6 +206,14 @@
 						</Component>
 					</Directory>
 				</Directory>
+
+				<Directory Id="XNVIEW.DIR" Name="XnView">
+					<Directory Id="XNVIEWPLUG.DIR" Name="PlugIns">
+						<Component Id="Xqoi32.usr" Win64="no">
+							<File Source="win32/Xqoi32.usr" Checksum="yes" KeyPath="yes" />
+						</Component>
+					</Directory>
+				</Directory>
 			</Directory>
 		</Directory>
 
@@ -189,8 +222,12 @@
 			<ComponentRef Id="fileqoi.exe" />
 		</Feature>
 		<Feature Id="imagine" Title="Imagine plugin" Level="9" ConfigurableDirectory="IMAGINEPLUG.DIR" Description="Plugin for Imagine." AllowAdvertise="no">
-			<Condition Level="1">IMAGINE.DIR</Condition>
+			<Condition Level="1">IMAGINE64.EXE</Condition>
 			<ComponentRef Id="QOI.plg64" />
+		</Feature>
+		<Feature Id="imagine32" Title="Imagine 32-bit plugin" Level="9" ConfigurableDirectory="IMAGINE32PLUG.DIR" Description="Plugin for 32-bit Imagine." AllowAdvertise="no">
+			<Condition Level="1">IMAGINE.EXE</Condition>
+			<ComponentRef Id="QOI.plg" />
 		</Feature>
 		<Feature Id="paintdotnet" Title="Paint.NET plugin" Level="9" ConfigurableDirectory="PAINTDOTNETFILETYPES.DIR" Description="Plugin for Paint.NET" AllowAdvertise="no">
 			<Condition Level="1">PAINTDOTNET.DIR</Condition>
@@ -199,6 +236,10 @@
 		<Feature Id="xnviewmp" Title="XnViewMP plugin" Level="9" ConfigurableDirectory="XNVIEWMPPLUG.DIR" Description="Plugin for XnViewMP." AllowAdvertise="no">
 			<Condition Level="1">XNVIEWMP.DIR</Condition>
 			<ComponentRef Id="Xqoi.usr" />
+		</Feature>
+		<Feature Id="xnview" Title="XnView Classic plugin" Level="9" ConfigurableDirectory="XNVIEWPLUG.DIR" Description="Plugin for XnView Classic." AllowAdvertise="no">
+			<Condition Level="1">XNVIEW.DIR</Condition>
+			<ComponentRef Id="Xqoi32.usr" />
 		</Feature>
 	</Product>
 </Wix>

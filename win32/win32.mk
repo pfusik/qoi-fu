@@ -32,7 +32,7 @@ install-paint.net: win32/QOIPaintDotNet.dll
 	$(SUDO) cp $< "$(PAINT_NET_DIR)/FileTypes/QOIPaintDotNet.dll"
 
 ../qoi-ci-$(VERSION)-win64.msi: win32/setup/qoi-ci.wixobj win32/setup/qoi.ico win32/setup/license.rtf win32/setup/dialog.jpg win32/setup/banner.jpg \
-	file-qoi.exe win32/QOI.plg64 win32/QOIPaintDotNet.dll Xqoi.usr win32/signed
+	file-qoi.exe win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr win32/signed
 	light -nologo -o $@ -spdb -ext WixUIExtension -sice:ICE69 -sice:ICE80 $<
 
 win32/setup/qoi-ci.wixobj: win32/setup/qoi-ci.wxs
