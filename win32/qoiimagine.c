@@ -1,6 +1,6 @@
 // qoiimagine.c - QOI Imagine plugin
 //
-// Copyright (C) 2021 Piotr Fusik
+// Copyright (C) 2021-2022 Piotr Fusik
 //
 // MIT License:
 //
@@ -22,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <stdlib.h>
 #include <string.h>
 #include <windows.h>
 
@@ -79,7 +80,7 @@ static LPIMAGINEBITMAP IMAGINEAPI loadFile(IMAGINEPLUGINFILEINFOTABLE *fileInfoT
 		else {
 			for (int x = 0; x < width; x++) {
 				int rgb = *pixels++;
-				/* 0xRRGGBB -> 0xBB 0xGG 0xRR */
+				// 0xRRGGBB -> 0xBB 0xGG 0xRR
 				*dest++ = (BYTE) rgb;
 				*dest++ = (BYTE) (rgb >> 8);
 				*dest++ = (BYTE) (rgb >> 16);
@@ -98,12 +99,81 @@ static LPIMAGINEBITMAP IMAGINEAPI loadFile(IMAGINEPLUGINFILEINFOTABLE *fileInfoT
 	return bitmap;
 }
 
+static BOOL IMAGINEAPI saveFile(IMAGINEPLUGINFILEINFOTABLE *fileInfoTable, LPIMAGINEBITMAP bitmap, IMAGINESAVEPARAM *saveParam, int flags)
+{
+	const IMAGINEPLUGININTERFACE *iface = fileInfoTable->iface;
+	if (iface == NULL)
+		return FALSE;
+	bool alpha;
+	switch (iface->lpVtbl->GetBitCount(bitmap)) {
+	case 24:
+		alpha = false;
+		break;
+	case 32:
+		alpha = true;
+		break;
+	default:
+		saveParam->errorCode = IMAGINEERROR_COLORNOTSUPPORTED;
+		return FALSE;
+	}
+	int width = iface->lpVtbl->GetWidth(bitmap);
+	int height = iface->lpVtbl->GetHeight(bitmap);
+	if (!QOIEncoder_CanEncode(width, height, alpha)) {
+		saveParam->errorCode = IMAGINEERROR_SIZENOTSUPPORTED;
+		return FALSE;
+	}
+	if ((flags & IMAGINESAVEPARAM_TEST) != 0)
+		return TRUE;
+
+	int *pixels = (int *) malloc(width * height * sizeof(int));
+	if (pixels == NULL) {
+		saveParam->errorCode = IMAGINEERROR_OUTOFMEMORY;
+		return FALSE;
+	}
+	for (int y = 0; y < height; y++) {
+		LPCBYTE src = (LPCBYTE) iface->lpVtbl->GetLineBits(bitmap, y);
+		if (alpha)
+			memcpy(pixels + y * width, src, width << 2);
+		else {
+			for (int x = 0; x < width; x++) {
+				// 0xBB 0xGG 0xRR -> 0xRRGGBB
+				pixels[y * width + x] = src[2] << 16 | src[1] << 8 | src[0];
+				src += 3;
+			}
+		}
+	}
+
+	QOIEncoder *qoi = QOIEncoder_New();
+	if (qoi == NULL) {
+		free(pixels);
+		saveParam->errorCode = IMAGINEERROR_OUTOFMEMORY;
+		return FALSE;
+	}
+	bool ok = QOIEncoder_Encode(qoi, width, height, pixels, alpha, false);
+	free(pixels);
+	if (!ok) {
+		QOIEncoder_Delete(qoi);
+		saveParam->errorCode = IMAGINEERROR_SIZENOTSUPPORTED;
+		return FALSE;
+	}
+	int encodedSize = QOIEncoder_GetEncodedSize(qoi);
+
+	saveParam->sb = iface->lpVtbl->sbAlloc(encodedSize, 0);
+	ok = iface->lpVtbl->sbWrite(saveParam->sb, saveParam->sb->current, QOIEncoder_GetEncoded(qoi), encodedSize) != NULL;
+	QOIEncoder_Delete(qoi);
+	if (!ok) {
+		saveParam->errorCode = IMAGINEERROR_WRITEERROR;
+		return FALSE;
+	}
+	return TRUE;
+}
+
 static BOOL IMAGINEAPI registerProcW(const IMAGINEPLUGININTERFACE *iface)
 {
 	static const IMAGINEFILEINFOITEM fileInfoItemW = {
 		checkFile,
 		loadFile,
-		NULL,
+		saveFile,
 		(LPCTSTR) L"Quite OK Image (QOI)",
 		(LPCTSTR) L"QOI\0"
 	};
@@ -115,7 +185,7 @@ __declspec(dllexport) BOOL IMAGINEAPI ImaginePluginGetInfoW(IMAGINEPLUGININFOW *
 	static const IMAGINEPLUGININFOW pluginInfoW = {
 		sizeof(pluginInfoW),
 		registerProcW,
-		0x01010000,
+		0x01010200,
 		L"QOI Plugin",
 		IMAGINEPLUGININTERFACE_VERSION
 	};
