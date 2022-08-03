@@ -104,6 +104,7 @@ static BOOL IMAGINEAPI saveFile(IMAGINEPLUGINFILEINFOTABLE *fileInfoTable, LPIMA
 	const IMAGINEPLUGININTERFACE *iface = fileInfoTable->iface;
 	if (iface == NULL)
 		return FALSE;
+
 	bool alpha;
 	switch (iface->lpVtbl->GetBitCount(bitmap)) {
 	case 24:
@@ -159,6 +160,11 @@ static BOOL IMAGINEAPI saveFile(IMAGINEPLUGINFILEINFOTABLE *fileInfoTable, LPIMA
 	int encodedSize = QOIEncoder_GetEncodedSize(qoi);
 
 	saveParam->sb = iface->lpVtbl->sbAlloc(encodedSize, 0);
+	if (saveParam->sb == NULL) {
+		QOIEncoder_Delete(qoi);
+		saveParam->errorCode = IMAGINEERROR_OUTOFMEMORY;
+		return FALSE;
+	}
 	ok = iface->lpVtbl->sbWrite(saveParam->sb, saveParam->sb->current, QOIEncoder_GetEncoded(qoi), encodedSize) != NULL;
 	QOIEncoder_Delete(qoi);
 	if (!ok) {
