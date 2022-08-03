@@ -1,3 +1,9 @@
+qoi-ci (1.1.2-1) UNRELEASED; urgency=low
+
+  * New release.
+
+ -- Piotr Fusik <fox@scene.pl>  Wed, 3 Aug 2022 19:46:08 +0200
+
 qoi-ci (1.1.1-1) UNRELEASED; urgency=low
 
   * Linear colorspace in GIMP.

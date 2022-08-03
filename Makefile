@@ -1,4 +1,4 @@
-VERSION = 1.1.1
+VERSION = 1.1.2
 
 CFLAGS = -O2 -Wall
 GIMP_LDFLAGS = `gimptool-2.0 --libs`
