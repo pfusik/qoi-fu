@@ -6,14 +6,14 @@ class QOIEncoder:
 
 	Losslessly compresses an image to a byte array."""
 
-	_HEADER_SIZE = 14
-
-	_PADDING_SIZE = 8
-
 	def __init__(self):
 		"""Constructs the encoder.
 
 		The encoder can be used for several images, one after another."""
+
+	_HEADER_SIZE = 14
+
+	_PADDING_SIZE = 8
 
 	@staticmethod
 	def can_encode(width, height, alpha):

@@ -23,10 +23,7 @@ public class QOIEncoder
 	/// <param name="width">Image width in pixels.</param>
 	/// <param name="height">Image height in pixels.</param>
 	/// <param name="alpha">Whether the image has the alpha channel (transparency).</param>
-	public static bool CanEncode(int width, int height, bool alpha)
-	{
-		return width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? 5 : 4);
-	}
+	public static bool CanEncode(int width, int height, bool alpha) => width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? 5 : 4);
 
 	/// <summary>Encodes the given image.</summary>
 	/// <remarks>Returns <see langword="true" /> if encoded successfully.</remarks>
@@ -129,16 +126,10 @@ public class QOIEncoder
 	/// <remarks>This method can only be called after <c>Encode</c> returned <see langword="true" />.
 	/// The allocated array is usually larger than the encoded data.
 	/// Call <c>GetEncodedSize</c> to retrieve the number of leading bytes that are significant.</remarks>
-	public byte[] GetEncoded()
-	{
-		return this.Encoded;
-	}
+	public byte[] GetEncoded() => this.Encoded;
 
 	/// <summary>Returns the encoded file length.</summary>
-	public int GetEncodedSize()
-	{
-		return this.EncodedSize;
-	}
+	public int GetEncodedSize() => this.EncodedSize;
 }
 
 /// <summary>Decoder of the "Quite OK Image" (QOI) format.</summary>
@@ -244,34 +235,19 @@ public class QOIDecoder
 	}
 
 	/// <summary>Returns the width of the decoded image in pixels.</summary>
-	public int GetWidth()
-	{
-		return this.Width;
-	}
+	public int GetWidth() => this.Width;
 
 	/// <summary>Returns the height of the decoded image in pixels.</summary>
-	public int GetHeight()
-	{
-		return this.Height;
-	}
+	public int GetHeight() => this.Height;
 
 	/// <summary>Returns the pixels of the decoded image, top-down, left-to-right.</summary>
 	/// <remarks>Each pixel is a 32-bit integer 0xAARRGGBB.</remarks>
-	public int[] GetPixels()
-	{
-		return this.Pixels;
-	}
+	public int[] GetPixels() => this.Pixels;
 
 	/// <summary>Returns the information about the alpha channel from the file header.</summary>
-	public bool HasAlpha()
-	{
-		return this.Alpha;
-	}
+	public bool HasAlpha() => this.Alpha;
 
 	/// <summary>Returns the color space information from the file header.</summary>
 	/// <remarks><see langword="false" /> = sRGB with linear alpha channel.<see langword="true" /> = all channels linear.</remarks>
-	public bool IsLinearColorspace()
-	{
-		return this.LinearColorspace;
-	}
+	public bool IsLinearColorspace() => this.LinearColorspace;
 }
