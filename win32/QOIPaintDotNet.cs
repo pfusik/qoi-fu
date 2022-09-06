@@ -97,9 +97,6 @@ namespace QOI.PaintDotNet
 
 	public class QOIFileTypeFactory : IFileTypeFactory
 	{
-		public FileType[] GetFileTypeInstances()
-		{
-			return new FileType[] { new QOIFileType() };
-		}
+		public FileType[] GetFileTypeInstances() => new FileType[] { new QOIFileType() };
 	}
 }
