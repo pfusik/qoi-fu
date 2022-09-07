@@ -1,4 +1,4 @@
-// wicqoi.c - QOI Codec for Windows Imaging Component
+// wicqoi.cpp - QOI Codec for Windows Imaging Component
 //
 // Copyright (C) 2022 Piotr Fusik
 //
