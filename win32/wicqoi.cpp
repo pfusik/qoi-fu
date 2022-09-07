@@ -26,6 +26,7 @@
 
 #include "QOI.h"
 
+static HINSTANCE g_hDll;
 static LONG g_cRef = 0;
 
 static void DllAddRef()
@@ -42,7 +43,7 @@ static void DllRelease()
 static const GUID GUID_QOIFormat =
 	{ 0x44229228, 0x8e08, 0x49cf, { 0xb9, 0x3e, 0xf6, 0xfa, 0x0b, 0xd3, 0xa5, 0x02 } };
 
-// 3786FCFE-A8F4-4AEB-852C-C76CC74D1123
+#define CLSID_WICQOIDecoder_str "{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}"
 static const GUID CLSID_WICQOIDecoder =
 	{ 0x3786fcfe, 0xa8f4, 0x4aeb, { 0x85, 0x2c, 0xc7, 0x6c, 0xc7, 0x4d, 0x11, 0x23 } };
 
@@ -385,4 +386,109 @@ STDAPI __declspec(dllexport) DllGetClassObject(REFCLSID rclsid, REFIID riid, LPV
 	}
 	*ppv = nullptr;
 	return CLASS_E_CLASSNOTAVAILABLE;
+}
+
+STDAPI_(BOOL) DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
+{
+	if (dwReason == DLL_PROCESS_ATTACH)
+		g_hDll = hInstance;
+	return TRUE;
+}
+
+static bool MyRegCreateKey(HKEY hk1, LPCSTR subkey, PHKEY hk2)
+{
+	return RegCreateKeyEx(hk1, subkey, 0, nullptr, 0, KEY_WRITE, nullptr, hk2, nullptr) == ERROR_SUCCESS;
+}
+
+static bool MyRegSetValueString(HKEY hk1, LPCSTR name, LPCSTR data)
+{
+	return RegSetValueEx(hk1, name, 0, REG_SZ, reinterpret_cast<const BYTE *>(data), strlen(data) + 1) == ERROR_SUCCESS;
+}
+
+static bool MyRegSetValueDword(HKEY hk1, LPCSTR name, DWORD type, DWORD data)
+{
+	return RegSetValueEx(hk1, name, 0, type, reinterpret_cast<const BYTE *>(&data), sizeof(data)) == ERROR_SUCCESS;
+}
+
+STDAPI __declspec(dllexport) DllRegisterServer()
+{
+	char szModulePath[MAX_PATH];
+	if (GetModuleFileName(g_hDll, szModulePath, MAX_PATH) == 0)
+		return E_FAIL;
+	HKEY hk1;
+	HKEY hk2;
+	if (!MyRegCreateKey(HKEY_CLASSES_ROOT, "CLSID\\" CLSID_WICQOIDecoder_str, &hk1))
+		return E_FAIL;
+	if (!MyRegCreateKey(hk1, "InProcServer32", &hk2)) {
+		RegCloseKey(hk1);
+		return E_FAIL;
+	}
+	if (!MyRegSetValueString(hk2, nullptr, szModulePath)
+	 || !MyRegSetValueString(hk2, "ThreadingModel", "Both")) {
+		RegCloseKey(hk2);
+		RegCloseKey(hk1);
+		return E_FAIL;
+	}
+	RegCloseKey(hk2);
+	if (!MyRegCreateKey(hk1, "Patterns\\0", &hk2)) {
+		RegCloseKey(hk1);
+		return E_FAIL;
+	}
+	if (!MyRegSetValueDword(hk2, "Position", REG_DWORD, 0)
+	 || !MyRegSetValueDword(hk2, "Length", REG_DWORD, 4)
+	 || !MyRegSetValueDword(hk2, "Pattern", REG_BINARY, 'q' | 'o' << 8 | 'i' << 16 | 'f' << 24)
+	 || !MyRegSetValueDword(hk2, "Mask", REG_BINARY, 0xffffffff)) {
+		RegCloseKey(hk2);
+		RegCloseKey(hk1);
+		return E_FAIL;
+	}
+	RegCloseKey(hk2);
+	RegCloseKey(hk1);
+
+	if (!MyRegCreateKey(HKEY_CLASSES_ROOT, "CLSID\\{7ED96837-96F0-4812-B211-F13C24117ED3}\\Instance\\" CLSID_WICQOIDecoder_str, &hk1))
+		return E_FAIL;
+	if (!MyRegSetValueString(hk1, "CLSID", CLSID_WICQOIDecoder_str)
+	 || !MyRegSetValueString(hk1, "FriendlyName", "Quite OK Image Decoder")) {
+		RegCloseKey(hk1);
+		return E_FAIL;
+	}
+	RegCloseKey(hk1);
+
+	if (!MyRegCreateKey(HKEY_CLASSES_ROOT, ".qoi", &hk1))
+		return E_FAIL;
+	if (!MyRegCreateKey(hk1, "ShellEx\\{e357fccd-a995-4576-b01f-234630154e96}", &hk2)) {
+		RegCloseKey(hk1);
+		return E_FAIL;
+	}
+	if (!MyRegSetValueString(hk2, nullptr, "{C7657C4A-9F68-40fa-A4DF-96BC08EB3551}")
+	 || !MyRegSetValueString(hk1, "PerceivedType", "image")) {
+		RegCloseKey(hk2);
+		RegCloseKey(hk1);
+		return E_FAIL;
+	}
+	RegCloseKey(hk2);
+	RegCloseKey(hk1);
+
+	return S_OK;
+}
+
+STDAPI __declspec(dllexport) DllUnregisterServer()
+{
+	HKEY hk1;
+	if (RegOpenKeyEx(HKEY_CLASSES_ROOT, ".qoi\\ShellEx", 0, DELETE, &hk1) == ERROR_SUCCESS) {
+		RegDeleteKey(hk1, "{e357fccd-a995-4576-b01f-234630154e96}");
+		RegCloseKey(hk1);
+	}
+	if (RegOpenKeyEx(HKEY_CLASSES_ROOT, "CLSID\\{7ED96837-96F0-4812-B211-F13C24117ED3}\\Instance", 0, DELETE, &hk1) == ERROR_SUCCESS) {
+		RegDeleteKey(hk1, CLSID_WICQOIDecoder_str);
+		RegCloseKey(hk1);
+	}
+	if (RegOpenKeyEx(HKEY_CLASSES_ROOT, "CLSID", 0, DELETE, &hk1) == ERROR_SUCCESS) {
+		RegDeleteKey(hk1, CLSID_WICQOIDecoder_str "\\Patterns\\0");
+		RegDeleteKey(hk1, CLSID_WICQOIDecoder_str "\\Patterns");
+		RegDeleteKey(hk1, CLSID_WICQOIDecoder_str "\\InProcServer32");
+		RegDeleteKey(hk1, CLSID_WICQOIDecoder_str);
+		RegCloseKey(hk1);
+	}
+	return S_OK;
 }
