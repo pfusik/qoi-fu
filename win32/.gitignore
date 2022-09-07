@@ -1,4 +1,5 @@
 *.wixobj
+QOI.o
 QOI.plg
 QOI.plg64
 Xqoi32.usr
