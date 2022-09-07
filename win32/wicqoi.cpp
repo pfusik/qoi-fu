@@ -474,21 +474,11 @@ STDAPI __declspec(dllexport) DllRegisterServer()
 
 STDAPI __declspec(dllexport) DllUnregisterServer()
 {
-	HKEY hk1;
-	if (RegOpenKeyEx(HKEY_CLASSES_ROOT, ".qoi\\ShellEx", 0, DELETE, &hk1) == ERROR_SUCCESS) {
-		RegDeleteKey(hk1, "{e357fccd-a995-4576-b01f-234630154e96}");
-		RegCloseKey(hk1);
-	}
-	if (RegOpenKeyEx(HKEY_CLASSES_ROOT, "CLSID\\{7ED96837-96F0-4812-B211-F13C24117ED3}\\Instance", 0, DELETE, &hk1) == ERROR_SUCCESS) {
-		RegDeleteKey(hk1, CLSID_WICQOIDecoder_str);
-		RegCloseKey(hk1);
-	}
-	if (RegOpenKeyEx(HKEY_CLASSES_ROOT, "CLSID", 0, DELETE, &hk1) == ERROR_SUCCESS) {
-		RegDeleteKey(hk1, CLSID_WICQOIDecoder_str "\\Patterns\\0");
-		RegDeleteKey(hk1, CLSID_WICQOIDecoder_str "\\Patterns");
-		RegDeleteKey(hk1, CLSID_WICQOIDecoder_str "\\InProcServer32");
-		RegDeleteKey(hk1, CLSID_WICQOIDecoder_str);
-		RegCloseKey(hk1);
-	}
+	RegDeleteKey(HKEY_CLASSES_ROOT, ".qoi\\ShellEx\\{e357fccd-a995-4576-b01f-234630154e96}");
+	RegDeleteKey(HKEY_CLASSES_ROOT, "CLSID\\{7ED96837-96F0-4812-B211-F13C24117ED3}\\Instance\\" CLSID_WICQOIDecoder_str);
+	RegDeleteKey(HKEY_CLASSES_ROOT, "CLSID\\" CLSID_WICQOIDecoder_str "\\Patterns\\0");
+	RegDeleteKey(HKEY_CLASSES_ROOT, "CLSID\\" CLSID_WICQOIDecoder_str "\\Patterns");
+	RegDeleteKey(HKEY_CLASSES_ROOT, "CLSID\\" CLSID_WICQOIDecoder_str "\\InProcServer32");
+	RegDeleteKey(HKEY_CLASSES_ROOT, "CLSID\\" CLSID_WICQOIDecoder_str);
 	return S_OK;
 }
