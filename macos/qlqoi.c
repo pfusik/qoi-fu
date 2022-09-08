@@ -54,7 +54,7 @@ static CGImageRef CreateImage(CFURLRef url)
 	}
 	int width = QOIDecoder_GetWidth(qoi);
 	int height = QOIDecoder_GetHeight(qoi);
-	CGContextRef context = CGBitmapContextCreate((void *) QOIDecoder_GetPixels(qoi), width, height, 8, width << 2, colorSpace, kCGBitmapByteOrder32Host | kCGImageAlphaFirst);
+	CGContextRef context = CGBitmapContextCreate((void *) QOIDecoder_GetPixels(qoi), width, height, 8, width << 2, colorSpace, kCGBitmapByteOrder32Host | kCGImageAlphaPremultipliedFirst);
 	CFRelease(colorSpace);
 	if (context == NULL) {
 		QOIDecoder_Delete(qoi);
