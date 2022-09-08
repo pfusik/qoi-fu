@@ -1,6 +1,6 @@
 // png2qoi.c - command-line converter between PNG and QOI formats
 //
-// Copyright (C) 2021 Piotr Fusik
+// Copyright (C) 2021-2022 Piotr Fusik
 //
 // MIT License:
 //
@@ -141,7 +141,7 @@ static bool process_file(const char *input_file)
 
 	fclose(f);
 	fprintf(stderr, "png2qoi: %s: unrecognized file format\n", input_file);
-	return f;
+	return false;
 }
 
 int main(int argc, char **argv)
