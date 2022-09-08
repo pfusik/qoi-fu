@@ -1,0 +1,3 @@
+[Thumbnailer Entry]
+Exec=png2qoi -o %o %i
+MimeType=image/qoi

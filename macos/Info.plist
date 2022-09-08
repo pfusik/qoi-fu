@@ -76,7 +76,7 @@
 						<string>qoi</string>
 					</array>
 					<key>public.mime-type</key>
-					<string>image/x-qoi</string>
+					<string>image/qoi</string>
 				</dict>
 			</dict>
 		</array>

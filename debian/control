@@ -5,10 +5,20 @@ Priority: optional
 Standards-Version: 4.6.0
 Build-Depends: debhelper (>= 7), gcc, libgimp2.0-dev
 
+Package: qoi-ci-2png
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Command-line converter between QOI and PNG formats.
+
 Package: qoi-ci-gimp
 Architecture: any
 Depends: gimp, ${shlibs:Depends}
 Description: GIMP plugin for the Quite OK Image (QOI) format.
+
+Package: qoi-ci-thumbnailer
+Architecture: all
+Depends: qoi-ci-2png
+Description: GNOME thumbnailer for the Quite OK Image (QOI) format.
 
 Package: qoi-ci-xnview
 Architecture: any

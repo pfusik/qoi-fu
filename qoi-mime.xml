@@ -1,0 +1,60 @@
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+	<mime-type type="image/qoi">
+		<comment>QOI image</comment>
+		<comment xml:lang="ar">صورة QOI</comment>
+		<comment xml:lang="az">QOI rəsmi</comment>
+		<comment xml:lang="be@latin">Vyjava QOI</comment>
+		<comment xml:lang="bg">Изображение — QOI</comment>
+		<comment xml:lang="ca">imatge QOI</comment>
+		<comment xml:lang="cs">obrázek QOI</comment>
+		<comment xml:lang="cy">Delwedd QOI</comment>
+		<comment xml:lang="da">QOI-billede</comment>
+		<comment xml:lang="de">QOI-Bild</comment>
+		<comment xml:lang="el">Εικόνα QOI</comment>
+		<comment xml:lang="en_GB">QOI image</comment>
+		<comment xml:lang="eo">QOI-bildo</comment>
+		<comment xml:lang="es">imagen QOI</comment>
+		<comment xml:lang="eu">QOI irudia</comment>
+		<comment xml:lang="fi">QOI-kuva</comment>
+		<comment xml:lang="fo">QOI mynd</comment>
+		<comment xml:lang="fr">image QOI</comment>
+		<comment xml:lang="ga">íomhá QOI</comment>
+		<comment xml:lang="gl">imaxe QOI</comment>
+		<comment xml:lang="he">תמונת QOI</comment>
+		<comment xml:lang="hr">QOI slika</comment>
+		<comment xml:lang="hu">QOI-kép</comment>
+		<comment xml:lang="ia">Imagine QOI</comment>
+		<comment xml:lang="id">Citra QOI</comment>
+		<comment xml:lang="it">Immagine QOI</comment>
+		<comment xml:lang="ja">QOI 画像</comment>
+		<comment xml:lang="kk">QOI суреті</comment>
+		<comment xml:lang="ko">QOI 그림</comment>
+		<comment xml:lang="lt">QOI paveikslėlis</comment>
+		<comment xml:lang="lv">QOI attēls</comment>
+		<comment xml:lang="ms">Imej QOI</comment>
+		<comment xml:lang="nb">QOI-bilde</comment>
+		<comment xml:lang="nl">QOI-afbeelding</comment>
+		<comment xml:lang="nn">QOI-bilete</comment>
+		<comment xml:lang="oc">imatge QOI</comment>
+		<comment xml:lang="pl">Obraz QOI</comment>
+		<comment xml:lang="pt">imagem QOI</comment>
+		<comment xml:lang="pt_BR">Imagem QOI</comment>
+		<comment xml:lang="ro">Imagine QOI</comment>
+		<comment xml:lang="ru">изображение QOI</comment>
+		<comment xml:lang="sk">Obrázok QOI</comment>
+		<comment xml:lang="sq">Figurë QOI</comment>
+		<comment xml:lang="sr">QOI слика</comment>
+		<comment xml:lang="sv">QOI-bild</comment>
+		<comment xml:lang="tr">QOI görüntüsü</comment>
+		<comment xml:lang="uk">зображення QOI</comment>
+		<comment xml:lang="vi">Ảnh QOI</comment>
+		<comment xml:lang="zh_CN">QOI 图像</comment>
+		<comment xml:lang="zh_TW">QOI 影像</comment>
+		<acronym>QOI</acronym>
+		<expanded-acronym>Quite OK Image</expanded-acronym>
+		<magic>
+			<match type="string" value="qoif" offset="0"/>
+		</magic>
+		<glob pattern="*.qoi" />
+	</mime-type>
+</mime-info>

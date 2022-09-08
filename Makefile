@@ -1,5 +1,6 @@
 VERSION = 1.1.2
 
+PREFIX = /usr/local
 CFLAGS = -O2 -Wall
 GIMP_LDFLAGS = `gimptool-2.0 --libs`
 GIMP_MACOS_LIBDIR = /Applications/GIMP-2.10.app/Contents/Resources/lib
@@ -26,6 +27,9 @@ file-qoi$(EXEEXT): file-qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 Xqoi.usr: Xqoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 	$(CC) $(CFLAGS) -I transpiled -o $@ Xqoi.c QOI-stdio.c transpiled/QOI.c -shared
 
+install-png2qoi: png2qoi$(EXEEXT)
+	install -D $< $(PREFIX)/bin/png2qoi$(EXEEXT)
+
 install-gimp: file-qoi$(EXEEXT)
 ifeq ($(OS),Windows_NT)
 	# gimptool-2.0 broken on mingw64
@@ -37,6 +41,15 @@ else ifneq ($(wildcard $(GIMP_MACOS_LIBDIR)),)
 else
 	gimptool-2.0 --install-admin-bin $<
 endif
+
+install-mime: qoi-mime.xml
+	install -D -m 644 $< $(PREFIX)/share/mime/packages/qoi-mime.xml
+ifndef BUILDING_PACKAGE
+	update-mime-database $(PREFIX)/share/mime
+endif
+
+install-thumbnailer: qoi.thumbnailer install-png2qoi install-mime
+	install -D -m 644 $< $(PREFIX)/share/thumbnailers/qoi.thumbnailer
 
 install-xnview: Xqoi.usr
 	$(SUDO) install -D -m 644 $< "$(XNVIEW_DIR)/Plugins/Xqoi.usr"
@@ -51,7 +64,7 @@ clean:
 deb:
 	debuild -b -us -uc
 
-.PHONY: all install-gimp install-xnview clean deb
+.PHONY: all install-png2qoi install-gimp install-mime install-thumbnailer install-xnview clean deb
 
 include macos/macos.mk
 include win32/win32.mk
