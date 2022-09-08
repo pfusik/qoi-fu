@@ -3,6 +3,7 @@ IMAGINE_DIR = $(LOCALAPPDATA)/Imagine
 IMAGINE32_DIR = $(LOCALAPPDATA)/Imagine32
 XNVIEW32_DIR = C:/Program Files (x86)/XnView
 CC32 = i686-w64-mingw32-gcc
+CXX32 = i686-w64-mingw32-g++
 CSC = "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/Roslyn/csc.exe" -nologo
 PAINT_NET_DIR = C:/Program Files/paint.net
 DOTNET_REF_DIR = `echo C:/Program\ Files/dotnet/packs/Microsoft.NETCore.App.Ref/6.0.*/ref/net6.0`
@@ -11,8 +12,14 @@ DO_SIGN = signtool sign -d "Quite OK Image plugins $(VERSION)" -n "Open Source D
 win32/wicqoi64.dll: win32/wicqoi.cpp win32/QOI.o
 	$(CXX) $(CXXFLAGS) -I transpiled -o $@ $^ -shared -lwindowscodecs -lole32
 
+win32/wicqoi32.dll: win32/wicqoi.cpp win32/QOI32.o
+	$(CXX32) $(CXXFLAGS) -I transpiled -o $@ $^ -shared -Wl,--kill-at -lwindowscodecs -lole32
+
 win32/QOI.o: transpiled/QOI.c
 	$(CC) $(CFLAGS) -c -o $@ $^
+
+win32/QOI32.o: transpiled/QOI.c
+	$(CC32) $(CFLAGS) -c -o $@ $^
 
 win32/QOI.plg64: win32/qoiimagine.c transpiled/QOI.c
 	$(CC) $(CFLAGS) -I . -I transpiled -o $@ $^ -shared
@@ -39,7 +46,7 @@ install-paint.net: win32/QOIPaintDotNet.dll
 	$(SUDO) cp $< "$(PAINT_NET_DIR)/FileTypes/QOIPaintDotNet.dll"
 
 ../qoi-ci-$(VERSION)-win64.msi: win32/setup/qoi-ci.wixobj win32/setup/qoi.ico win32/setup/license.rtf win32/setup/dialog.jpg win32/setup/banner.jpg \
-	file-qoi.exe win32/wicqoi64.dll win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr win32/signed
+	file-qoi.exe win32/wicqoi64.dll win32/wicqoi32.dll win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr win32/signed
 	light -nologo -o $@ -spdb -ext WixUIExtension -sice:ICE69 -sice:ICE80 $<
 
 win32/setup/qoi-ci.wixobj: win32/setup/qoi-ci.wxs
@@ -48,7 +55,7 @@ win32/setup/qoi-ci.wixobj: win32/setup/qoi-ci.wxs
 win32/setup/signed: ../qoi-ci-$(VERSION)-win64.msi
 	$(DO_SIGN)
 
-win32/signed: file-qoi.exe win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr
+win32/signed: win32/wicqoi64.dll win32/wicqoi32.dll file-qoi.exe win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr
 	$(DO_SIGN)
 
 deb64:
@@ -70,6 +77,6 @@ mac:
 	ssh mac 'security unlock-keychain ~/Library/Keychains/login.keychain && rm -rf qoi-ci-$(VERSION) && tar xf qoi-ci-$(VERSION).tar.gz && PATH=/usr/local/bin:$$PATH make -C qoi-ci-$(VERSION) macos/qoi-ci-$(VERSION)-macos.dmg'
 	scp mac:qoi-ci-$(VERSION)/macos/qoi-ci-$(VERSION)-macos.dmg ..
 
-CLEAN += win32/wicqoi64.dll win32/QOI.o win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll win32/setup/qoi-ci.wixobj win32/setup/signed win32/signed
+CLEAN += win32/wicqoi64.dll win32/wicqoi32.dll win32/QOI.o win32/QOI32.o win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll win32/setup/qoi-ci.wixobj win32/setup/signed win32/signed
 
 .PHONY: install-imagine install-imagine32 install-xnview32 install-paint.net deb64 rpm64 mac
