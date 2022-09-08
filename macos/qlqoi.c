@@ -164,7 +164,7 @@ void *QuickLookGeneratorPluginFactory(CFAllocatorRef allocator, CFUUIDRef typeID
 		Plugin *plugin = (Plugin *) malloc(sizeof(Plugin));
 		plugin->vtbl = &pluginVtbl;
 		plugin->refCount = 1;
-		plugin->factoryID = CFUUIDCreateFromString(allocator, CFSTR("EBD90849-B1FC-4285-850B-76BD57E5C97F"));
+		plugin->factoryID = CFUUIDCreateFromString(kCFAllocatorDefault, CFSTR("EBD90849-B1FC-4285-850B-76BD57E5C97F"));
 		CFPlugInAddInstanceForFactory(plugin->factoryID);
 		return plugin;
 	}
