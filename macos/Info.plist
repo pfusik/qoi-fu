@@ -19,7 +19,7 @@
 		<key>CFBundleIconFile</key>
 		<string/>
 		<key>CFBundleIdentifier</key>
-		<string>qoi-ci</string>
+		<string>foxoft.qoi-ci</string>
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
