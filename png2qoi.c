@@ -34,11 +34,16 @@
 static void usage(void)
 {
 	puts(
-		"Usage: png2qoi INPUTFILE...\n"
-		"INPUTFILE must be in PNG or QOI format");
+		"Usage: png2qoi [OPTIONS] INPUTFILE...\n"
+		"INPUTFILE must be in PNG or QOI format.\n"
+		"Options:\n"
+		"-o FILE  --output=FILE   Set output file name\n"
+		"-h       --help          Display this information\n"
+		"-v       --version       Display version information"
+	);
 }
 
-static bool png2qoi(const char *input_file, FILE *f)
+static bool png2qoi(const char *input_file, FILE *f, const char *output_file)
 {
 	if (fseek(f, 0, SEEK_SET) != 0) {
 		perror(input_file);
@@ -68,12 +73,6 @@ static bool png2qoi(const char *input_file, FILE *f)
 	}
 	fclose(f);
 
-	char output_file[FILENAME_MAX];
-	if (snprintf(output_file, sizeof(output_file), "%s.qoi", input_file) >= sizeof(output_file)) {
-		fprintf(stderr, "png2qoi: %s: filename too long\n", input_file);
-		return false;
-	}
-
 	QOIEncoder *qoi = QOIEncoder_New();
 	if (!QOIEncoder_Encode(qoi, png.width, png.height, pixels, alpha, false)) {
 		QOIEncoder_Delete(qoi);
@@ -92,17 +91,11 @@ static bool png2qoi(const char *input_file, FILE *f)
 	return true;
 }
 
-static bool qoi2png(const char *input_file, FILE *f)
+static bool qoi2png(const char *input_file, FILE *f, const char *output_file)
 {
 	QOIDecoder *qoi = QOIDecoder_LoadStdio(f);
 	if (qoi == NULL) {
 		fprintf(stderr, "png2qoi: %s: error loading\n", input_file);
-		return false;
-	}
-
-	char output_file[FILENAME_MAX];
-	if (snprintf(output_file, sizeof(output_file), "%s.png", input_file) >= sizeof(output_file)) {
-		fprintf(stderr, "png2qoi: %s: filename too long\n", input_file);
 		return false;
 	}
 
@@ -120,7 +113,7 @@ static bool qoi2png(const char *input_file, FILE *f)
 	return true;
 }
 
-static bool process_file(const char *input_file)
+static bool process_file(const char *input_file, const char *output_file)
 {
 	FILE *f = fopen(input_file, "rb");
 	if (f == NULL) {
@@ -134,10 +127,21 @@ static bool process_file(const char *input_file)
 		return false;
 	}
 
+	char default_output_file[FILENAME_MAX];
+	if (output_file == NULL) {
+		const char *ext = png_check_sig(magic, sizeof(magic)) ? "qoi" : "png";
+		if (snprintf(default_output_file, sizeof(default_output_file), "%s.%s", input_file, ext) >= sizeof(default_output_file)) {
+			fclose(f);
+			fprintf(stderr, "png2qoi: %s: filename too long\n", input_file);
+			return false;
+		}
+		output_file = default_output_file;
+	}
+
 	if (png_check_sig(magic, sizeof(magic)))
-		return png2qoi(input_file, f);
+		return png2qoi(input_file, f, output_file);
 	if (memcmp(magic, "qoif", 4) == 0)
-		return qoi2png(input_file, f);
+		return qoi2png(input_file, f, output_file);
 
 	fclose(f);
 	fprintf(stderr, "png2qoi: %s: unrecognized file format\n", input_file);
@@ -150,13 +154,22 @@ int main(int argc, char **argv)
 		usage();
 		return 1;
 	}
+	const char *output_file = NULL;
 	bool ok = true;
 	for (int i = 1; i < argc; i++) {
 		const char *arg = argv[i];
-		if (arg[0] != '-')
-			ok &= process_file(arg);
-		else if (strcmp(arg, "--help") == 0)
+		if (arg[0] != '-') {
+			ok &= process_file(arg, output_file);
+			output_file = NULL;
+		}
+		else if (arg[1] == 'o' && arg[2] == '\0' && i + 1 < argc)
+			output_file = argv[++i];
+		else if (strncmp(arg, "--output=", 9) == 0)
+			output_file = arg + 9;
+		else if ((arg[1] == 'h' && arg[2] == '\0') || strcmp(arg, "--help") == 0)
 			usage();
+		else if ((arg[1] == 'v' && arg[2] == '\0') || strcmp(arg, "--version") == 0)
+			puts("png2qoi 1.2.0");
 		else {
 			fprintf(stderr, "png2qoi: unknown option: %s\n", arg);
 			return 1;
