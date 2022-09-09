@@ -94,6 +94,7 @@ static bool png2qoi(const char *input_file, FILE *f, const char *output_file)
 static bool qoi2png(const char *input_file, FILE *f, const char *output_file)
 {
 	QOIDecoder *qoi = QOIDecoder_LoadStdio(f);
+	fclose(f);
 	if (qoi == NULL) {
 		fprintf(stderr, "png2qoi: %s: error loading\n", input_file);
 		return false;

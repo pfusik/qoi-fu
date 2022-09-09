@@ -1,6 +1,6 @@
 // qoi-stdio.c - QOI format I/O using stdio.h
 //
-// Copyright (C) 2021 Piotr Fusik
+// Copyright (C) 2021-2022 Piotr Fusik
 //
 // MIT License:
 //
@@ -31,15 +31,17 @@
 bool QOIEncoder_SaveStdio(const QOIEncoder *qoi, FILE *f)
 {
 	int size = QOIEncoder_GetEncodedSize(qoi);
-	size_t writeResult = fwrite(QOIEncoder_GetEncoded(qoi), 1, size, f);
-	int closeResult = fclose(f);
-	return writeResult == size && closeResult == 0;
+	return fwrite(QOIEncoder_GetEncoded(qoi), 1, size, f) == size;
 }
 
 bool QOIEncoder_SaveFile(const QOIEncoder *qoi, const char *filename)
 {
 	FILE *f = fopen(filename, "wb");
-	return f != NULL && QOIEncoder_SaveStdio(qoi, f);
+	if (f == NULL)
+		return false;
+	bool saveResult = QOIEncoder_SaveStdio(qoi, f);
+	int closeResult = fclose(f);
+	return saveResult && closeResult == 0;
 }
 
 QOIDecoder *QOIDecoder_LoadStdio(FILE *f)
@@ -47,21 +49,13 @@ QOIDecoder *QOIDecoder_LoadStdio(FILE *f)
 	long encoded_size;
 	if (fseek(f, 0, SEEK_END) != 0
 	 || (encoded_size = ftell(f)) < 0
-	 || fseek(f, 0, SEEK_SET) != 0) {
-		fclose(f);
+	 || fseek(f, 0, SEEK_SET) != 0
+	 || encoded_size > INT_MAX)
 		return NULL;
-	}
-	if (encoded_size > INT_MAX) {
-		fclose(f);
-		return NULL;
-	}
 	void *encoded = malloc(encoded_size);
 	if (encoded == NULL
-	 || fread(encoded, 1, encoded_size, f) != encoded_size) {
-		fclose(f);
+	 || fread(encoded, 1, encoded_size, f) != encoded_size)
 		return NULL;
-	}
-	fclose(f);
 
 	QOIDecoder *qoi = QOIDecoder_New();
 	if (!QOIDecoder_Decode(qoi, (const uint8_t *) encoded, (int) encoded_size)) {
@@ -78,5 +72,7 @@ QOIDecoder *QOIDecoder_LoadFile(const char *filename)
 	FILE *f = fopen(filename, "rb");
 	if (f == NULL)
 		return NULL;
-	return QOIDecoder_LoadStdio(f);
+	QOIDecoder *qoi = QOIDecoder_LoadStdio(f);
+	fclose(f);
+	return qoi;
 }

@@ -205,9 +205,8 @@ DLL_EXPORT void API gfpSavePictureExit(void *ptr)
 	QOIEncoder *qoi = QOIEncoder_New();
 	if (QOIEncoder_Encode(qoi, w->width, w->height, w->pixels, w->alpha, false))
 		QOIEncoder_SaveStdio(qoi, w->f);
-	else
-		fclose(w->f);
 	QOIEncoder_Delete(qoi);
+	fclose(w->f);
 	free(w);
 }
 
