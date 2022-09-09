@@ -33,6 +33,9 @@ Xqoi.usr: Xqoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 install-png2qoi: png2qoi$(EXEEXT)
 	install -D $< $(PREFIX)/bin/png2qoi$(EXEEXT)
 
+install-pixbuf: libpixbufloader-qoi.so install-mime
+	install -m 644 $< `pkg-config --variable=gdk_pixbuf_moduledir gdk-pixbuf-2.0`/libpixbufloader-qoi.so
+
 install-gimp: file-qoi$(EXEEXT)
 ifeq ($(OS),Windows_NT)
 	# gimptool-2.0 broken on mingw64
@@ -67,7 +70,7 @@ clean:
 deb:
 	debuild -b -us -uc
 
-.PHONY: all install-png2qoi install-gimp install-mime install-thumbnailer install-xnview clean deb
+.PHONY: all install-png2qoi install-pixbuf install-gimp install-mime install-thumbnailer install-xnview clean deb
 
 include macos/macos.mk
 include win32/win32.mk
