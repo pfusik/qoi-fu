@@ -3,3 +3,4 @@ file-qoi
 Xqoi.usr
 *.dll
 *.exe
+*.so

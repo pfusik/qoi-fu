@@ -21,6 +21,9 @@ all: png2qoi$(EXEEXT) Xqoi.usr $(TRANSPILED)
 png2qoi$(EXEEXT): png2qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 	$(CC) $(CFLAGS) -I transpiled -o $@ png2qoi.c QOI-stdio.c transpiled/QOI.c -lpng
 
+libpixbufloader-qoi.so: io-qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
+	$(CC) $(CFLAGS) `pkg-config --cflags gdk-pixbuf-2.0` -I transpiled -o $@ io-qoi.c QOI-stdio.c transpiled/QOI.c -fvisibility=hidden -shared -lgdk_pixbuf-2.0 -lglib-2.0
+
 file-qoi$(EXEEXT): file-qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 	$(CC) $(CFLAGS) -I transpiled `gimptool-2.0 --cflags` -o $@ file-qoi.c QOI-stdio.c transpiled/QOI.c $(GIMP_LDFLAGS)
 
@@ -57,7 +60,7 @@ install-xnview: Xqoi.usr
 $(TRANSPILED): QOI.ci
 	mkdir -p $(@D) && cito -o $@ $^
 
-CLEAN = png2qoi$(EXEEXT) file-qoi$(EXEEXT) Xqoi.usr $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIEncoder.java
+CLEAN = png2qoi$(EXEEXT) libpixbufloader-qoi.so file-qoi$(EXEEXT) Xqoi.usr $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIEncoder.java
 clean:
 	$(RM) $(CLEAN)
 
