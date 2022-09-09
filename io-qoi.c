@@ -29,12 +29,22 @@
 
 static void error_memory(GError **error)
 {
-	g_set_error_literal(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY, "Not enough memory to load file");
+	g_set_error_literal(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_INSUFFICIENT_MEMORY, "Out of memory");
 }
 
-static void error_format(GError **error)
+static void error_decode(GError **error)
 {
-	g_set_error_literal(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_UNKNOWN_TYPE, "Error decoding file");
+	g_set_error_literal(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_UNKNOWN_TYPE, "Error decoding QOI file");
+}
+
+static void error_encode(GError **error)
+{
+	g_set_error_literal(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_UNSUPPORTED_OPERATION, "Cannot encode to QOI");
+}
+
+static void error_write(GError **error)
+{
+	g_set_error_literal(error, GDK_PIXBUF_ERROR, GDK_PIXBUF_ERROR_FAILED, "Error writing file");
 }
 
 static GdkPixbuf *to_pixbuf(QOIDecoder *qoi, GError **error)
@@ -71,7 +81,7 @@ static GdkPixbuf *load(FILE *f, GError **error)
 {
 	QOIDecoder *qoi = QOIDecoder_LoadStdio(f);
 	if (qoi == NULL) {
-		error_format(error);
+		error_decode(error);
 		return NULL;
 	}
 	return to_pixbuf(qoi, error);
@@ -124,7 +134,7 @@ static gboolean stop_load(gpointer data, GError **error)
 		QOIDecoder_Delete(qoi);
 		free(context->content);
 		free(context);
-		error_format(error);
+		error_decode(error);
 		return FALSE;
 	}
 	free(context->content);
@@ -156,7 +166,7 @@ static gboolean load_increment(gpointer data, const guchar *buf, guint size, GEr
 	size_t new_len = (size_t) context->content_len + size;
 	if (new_len > INT_MAX) {
 		context->failed = true;
-		error_format(error);
+		error_decode(error);
 		return FALSE;
 	}
 	context->content = realloc(context->content, new_len);
@@ -170,12 +180,86 @@ static gboolean load_increment(gpointer data, const guchar *buf, guint size, GEr
 	return TRUE;
 }
 
+static QOIEncoder *to_qoi(const GdkPixbuf *pixbuf, GError **error)
+{
+	bool alpha = gdk_pixbuf_get_has_alpha(pixbuf);
+	int width = gdk_pixbuf_get_width(pixbuf);
+	int height = gdk_pixbuf_get_height(pixbuf);
+	if (gdk_pixbuf_get_colorspace(pixbuf) != GDK_COLORSPACE_RGB
+	 || gdk_pixbuf_get_bits_per_sample(pixbuf) != 8
+	 || !QOIEncoder_CanEncode(width, height, alpha)) {
+		error_encode(error);
+		return NULL;
+	}
+
+	int *qoi_pixels = malloc((size_t) width * height * sizeof(int));
+	if (qoi_pixels == NULL) {
+		error_memory(error);
+		return NULL;
+	}
+	const guint8 *pixbuf_pixels = gdk_pixbuf_read_pixels(pixbuf);
+	int pixbuf_stride = gdk_pixbuf_get_rowstride(pixbuf);
+	for (int y = 0; y < height; y++) {
+		const guint8 *src = pixbuf_pixels + y * pixbuf_stride;
+		for (int x = 0; x < width; x++) {
+			int rgb = src[0] << 16 | src[1] << 8 | src[2];
+			src += 3;
+			qoi_pixels[y * width + x] = (alpha ? *src++ : 0xff) << 24 | rgb;
+		}
+	}
+
+	QOIEncoder *qoi = QOIEncoder_New();
+	if (qoi == NULL) {
+		free(qoi_pixels);
+		error_memory(error);
+		return NULL;
+	}
+	if (!QOIEncoder_Encode(qoi, width, height, qoi_pixels, alpha, false)) {
+		QOIEncoder_Delete(qoi);
+		free(qoi_pixels);
+		error_encode(error);
+		return NULL;
+	}
+	free(qoi_pixels);
+	return qoi;
+}
+
+static gboolean save(FILE *f, GdkPixbuf *pixbuf, gchar **param_keys, gchar **param_values, GError **error)
+{
+	QOIEncoder *qoi = to_qoi(pixbuf, error);
+	if (qoi == NULL)
+		return FALSE;
+	if (!QOIEncoder_SaveStdio(qoi, f)) {
+		QOIEncoder_Delete(qoi);
+		error_write(error);
+		return FALSE;
+	}
+	QOIEncoder_Delete(qoi);
+	return TRUE;
+}
+
+static gboolean save_to_callback(GdkPixbufSaveFunc save_func, gpointer user_data, GdkPixbuf *pixbuf, gchar **option_keys, gchar **option_values, GError **error)
+{
+	QOIEncoder *qoi = to_qoi(pixbuf, error);
+	if (qoi == NULL)
+		return FALSE;
+	if (!save_func((const gchar *) QOIEncoder_GetEncoded(qoi), QOIEncoder_GetEncodedSize(qoi), error, user_data)) {
+		QOIEncoder_Delete(qoi);
+		error_write(error);
+		return FALSE;
+	}
+	QOIEncoder_Delete(qoi);
+	return TRUE;
+}
+
 G_MODULE_EXPORT void fill_vtable(GdkPixbufModule *module)
 {
 	module->load = load;
 	module->begin_load = begin_load;
 	module->stop_load = stop_load;
 	module->load_increment = load_increment;
+	module->save = save;
+	module->save_to_callback = save_to_callback;
 }
 
 G_MODULE_EXPORT void fill_info(GdkPixbufFormat *info)
@@ -188,6 +272,6 @@ G_MODULE_EXPORT void fill_info(GdkPixbufFormat *info)
 	info->description = "QOI image";
 	info->mime_types = mime_types;
 	info->extensions = extensions;
-	info->flags = GDK_PIXBUF_FORMAT_THREADSAFE;
+	info->flags = GDK_PIXBUF_FORMAT_WRITABLE | GDK_PIXBUF_FORMAT_THREADSAFE;
 	info->license = "MIT";
 }
