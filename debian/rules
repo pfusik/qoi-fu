@@ -6,4 +6,4 @@
 override_dh_auto_clean:
 
 override_dh_auto_install:
-	$(MAKE) PREFIX=$$(pwd)/debian/tmp/usr libdir=$$(pwd)/debian/tmp/usr/lib XNVIEW_DIR=$$(pwd)/debian/tmp/opt/XnView BUILDING_PACKAGE=1 install-thumbnailer install-gimp install-xnview
+	$(MAKE) PREFIX=$$(pwd)/debian/tmp/usr GDK_PIXBUF_LOADERS_DIR=$$(pwd)/debian/tmp/usr/lib/$(DEB_HOST_GNU_TYPE)/gdk-pixbuf-2.0/2.10.0/loaders libdir=$$(pwd)/debian/tmp/usr/lib XNVIEW_DIR=$$(pwd)/debian/tmp/opt/XnView BUILDING_PACKAGE=1 install-png2qoi install-gdk-pixbuf install-gimp install-xnview

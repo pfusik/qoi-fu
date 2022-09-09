@@ -63,17 +63,17 @@ deb64:
 	scp ../qoi-ci-$(VERSION).tar.gz vm:qoi-ci-$(VERSION).tar
 	ssh vm 'rm -rf qoi-ci-$(VERSION) && tar xf qoi-ci-$(VERSION).tar && make -C qoi-ci-$(VERSION) deb'
 	scp vm:qoi-ci-2png_$(VERSION)-1_amd64.deb ..
+	scp vm:qoi-ci-gdk-pixbuf_$(VERSION)-1_amd64.deb ..
 	scp vm:qoi-ci-gimp_$(VERSION)-1_amd64.deb ..
 	scp vm:qoi-ci-xnview_$(VERSION)-1_amd64.deb ..
-	scp vm:qoi-ci-thumbnailer_$(VERSION)-1_all.deb ..
 
 rpm64:
 	/usr/bin/tar czf ../qoi-ci-$(VERSION).tar.gz --numeric-owner --owner=0 --group=0 --mode=644 --transform=s,,qoi-ci-$(VERSION)/, `git ls-files`
 	scp ../qoi-ci-$(VERSION).tar.gz vm:.
 	ssh vm 'rpmbuild -tb qoi-ci-$(VERSION).tar.gz'
 	scp vm:rpmbuild/RPMS/x86_64/qoi-ci-2png-$(VERSION)-1.x86_64.rpm ..
+	scp vm:rpmbuild/RPMS/x86_64/qoi-ci-gdk-pixbuf-$(VERSION)-1.x86_64.rpm ..
 	scp vm:rpmbuild/RPMS/x86_64/qoi-ci-gimp-$(VERSION)-1.x86_64.rpm ..
-	scp vm:rpmbuild/RPMS/noarch/qoi-ci-thumbnailer-$(VERSION)-1.noarch.rpm ..
 
 mac:
 	/usr/bin/tar czf ../qoi-ci-$(VERSION).tar.gz --numeric-owner --owner=0 --group=0 --mode=644 --transform=s,,qoi-ci-$(VERSION)/, `git ls-files`

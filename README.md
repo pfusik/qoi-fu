@@ -7,8 +7,8 @@ See the [transpiled](transpiled) directory for these translations.
 
 Included are plugins for:
 - Windows Explorer
-- Quick Look - macOS
-- GNOME Files - Linux
+- Finder - macOS
+- GNOME - Linux
 - [GIMP](https://www.gimp.org) - Windows/macOS/Linux
 - [Imagine](http://www.nyam.pe.kr/dev/imagine/) - Windows
 - [Paint.NET](https://www.getpaint.net) - Windows
