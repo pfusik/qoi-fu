@@ -164,6 +164,14 @@
 			<Directory Id="ProgramFiles64Folder">
 
 				<Directory Id="QOI.DIR" Name="qoi-ci">
+					<Component Id="png2qoi.exe">
+						<File Source="png2qoi.exe" Checksum="yes" KeyPath="yes" />
+					</Component>
+					<Component Id="path" Guid="053F1EB2-D163-4236-A1C9-C112C029CDCB">
+						<Environment Id="path" Action="set" Name="Path" Part="last" Permanent="no" System="yes" Value="[QOI.DIR]" />
+						<CreateFolder />
+					</Component>
+
 					<Component Id="wicqoi64.dll">
 						<File Source="win32/wicqoi64.dll" Checksum="yes" KeyPath="yes">
 							<Class Id="{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Context="InprocServer32" Description="WIC QOI Decoder (64-bit)" ThreadingModel="both" />
@@ -274,6 +282,12 @@
 		<Feature Id="xnview" Title="XnView Classic plugin" Level="9" ConfigurableDirectory="XNVIEWPLUG.DIR" Description="Plugin for XnView Classic." AllowAdvertise="no">
 			<Condition Level="1">XNVIEW.DIR</Condition>
 			<ComponentRef Id="Xqoi32.usr" />
+		</Feature>
+		<Feature Id="png2qoi" Title="png2qoi" Level="1" ConfigurableDirectory="QOI.DIR" Description="Command-line converter between PNG and QOI formats." AllowAdvertise="no">
+			<ComponentRef Id="png2qoi.exe" />
+			<Feature Id="path" Title="Add to Path" Level="1" Description="Add the directory to the Path environment variable so that you don't have to type the location of png2qoi at the command prompt." AllowAdvertise="no">
+				<ComponentRef Id="path" />
+			</Feature>
 		</Feature>
 	</Product>
 </Wix>
