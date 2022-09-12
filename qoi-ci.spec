@@ -22,6 +22,7 @@ and PNG formats.
 
 %package gdk-pixbuf
 Summary: GdkPixbuf loader for QOI image files
+BuildRequires: gdk-pixbuf2-devel
 
 %description gdk-pixbuf
 GdkPixbuf loader for the Quite OK Image (QOI) format.

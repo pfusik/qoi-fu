@@ -3,7 +3,7 @@ Maintainer: Piotr Fusik <fox@scene.pl>
 Section: graphics
 Priority: optional
 Standards-Version: 4.6.0
-Build-Depends: debhelper (>= 7), gcc, libgdk-pixbuf-2.0-dev, libgimp2.0-dev
+Build-Depends: debhelper (>= 7), gcc, libpng-dev, libgdk-pixbuf-2.0-dev, libgimp2.0-dev
 
 Package: qoi-ci-2png
 Architecture: any
