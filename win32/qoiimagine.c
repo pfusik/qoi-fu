@@ -191,7 +191,7 @@ __declspec(dllexport) BOOL IMAGINEAPI ImaginePluginGetInfoW(IMAGINEPLUGININFOW *
 	static const IMAGINEPLUGININFOW pluginInfoW = {
 		sizeof(pluginInfoW),
 		registerProcW,
-		0x01010200,
+		0x02000000,
 		L"QOI Plugin",
 		IMAGINEPLUGININTERFACE_VERSION
 	};

@@ -1,4 +1,4 @@
-VERSION = 1.1.2
+VERSION = 2.0.0
 
 PREFIX = /usr/local
 CFLAGS = -O2 -Wall

@@ -1,3 +1,10 @@
+qoi-ci (2.0.0-1) UNRELEASED; urgency=low
+
+  * New release.
+  * Added 2png and gdk-pixbuf subpackages.
+
+ -- Piotr Fusik <fox@scene.pl>  Mon, 12 Sep 2022 10:27:01 +0200
+
 qoi-ci (1.1.2-1) UNRELEASED; urgency=low
 
   * New release.

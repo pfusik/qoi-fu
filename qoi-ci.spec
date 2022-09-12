@@ -1,5 +1,5 @@
 Name: qoi-ci
-Version: 1.1.2
+Version: 2.0.0
 Release: 1
 Summary: Quite OK Image (QOI) encoder/decoder
 License: MIT
@@ -65,6 +65,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/gimp/2.0/plug-ins/file-qoi/file-qoi
 
 %changelog
+* Mon Sep 12 2022 Piotr Fusik <fox@scene.pl>
+- 2.0.0-1
+
 * Wed Aug 3 2022 Piotr Fusik <fox@scene.pl>
 - 1.1.2-1
 
