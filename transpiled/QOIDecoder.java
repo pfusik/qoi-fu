@@ -33,7 +33,7 @@ public class QOIDecoder
 		int height = (encoded[8] & 0xff) << 24 | (encoded[9] & 0xff) << 16 | (encoded[10] & 0xff) << 8 | encoded[11] & 0xff;
 		if (width <= 0 || height <= 0 || height > 2147483647 / width)
 			return false;
-		switch (encoded[12] & 0xff) {
+		switch (encoded[12]) {
 		case 3:
 			this.alpha = false;
 			break;
@@ -43,7 +43,7 @@ public class QOIDecoder
 		default:
 			return false;
 		}
-		switch (encoded[13] & 0xff) {
+		switch (encoded[13]) {
 		case 0:
 			this.linearColorspace = false;
 			break;
