@@ -248,6 +248,7 @@ public class QOIDecoder
 	public bool HasAlpha() => this.Alpha;
 
 	/// <summary>Returns the color space information from the file header.</summary>
-	/// <remarks><see langword="false" /> = sRGB with linear alpha channel.<see langword="true" /> = all channels linear.</remarks>
+	/// <remarks><see langword="false" /> = sRGB with linear alpha channel.
+	/// <see langword="true" /> = all channels linear.</remarks>
 	public bool IsLinearColorspace() => this.LinearColorspace;
 }

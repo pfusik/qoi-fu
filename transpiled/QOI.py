@@ -233,5 +233,6 @@ class QOIDecoder:
 	def is_linear_colorspace(self):
 		"""Returns the color space information from the file header.
 
-		`false` = sRGB with linear alpha channel.`true` = all channels linear."""
+		`false` = sRGB with linear alpha channel.
+		`true` = all channels linear."""
 		return self._linear_colorspace

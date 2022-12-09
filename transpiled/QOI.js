@@ -290,7 +290,8 @@ class QOIDecoder
 
 	/**
 	 * Returns the color space information from the file header.
-	 * <code>false</code> = sRGB with linear alpha channel.<code>true</code> = all channels linear.
+	 * <code>false</code> = sRGB with linear alpha channel.
+	 * <code>true</code> = all channels linear.
 	 */
 	isLinearColorspace()
 	{

@@ -292,7 +292,8 @@ public class QOIDecoder
 	}
 
 	/// Returns the color space information from the file header.
-	/// `false` = sRGB with linear alpha channel.`true` = all channels linear.
+	/// `false` = sRGB with linear alpha channel.
+	/// `true` = all channels linear.
 	public func isLinearColorspace() -> Bool
 	{
 		return self.linearColorspace

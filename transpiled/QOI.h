@@ -85,7 +85,8 @@ bool QOIDecoder_HasAlpha(const QOIDecoder *self);
 
 /**
  * Returns the color space information from the file header.
- * <code>false</code> = sRGB with linear alpha channel.<code>true</code> = all channels linear.
+ * <code>false</code> = sRGB with linear alpha channel.
+ * <code>true</code> = all channels linear.
  * @param self This <code>QOIDecoder</code>.
  */
 bool QOIDecoder_IsLinearColorspace(const QOIDecoder *self);
