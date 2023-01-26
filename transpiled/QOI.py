@@ -153,18 +153,20 @@ class QOIDecoder:
 		height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11]
 		if width <= 0 or height <= 0 or height > int(2147483647 / width):
 			return False
-		if encoded[12] == 3:
-			self._alpha = False
-		elif encoded[12] == 4:
-			self._alpha = True
-		else:
-			return False
-		if encoded[13] == 0:
-			self._linear_colorspace = False
-		elif encoded[13] == 1:
-			self._linear_colorspace = True
-		else:
-			return False
+		match encoded[12]:
+			case 3:
+				self._alpha = False
+			case 4:
+				self._alpha = True
+			case _:
+				return False
+		match encoded[13]:
+			case 0:
+				self._linear_colorspace = False
+			case 1:
+				self._linear_colorspace = True
+			case _:
+				return False
 		pixels_size = width * height
 		pixels = array.array("i", [ 0 ]) * pixels_size
 		encoded_size -= 8
@@ -177,32 +179,32 @@ class QOIDecoder:
 				return False
 			e = encoded[encoded_offset]
 			encoded_offset += 1
-			ci_switch_tmp = e >> 6
-			if ci_switch_tmp == 0:
-				pixels[pixels_offset] = pixel = index[e]
-				pixels_offset += 1
-				continue
-			elif ci_switch_tmp == 1:
-				pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 4 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255)
-			elif ci_switch_tmp == 2:
-				e -= 160
-				rb = encoded[encoded_offset]
-				encoded_offset += 1
-				pixel = (pixel & -16777216) | ((pixel + ((e + (rb >> 4) - 8) << 16)) & 16711680) | ((pixel + (e << 8)) & 65280) | ((pixel + e + (rb & 15) - 8) & 255)
-			else:
-				if e < 254:
-					e -= 191
-					if pixels_offset + e > pixels_size:
-						return False
-					pixels[pixels_offset:pixels_offset + e] = array.array("i", [ pixel ]) * e
-					pixels_offset += e
+			match e >> 6:
+				case 0:
+					pixels[pixels_offset] = pixel = index[e]
+					pixels_offset += 1
 					continue
-				if e == 254:
-					pixel = (pixel & -16777216) | encoded[encoded_offset] << 16 | encoded[encoded_offset + 1] << 8 | encoded[encoded_offset + 2]
-					encoded_offset += 3
-				else:
-					pixel = encoded[encoded_offset + 3] << 24 | encoded[encoded_offset] << 16 | encoded[encoded_offset + 1] << 8 | encoded[encoded_offset + 2]
-					encoded_offset += 4
+				case 1:
+					pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 4 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255)
+				case 2:
+					e -= 160
+					rb = encoded[encoded_offset]
+					encoded_offset += 1
+					pixel = (pixel & -16777216) | ((pixel + ((e + (rb >> 4) - 8) << 16)) & 16711680) | ((pixel + (e << 8)) & 65280) | ((pixel + e + (rb & 15) - 8) & 255)
+				case _:
+					if e < 254:
+						e -= 191
+						if pixels_offset + e > pixels_size:
+							return False
+						pixels[pixels_offset:pixels_offset + e] = array.array("i", [ pixel ]) * e
+						pixels_offset += e
+						continue
+					if e == 254:
+						pixel = (pixel & -16777216) | encoded[encoded_offset] << 16 | encoded[encoded_offset + 1] << 8 | encoded[encoded_offset + 2]
+						encoded_offset += 3
+					else:
+						pixel = encoded[encoded_offset + 3] << 24 | encoded[encoded_offset] << 16 | encoded[encoded_offset + 1] << 8 | encoded[encoded_offset + 2]
+						encoded_offset += 4
 			pixels[pixels_offset] = index[((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63] = pixel
 			pixels_offset += 1
 		if encoded_offset != encoded_size:

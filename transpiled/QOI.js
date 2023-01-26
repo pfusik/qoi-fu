@@ -1,12 +1,10 @@
 // Generated automatically with "cito". Do not edit.
 
-"use strict";
-
 /**
  * Encoder of the "Quite OK Image" (QOI) format.
  * Losslessly compresses an image to a byte array.
  */
-class QOIEncoder
+export class QOIEncoder
 {
 	/**
 	 * Constructs the encoder.
@@ -155,7 +153,7 @@ class QOIEncoder
 /**
  * Decoder of the "Quite OK Image" (QOI) format.
  */
-class QOIDecoder
+export class QOIDecoder
 {
 	/**
 	 * Constructs the decoder.

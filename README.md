@@ -19,4 +19,4 @@ License
 
 This code is licensed under the standard MIT license.
 
-Copyright (C) 2021-2022 Piotr Fusik
+Copyright (C) 2021-2023 Piotr Fusik
