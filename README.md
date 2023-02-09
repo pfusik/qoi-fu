@@ -2,7 +2,7 @@
 the ["Quite OK Image" (QOI)](https://github.com/phoboslab/qoi) format
 in the [Ć programming language](https://github.com/pfusik/cito).
 Ć can be automatically translated to pure C, C++, C#, Java, JavaScript,
-Python and Swift with no additional dependencies.
+Python, Swift and TypeScript with no additional dependencies.
 See the [transpiled](transpiled) directory for these translations.
 
 Included are plugins for:

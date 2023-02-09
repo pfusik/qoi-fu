@@ -15,7 +15,7 @@ GIMP_LDFLAGS = -mmacosx-version-min=10.9 -rpath @executable_path/../../../ -L $(
 else
 XNVIEW_DIR = /opt/XnView
 endif
-TRANSPILED = $(addprefix transpiled/QOI., c cpp cs js py swift) transpiled/QOIDecoder.java
+TRANSPILED = $(addprefix transpiled/QOI., c cpp cs js py swift ts) transpiled/QOIDecoder.java
 
 all: png2qoi$(EXEEXT) Xqoi.usr $(TRANSPILED)
 
