@@ -27,7 +27,7 @@ public class QOIDecoder
 	 */
 	public final boolean decode(byte[] encoded, int encodedSize)
 	{
-		if (encoded == null || encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
+		if (encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
 			return false;
 		int width = (encoded[4] & 0xff) << 24 | (encoded[5] & 0xff) << 16 | (encoded[6] & 0xff) << 8 | encoded[7] & 0xff;
 		int height = (encoded[8] & 0xff) << 24 | (encoded[9] & 0xff) << 16 | (encoded[10] & 0xff) << 8 | encoded[11] & 0xff;

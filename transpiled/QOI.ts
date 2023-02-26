@@ -40,12 +40,12 @@ export class QOIEncoder
 	 * @param alpha <code>false</code> specifies that all pixels are opaque. High bytes of <code>pixels</code> elements are ignored then.
 	 * @param linearColorspace Specifies the color space.
 	 */
-	public encode(width: number, height: number, pixels: Readonly<Int32Array> | null, alpha: boolean, linearColorspace: boolean): boolean
+	public encode(width: number, height: number, pixels: Readonly<Int32Array>, alpha: boolean, linearColorspace: boolean): boolean
 	{
-		if (pixels == null || !QOIEncoder.canEncode(width, height, alpha))
+		if (!QOIEncoder.canEncode(width, height, alpha))
 			return false;
 		let pixelsSize: number = width * height;
-		let encoded: Uint8Array | null = new Uint8Array(14 + pixelsSize * (alpha ? 5 : 4) + 8);
+		let encoded: Uint8Array = new Uint8Array(14 + pixelsSize * (alpha ? 5 : 4) + 8);
 		encoded[0] = 113;
 		encoded[1] = 111;
 		encoded[2] = 105;
@@ -136,7 +136,7 @@ export class QOIEncoder
 	 * The allocated array is usually larger than the encoded data.
 	 * Call <code>GetEncodedSize</code> to retrieve the number of leading bytes that are significant.
 	 */
-	public getEncoded(): Readonly<Uint8Array> | null
+	public getEncoded(): Readonly<Uint8Array>
 	{
 		return this.encoded;
 	}
@@ -174,9 +174,9 @@ export class QOIDecoder
 	 * @param encoded QOI file contents. Only the first <code>encodedSize</code> bytes are accessed.
 	 * @param encodedSize QOI file length.
 	 */
-	public decode(encoded: Readonly<Uint8Array> | null, encodedSize: number): boolean
+	public decode(encoded: Readonly<Uint8Array>, encodedSize: number): boolean
 	{
-		if (encoded == null || encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
+		if (encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
 			return false;
 		let width: number = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];
 		let height: number = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];
@@ -203,7 +203,7 @@ export class QOIDecoder
 			return false;
 		}
 		let pixelsSize: number = width * height;
-		let pixels: Int32Array | null = new Int32Array(pixelsSize);
+		let pixels: Int32Array = new Int32Array(pixelsSize);
 		encodedSize -= 8;
 		let encodedOffset: number = 14;
 		const index: Int32Array = new Int32Array(64);
@@ -273,7 +273,7 @@ export class QOIDecoder
 	 * Returns the pixels of the decoded image, top-down, left-to-right.
 	 * Each pixel is a 32-bit integer 0xAARRGGBB.
 	 */
-	public getPixels(): Readonly<Int32Array> | null
+	public getPixels(): Readonly<Int32Array>
 	{
 		return this.pixels;
 	}

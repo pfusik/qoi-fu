@@ -36,7 +36,7 @@ class QOIEncoder:
 		:param alpha: `false` specifies that all pixels are opaque. High bytes of `pixels` elements are ignored then.
 		:param linear_colorspace: Specifies the color space.
 		"""
-		if pixels is None or not QOIEncoder.can_encode(width, height, alpha):
+		if not QOIEncoder.can_encode(width, height, alpha):
 			return False
 		pixels_size = width * height
 		encoded = bytearray(14 + pixels_size * (5 if alpha else 4) + 8)
@@ -147,7 +147,7 @@ class QOIDecoder:
 		:param encoded: QOI file contents. Only the first `encodedSize` bytes are accessed.
 		:param encoded_size: QOI file length.
 		"""
-		if encoded is None or encoded_size < 23 or encoded[0] != 113 or encoded[1] != 111 or encoded[2] != 105 or encoded[3] != 102:
+		if encoded_size < 23 or encoded[0] != 113 or encoded[1] != 111 or encoded[2] != 105 or encoded[3] != 102:
 			return False
 		width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7]
 		height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11]

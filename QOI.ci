@@ -29,7 +29,7 @@ public class QOIEncoder
 	internal const int HeaderSize = 14;
 	internal const int PaddingSize = 8;
 
-	byte[]# Encoded;
+	byte[]#? Encoded;
 	int EncodedSize;
 
 	/// Constructs the encoder.
@@ -66,7 +66,7 @@ public class QOIEncoder
 		/// This is written in the header, but doesn't affect decoding in any way.
 		bool linearColorspace)
 	{
-		if (pixels == null || !CanEncode(width, height, alpha))
+		if (!CanEncode(width, height, alpha))
 			return false;
 		int pixelsSize = width * height;
 		byte[]# encoded = new byte[HeaderSize + pixelsSize * (alpha ? 5 : 4) + PaddingSize];
@@ -175,7 +175,7 @@ public class QOIDecoder
 {
 	int Width;
 	int Height;
-	int[]# Pixels;
+	int[]#? Pixels;
 	bool Alpha;
 	bool LinearColorspace;
 
@@ -193,8 +193,7 @@ public class QOIDecoder
 		/// QOI file length.
 		int encodedSize)
 	{
-		if (encoded == null
-		 || encodedSize < QOIEncoder.HeaderSize + 1 + QOIEncoder.PaddingSize
+		if (encodedSize < QOIEncoder.HeaderSize + 1 + QOIEncoder.PaddingSize
 		 || encoded[0] != 'q' || encoded[1] != 'o' || encoded[2] != 'i' || encoded[3] != 'f')
 			return false;
 		int width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];

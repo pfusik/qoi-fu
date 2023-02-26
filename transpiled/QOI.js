@@ -42,7 +42,7 @@ export class QOIEncoder
 	 */
 	encode(width, height, pixels, alpha, linearColorspace)
 	{
-		if (pixels == null || !QOIEncoder.canEncode(width, height, alpha))
+		if (!QOIEncoder.canEncode(width, height, alpha))
 			return false;
 		let pixelsSize = width * height;
 		let encoded = new Uint8Array(14 + pixelsSize * (alpha ? 5 : 4) + 8);
@@ -176,7 +176,7 @@ export class QOIDecoder
 	 */
 	decode(encoded, encodedSize)
 	{
-		if (encoded == null || encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
+		if (encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102)
 			return false;
 		let width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];
 		let height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];

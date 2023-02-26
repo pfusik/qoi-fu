@@ -34,7 +34,7 @@ public class QOIEncoder
 	/// <param name="linearColorspace">Specifies the color space.</param>
 	public bool Encode(int width, int height, int[] pixels, bool alpha, bool linearColorspace)
 	{
-		if (pixels == null || !CanEncode(width, height, alpha))
+		if (!CanEncode(width, height, alpha))
 			return false;
 		int pixelsSize = width * height;
 		byte[] encoded = new byte[14 + pixelsSize * (alpha ? 5 : 4) + 8];
@@ -157,7 +157,7 @@ public class QOIDecoder
 	/// <param name="encodedSize">QOI file length.</param>
 	public bool Decode(byte[] encoded, int encodedSize)
 	{
-		if (encoded == null || encodedSize < 23 || encoded[0] != 'q' || encoded[1] != 'o' || encoded[2] != 'i' || encoded[3] != 'f')
+		if (encodedSize < 23 || encoded[0] != 'q' || encoded[1] != 'o' || encoded[2] != 'i' || encoded[3] != 'f')
 			return false;
 		int width = encoded[4] << 24 | encoded[5] << 16 | encoded[6] << 8 | encoded[7];
 		int height = encoded[8] << 24 | encoded[9] << 16 | encoded[10] << 8 | encoded[11];

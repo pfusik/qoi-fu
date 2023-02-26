@@ -43,7 +43,7 @@ public class QOIEncoder
 	 */
 	public final boolean encode(int width, int height, int[] pixels, boolean alpha, boolean linearColorspace)
 	{
-		if (pixels == null || !canEncode(width, height, alpha))
+		if (!canEncode(width, height, alpha))
 			return false;
 		int pixelsSize = width * height;
 		byte[] encoded = new byte[14 + pixelsSize * (alpha ? 5 : 4) + 8];
