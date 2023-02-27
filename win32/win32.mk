@@ -6,7 +6,7 @@ CC32 = i686-w64-mingw32-gcc
 CXX32 = i686-w64-mingw32-g++
 CSC = "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/Roslyn/csc.exe" -nologo
 PAINT_NET_DIR = C:/Program Files/paint.net
-DOTNET_REF_DIR = `echo C:/Program\ Files/dotnet/packs/Microsoft.NETCore.App.Ref/6.0.*/ref/net6.0`
+DOTNET_REF_DIR = `echo C:/Program\ Files/dotnet/packs/Microsoft.NETCore.App.Ref/7.0.*/ref/net7.0`
 DO_SIGN = signtool sign -d "Quite OK Image plugins $(VERSION)" -n "Open Source Developer, Piotr Fusik" -tr http://time.certum.pl -fd sha256 -td sha256 $^ && touch $@
 
 win32/wicqoi64.dll: win32/wicqoi.cpp win32/QOI.o
@@ -31,7 +31,7 @@ win32/Xqoi32.usr: Xqoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 	$(CC32) $(CFLAGS) -I transpiled -o $@ $^ -shared -Wl,--kill-at
 
 win32/QOIPaintDotNet.dll: win32/QOIPaintDotNet.cs transpiled/QOI.cs
-	$(CSC) -o+ -out:$@ -t:library $^ -nostdlib -r:"$(PAINT_NET_DIR)/PaintDotNet.Base.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Core.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Data.dll" -r:"$(DOTNET_REF_DIR)/System.Runtime.dll"
+	$(CSC) -o+ -out:$@ -t:library $^ -nostdlib -r:"$(PAINT_NET_DIR)/PaintDotNet.ComponentModel.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Core.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Data.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Primitives.dll" -r:"$(DOTNET_REF_DIR)/System.Runtime.dll"
 
 install-imagine: win32/QOI.plg64
 	cp $< "$(IMAGINE_DIR)/Plugin/QOI.plg64"
