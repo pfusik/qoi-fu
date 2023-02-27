@@ -141,7 +141,7 @@ public class QOIEncoder
 	/// Call `GetEncodedSize` to retrieve the number of leading bytes that are significant.
 	public func getEncoded() -> ArrayRef<UInt8>
 	{
-		return self.encoded
+		return self.encoded!
 	}
 
 	/// Returns the encoded file length.
@@ -282,7 +282,7 @@ public class QOIDecoder
 	/// Each pixel is a 32-bit integer 0xAARRGGBB.
 	public func getPixels() -> ArrayRef<Int>
 	{
-		return self.pixels
+		return self.pixels!
 	}
 
 	/// Returns the information about the alpha channel from the file header.
