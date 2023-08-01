@@ -37,7 +37,7 @@ GIMP plugin for loading and exporting the Quite OK Image (QOI) format.
 %setup -q
 
 %build
-make CFLAGS="%{optflags}" png2qoi libpixbufloader-qoi.so file-qoi
+make CFLAGS="%{build_cflags}" png2qoi libpixbufloader-qoi.so file-qoi
 
 %install
 make PREFIX=%{buildroot}%{_prefix} GDK_PIXBUF_LOADERS_DIR=%{buildroot}%{_libdir}/gdk-pixbuf-2.0/2.10.0/loaders libdir=%{buildroot}%{_libdir} BUILDING_PACKAGE=1 install-png2qoi install-gdk-pixbuf install-gimp
