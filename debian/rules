@@ -2,7 +2,7 @@
 %:
 	dh $@
 
-# skip "make clean" to avoid dependency on cito
+# skip "make clean" to avoid dependency on fut
 override_dh_auto_clean:
 
 override_dh_auto_install:

@@ -1,4 +1,4 @@
-// Generated automatically with "cito". Do not edit.
+// Generated automatically with "fut". Do not edit.
 
 /// Encoder of the "Quite OK Image" (QOI) format.
 /// Losslessly compresses an image to a byte array.
@@ -174,9 +174,9 @@ public class QOIDecoder
 	/// Returns `true` if decoded successfully.
 	/// - parameter encoded QOI file contents. Only the first `encodedSize` bytes are accessed.
 	/// - parameter encodedSize QOI file length.
-	public func decode(_ encoded : ArrayRef<UInt8>, _ ciParamEncodedSize : Int) -> Bool
+	public func decode(_ encoded : ArrayRef<UInt8>, _ fuParamEncodedSize : Int) -> Bool
 	{
-		var encodedSize : Int = ciParamEncodedSize
+		var encodedSize : Int = fuParamEncodedSize
 		if encodedSize < 23 || encoded[0] != 113 || encoded[1] != 111 || encoded[2] != 105 || encoded[3] != 102 {
 			return false
 		}

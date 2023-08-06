@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Name: qoi-ci
-Source: https://github.com/pfusik/qoi-ci
+Name: qoi-fu
+Source: https://github.com/pfusik/qoi-fu
 
 Files: *
-Copyright: 2021-2022 Piotr Fusik <fox@scene.pl>
+Copyright: 2021-2023 Piotr Fusik <piotr@fusion-lang.org>
 License: MIT

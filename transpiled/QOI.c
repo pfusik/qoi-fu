@@ -1,19 +1,19 @@
-// Generated automatically with "cito". Do not edit.
+// Generated automatically with "fut". Do not edit.
 #include <stdlib.h>
 #include <string.h>
 #include "QOI.h"
 
-typedef void (*CiMethodPtr)(void *);
+typedef void (*FuMethodPtr)(void *);
 typedef struct {
 	size_t count;
 	size_t unitSize;
 	size_t refCount;
-	CiMethodPtr destructor;
-} CiShared;
+	FuMethodPtr destructor;
+} FuShared;
 
-static void *CiShared_Make(size_t count, size_t unitSize, CiMethodPtr constructor, CiMethodPtr destructor)
+static void *FuShared_Make(size_t count, size_t unitSize, FuMethodPtr constructor, FuMethodPtr destructor)
 {
-	CiShared *self = (CiShared *) malloc(sizeof(CiShared) + count * unitSize);
+	FuShared *self = (FuShared *) malloc(sizeof(FuShared) + count * unitSize);
 	self->count = count;
 	self->unitSize = unitSize;
 	self->refCount = 1;
@@ -25,18 +25,18 @@ static void *CiShared_Make(size_t count, size_t unitSize, CiMethodPtr constructo
 	return self + 1;
 }
 
-static void *CiShared_AddRef(void *ptr)
+static void *FuShared_AddRef(void *ptr)
 {
 	if (ptr != NULL)
-		((CiShared *) ptr)[-1].refCount++;
+		((FuShared *) ptr)[-1].refCount++;
 	return ptr;
 }
 
-static void CiShared_Release(void *ptr)
+static void FuShared_Release(void *ptr)
 {
 	if (ptr == NULL)
 		return;
-	CiShared *self = (CiShared *) ptr - 1;
+	FuShared *self = (FuShared *) ptr - 1;
 	if (--self->refCount != 0)
 		return;
 	if (self->destructor != NULL) {
@@ -46,9 +46,9 @@ static void CiShared_Release(void *ptr)
 	free(self);
 }
 
-static void CiShared_Assign(void **ptr, void *value)
+static void FuShared_Assign(void **ptr, void *value)
 {
-	CiShared_Release(*ptr);
+	FuShared_Release(*ptr);
 	*ptr = value;
 }
 
@@ -83,7 +83,7 @@ static void QOIEncoder_Construct(QOIEncoder *self)
 
 static void QOIEncoder_Destruct(QOIEncoder *self)
 {
-	CiShared_Release(self->encoded);
+	FuShared_Release(self->encoded);
 }
 
 QOIEncoder *QOIEncoder_New(void)
@@ -112,7 +112,7 @@ bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixel
 	if (!QOIEncoder_CanEncode(width, height, alpha))
 		return false;
 	int pixelsSize = width * height;
-	uint8_t *encoded = (uint8_t *) CiShared_Make(14 + pixelsSize * (alpha ? 5 : 4) + 8, sizeof(uint8_t), NULL, NULL);
+	uint8_t *encoded = (uint8_t *) FuShared_Make(14 + pixelsSize * (alpha ? 5 : 4) + 8, sizeof(uint8_t), NULL, NULL);
 	encoded[0] = 'q';
 	encoded[1] = 'o';
 	encoded[2] = 'i';
@@ -192,9 +192,9 @@ bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixel
 	}
 	memset(encoded + encodedOffset, 0, 7 * sizeof(uint8_t));
 	encoded[encodedOffset + 8 - 1] = 1;
-	CiShared_Assign((void **) &self->encoded, CiShared_AddRef(encoded));
+	FuShared_Assign((void **) &self->encoded, FuShared_AddRef(encoded));
 	self->encodedSize = encodedOffset + 8;
-	CiShared_Release(encoded);
+	FuShared_Release(encoded);
 	return true;
 }
 
@@ -215,7 +215,7 @@ static void QOIDecoder_Construct(QOIDecoder *self)
 
 static void QOIDecoder_Destruct(QOIDecoder *self)
 {
-	CiShared_Release(self->pixels);
+	FuShared_Release(self->pixels);
 }
 
 QOIDecoder *QOIDecoder_New(void)
@@ -263,14 +263,14 @@ bool QOIDecoder_Decode(QOIDecoder *self, uint8_t const *encoded, int encodedSize
 		return false;
 	}
 	int pixelsSize = width * height;
-	int *pixels = (int *) CiShared_Make(pixelsSize, sizeof(int), NULL, NULL);
+	int *pixels = (int *) FuShared_Make(pixelsSize, sizeof(int), NULL, NULL);
 	encodedSize -= 8;
 	int encodedOffset = 14;
 	int index[64] = { 0 };
 	int pixel = -16777216;
 	for (int pixelsOffset = 0; pixelsOffset < pixelsSize;) {
 		if (encodedOffset >= encodedSize) {
-			CiShared_Release(pixels);
+			FuShared_Release(pixels);
 			return false;
 		}
 		int e = encoded[encodedOffset++];
@@ -290,7 +290,7 @@ bool QOIDecoder_Decode(QOIDecoder *self, uint8_t const *encoded, int encodedSize
 			if (e < 254) {
 				e -= 191;
 				if (pixelsOffset + e > pixelsSize) {
-					CiShared_Release(pixels);
+					FuShared_Release(pixels);
 					return false;
 				}
 				for (int _i = 0; _i < e; _i++)
@@ -311,13 +311,13 @@ bool QOIDecoder_Decode(QOIDecoder *self, uint8_t const *encoded, int encodedSize
 		pixels[pixelsOffset++] = index[((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63] = pixel;
 	}
 	if (encodedOffset != encodedSize) {
-		CiShared_Release(pixels);
+		FuShared_Release(pixels);
 		return false;
 	}
 	self->width = width;
 	self->height = height;
-	CiShared_Assign((void **) &self->pixels, CiShared_AddRef(pixels));
-	CiShared_Release(pixels);
+	FuShared_Assign((void **) &self->pixels, FuShared_AddRef(pixels));
+	FuShared_Release(pixels);
 	return true;
 }
 

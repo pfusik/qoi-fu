@@ -1,23 +1,23 @@
-qoi-ci (2.0.0-1) UNRELEASED; urgency=low
+qoi-fu (2.0.0-1) UNRELEASED; urgency=low
 
   * New release.
   * Added 2png and gdk-pixbuf subpackages.
 
  -- Piotr Fusik <fox@scene.pl>  Mon, 12 Sep 2022 10:27:01 +0200
 
-qoi-ci (1.1.2-1) UNRELEASED; urgency=low
+qoi-fu (1.1.2-1) UNRELEASED; urgency=low
 
   * New release.
 
  -- Piotr Fusik <fox@scene.pl>  Wed, 3 Aug 2022 19:46:08 +0200
 
-qoi-ci (1.1.1-1) UNRELEASED; urgency=low
+qoi-fu (1.1.1-1) UNRELEASED; urgency=low
 
   * Linear colorspace in GIMP.
 
  -- Piotr Fusik <fox@scene.pl>  Mon, 11 Apr 2022 21:20:36 +0200
 
-qoi-ci (1.1.0-1) UNRELEASED; urgency=low
+qoi-fu (1.1.0-1) UNRELEASED; urgency=low
 
   * First deb packaging.
 

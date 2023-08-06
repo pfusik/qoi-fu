@@ -1,10 +1,10 @@
-Name: qoi-ci
+Name: qoi-fu
 Version: 2.0.0
 Release: 1
 Summary: Quite OK Image (QOI) encoder/decoder
 License: MIT
-Source: https://github.com/pfusik/qoi-ci/archive/qoi-ci-%{version}/qoi-ci-%{version}.tar.gz
-URL: https://github.com/pfusik/qoi-ci
+Source: https://github.com/pfusik/qoi-fu/archive/qoi-fu-%{version}/qoi-fu-%{version}.tar.gz
+URL: https://github.com/pfusik/qoi-fu
 BuildRequires: gcc
 
 %description

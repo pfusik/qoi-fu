@@ -59,8 +59,8 @@ endif
 install-xnview: Xqoi.usr
 	$(SUDO) install -D -m 644 $< "$(XNVIEW_DIR)/Plugins/Xqoi.usr"
 
-$(TRANSPILED): QOI.ci
-	mkdir -p $(@D) && cito -o $@ $^
+$(TRANSPILED): QOI.fu
+	mkdir -p $(@D) && fut -o $@ $^
 
 CLEAN = png2qoi$(EXEEXT) libpixbufloader-qoi.so file-qoi$(EXEEXT) Xqoi.usr $(TRANSPILED) transpiled/QOI.h transpiled/QOI.hpp transpiled/QOIEncoder.java
 clean:

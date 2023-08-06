@@ -1,4 +1,4 @@
-// Generated automatically with "cito". Do not edit.
+// Generated automatically with "fut". Do not edit.
 
 /**
  * Encoder of the "Quite OK Image" (QOI) format.

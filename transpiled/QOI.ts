@@ -1,4 +1,4 @@
-// Generated automatically with "cito". Do not edit.
+// Generated automatically with "fut". Do not edit.
 
 /**
  * Encoder of the "Quite OK Image" (QOI) format.
@@ -17,8 +17,8 @@ export class QOIEncoder
 	static readonly HEADER_SIZE: number = 14;
 
 	static readonly PADDING_SIZE: number = 8;
-	private encoded: Uint8Array | null;
-	private encodedSize: number;
+	#encoded: Uint8Array | null;
+	#encodedSize: number;
 
 	/**
 	 * Determines if an image of given size can be encoded.
@@ -125,8 +125,8 @@ export class QOIEncoder
 		}
 		encoded.fill(0, encodedOffset, encodedOffset + 7);
 		encoded[encodedOffset + 8 - 1] = 1;
-		this.encoded = encoded;
-		this.encodedSize = encodedOffset + 8;
+		this.#encoded = encoded;
+		this.#encodedSize = encodedOffset + 8;
 		return true;
 	}
 
@@ -138,7 +138,7 @@ export class QOIEncoder
 	 */
 	public getEncoded(): Readonly<Uint8Array>
 	{
-		return this.encoded;
+		return this.#encoded;
 	}
 
 	/**
@@ -146,7 +146,7 @@ export class QOIEncoder
 	 */
 	public getEncodedSize(): number
 	{
-		return this.encodedSize;
+		return this.#encodedSize;
 	}
 }
 
@@ -162,11 +162,11 @@ export class QOIDecoder
 	public constructor()
 	{
 	}
-	private width: number;
-	private height: number;
-	private pixels: Int32Array | null;
-	private alpha: boolean;
-	private linearColorspace: boolean;
+	#width: number;
+	#height: number;
+	#pixels: Int32Array | null;
+	#alpha: boolean;
+	#linearColorspace: boolean;
 
 	/**
 	 * Decodes the given QOI file contents.
@@ -184,20 +184,20 @@ export class QOIDecoder
 			return false;
 		switch (encoded[12]) {
 		case 3:
-			this.alpha = false;
+			this.#alpha = false;
 			break;
 		case 4:
-			this.alpha = true;
+			this.#alpha = true;
 			break;
 		default:
 			return false;
 		}
 		switch (encoded[13]) {
 		case 0:
-			this.linearColorspace = false;
+			this.#linearColorspace = false;
 			break;
 		case 1:
-			this.linearColorspace = true;
+			this.#linearColorspace = true;
 			break;
 		default:
 			return false;
@@ -247,9 +247,9 @@ export class QOIDecoder
 		}
 		if (encodedOffset != encodedSize)
 			return false;
-		this.width = width;
-		this.height = height;
-		this.pixels = pixels;
+		this.#width = width;
+		this.#height = height;
+		this.#pixels = pixels;
 		return true;
 	}
 
@@ -258,7 +258,7 @@ export class QOIDecoder
 	 */
 	public getWidth(): number
 	{
-		return this.width;
+		return this.#width;
 	}
 
 	/**
@@ -266,7 +266,7 @@ export class QOIDecoder
 	 */
 	public getHeight(): number
 	{
-		return this.height;
+		return this.#height;
 	}
 
 	/**
@@ -275,7 +275,7 @@ export class QOIDecoder
 	 */
 	public getPixels(): Readonly<Int32Array>
 	{
-		return this.pixels;
+		return this.#pixels;
 	}
 
 	/**
@@ -283,7 +283,7 @@ export class QOIDecoder
 	 */
 	public hasAlpha(): boolean
 	{
-		return this.alpha;
+		return this.#alpha;
 	}
 
 	/**
@@ -293,6 +293,6 @@ export class QOIDecoder
 	 */
 	public isLinearColorspace(): boolean
 	{
-		return this.linearColorspace;
+		return this.#linearColorspace;
 	}
 }

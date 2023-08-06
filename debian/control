@@ -1,26 +1,34 @@
-Source: qoi-ci
+Source: qoi-fu
 Maintainer: Piotr Fusik <fox@scene.pl>
 Section: graphics
 Priority: optional
 Standards-Version: 4.6.0
 Build-Depends: debhelper (>= 7), gcc, libpng-dev, libgdk-pixbuf-2.0-dev, libgimp2.0-dev
 
-Package: qoi-ci-2png
+Package: qoi-fu-2png
+Replaces: qoi-ci-2png
+Breaks: qoi-ci-2png
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: Command-line converter between QOI and PNG formats.
 
-Package: qoi-ci-gdk-pixbuf
+Package: qoi-fu-gdk-pixbuf
+Replaces: qoi-ci-gdk-pixbuf
+Breaks: qoi-ci-gdk-pixbuf
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: GdkPixbuf loader for the Quite OK Image (QOI) format.
 
-Package: qoi-ci-gimp
+Package: qoi-fu-gimp
+Replaces: qoi-ci-gimp
+Breaks: qoi-ci-gimp
 Architecture: any
 Depends: gimp, ${shlibs:Depends}
 Description: GIMP plugin for the Quite OK Image (QOI) format.
 
-Package: qoi-ci-xnview
+Package: qoi-fu-xnview
+Replaces: qoi-ci-xnview
+Breaks: qoi-ci-xnview
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: XnView MP plugin for the Quite OK Image (QOI) format.
