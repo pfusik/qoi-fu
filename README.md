@@ -1,8 +1,8 @@
 This project implements encoding and decoding
 the ["Quite OK Image" (QOI)](https://github.com/phoboslab/qoi) format
 in the [Fusion programming language](https://fusion-lang.org).
-Fusion can be automatically translated to pure C, C++, C#, Java, JavaScript,
-Python, Swift and TypeScript with no additional dependencies.
+Fusion can be automatically translated to pure C, C++, C#, D, Java,
+JavaScript, Python, Swift and TypeScript with no additional dependencies.
 See the [transpiled](transpiled) directory for these translations.
 
 Included are plugins for:
