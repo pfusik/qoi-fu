@@ -22,10 +22,7 @@ class QOIEncoder
 	/// width = Image width in pixels.
 	/// height = Image height in pixels.
 	/// alpha = Whether the image has the alpha channel (transparency).
-	static bool canEncode(int width, int height, bool alpha)
-	{
-		return width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? cast(ubyte)(5) : cast(ubyte)(4));
-	}
+	static bool canEncode(int width, int height, bool alpha) => width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? cast(ubyte)(5) : cast(ubyte)(4));
 
 	/// Encodes the given image.
 	/// Returns `true` if encoded successfully.
@@ -129,16 +126,10 @@ class QOIEncoder
 	/// This method can only be called after `Encode` returned `true`.
 	/// The allocated array is usually larger than the encoded data.
 	/// Call `GetEncodedSize` to retrieve the number of leading bytes that are significant.
-	const(ubyte)[] getEncoded()
-	{
-		return this.encoded;
-	}
+	const(ubyte)[] getEncoded() => this.encoded;
 
 	/// Returns the encoded file length.
-	int getEncodedSize()
-	{
-		return this.encodedSize;
-	}
+	int getEncodedSize() => this.encodedSize;
 }
 
 /// Decoder of the "Quite OK Image" (QOI) format.
@@ -245,35 +236,20 @@ class QOIDecoder
 	}
 
 	/// Returns the width of the decoded image in pixels.
-	int getWidth()
-	{
-		return this.width;
-	}
+	int getWidth() => this.width;
 
 	/// Returns the height of the decoded image in pixels.
-	int getHeight()
-	{
-		return this.height;
-	}
+	int getHeight() => this.height;
 
 	/// Returns the pixels of the decoded image, top-down, left-to-right.
 	/// Each pixel is a 32-bit integer 0xAARRGGBB.
-	const(int)[] getPixels()
-	{
-		return this.pixels;
-	}
+	const(int)[] getPixels() => this.pixels;
 
 	/// Returns the information about the alpha channel from the file header.
-	bool hasAlpha()
-	{
-		return this.alpha;
-	}
+	bool hasAlpha() => this.alpha;
 
 	/// Returns the color space information from the file header.
 	/// `false` = sRGB with linear alpha channel.
 	/// `true` = all channels linear.
-	bool isLinearColorspace()
-	{
-		return this.linearColorspace;
-	}
+	bool isLinearColorspace() => this.linearColorspace;
 }
