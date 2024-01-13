@@ -86,13 +86,12 @@ class QOIEncoder:
 					r: int = pixel >> 16 & 255
 					g: int = pixel >> 8 & 255
 					b: int = pixel & 255
-					a: int = pixel >> 24 & 255
 					if (pixel ^ last_pixel) >> 24 != 0:
 						encoded[encoded_offset] = 255
 						encoded[encoded_offset + 1] = r
 						encoded[encoded_offset + 2] = g
 						encoded[encoded_offset + 3] = b
-						encoded[encoded_offset + 4] = a
+						encoded[encoded_offset + 4] = pixel >> 24 & 255
 						encoded_offset += 5
 					else:
 						dr: int = r - (last_pixel >> 16 & 255)

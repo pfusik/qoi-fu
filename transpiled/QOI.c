@@ -154,13 +154,12 @@ bool QOIEncoder_Encode(QOIEncoder *self, int width, int height, int const *pixel
 				int r = pixel >> 16 & 255;
 				int g = pixel >> 8 & 255;
 				int b = pixel & 255;
-				int a = pixel >> 24 & 255;
 				if ((pixel ^ lastPixel) >> 24 != 0) {
 					encoded[encodedOffset] = 255;
 					encoded[encodedOffset + 1] = (uint8_t) r;
 					encoded[encodedOffset + 2] = (uint8_t) g;
 					encoded[encodedOffset + 3] = (uint8_t) b;
-					encoded[encodedOffset + 4] = (uint8_t) a;
+					encoded[encodedOffset + 4] = (uint8_t) (pixel >> 24);
 					encodedOffset += 5;
 				}
 				else {

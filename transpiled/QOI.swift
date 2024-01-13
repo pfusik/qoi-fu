@@ -90,13 +90,12 @@ public class QOIEncoder
 					let r : Int = pixel >> 16 & 255
 					let g : Int = pixel >> 8 & 255
 					let b : Int = pixel & 255
-					let a : Int = pixel >> 24 & 255
 					if (pixel ^ lastPixel) >> 24 != 0 {
 						encoded[encodedOffset] = 255
 						encoded[encodedOffset + 1] = UInt8(r)
 						encoded[encodedOffset + 2] = UInt8(g)
 						encoded[encodedOffset + 3] = UInt8(b)
-						encoded[encodedOffset + 4] = UInt8(a)
+						encoded[encodedOffset + 4] = UInt8(pixel >> 24 & 255)
 						encodedOffset += 5
 					}
 					else {

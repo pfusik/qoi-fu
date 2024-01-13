@@ -87,13 +87,12 @@ export class QOIEncoder
 					let r = pixel >> 16 & 255;
 					let g = pixel >> 8 & 255;
 					let b = pixel & 255;
-					let a = pixel >> 24 & 255;
 					if ((pixel ^ lastPixel) >> 24 != 0) {
 						encoded[encodedOffset] = 255;
 						encoded[encodedOffset + 1] = r;
 						encoded[encodedOffset + 2] = g;
 						encoded[encodedOffset + 3] = b;
-						encoded[encodedOffset + 4] = a;
+						encoded[encodedOffset + 4] = pixel >> 24 & 255;
 						encodedOffset += 5;
 					}
 					else {

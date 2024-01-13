@@ -1,6 +1,6 @@
 // QOI.fu - encoder and decoder of the "Quite OK Image" format
 //
-// Copyright (C) 2021-2023 Piotr Fusik
+// Copyright (C) 2021-2024 Piotr Fusik
 //
 // MIT License:
 //
@@ -112,13 +112,12 @@ public class QOIEncoder
 					int r = pixel >> 16 & 0xff;
 					int g = pixel >> 8 & 0xff;
 					int b = pixel & 0xff;
-					int a = pixel >> 24 & 0xff;
 					if ((pixel ^ lastPixel) >> 24 != 0) {
 						encoded[encodedOffset] = 0xff;
 						encoded[encodedOffset + 1] = r;
 						encoded[encodedOffset + 2] = g;
 						encoded[encodedOffset + 3] = b;
-						encoded[encodedOffset + 4] = a;
+						encoded[encodedOffset + 4] = pixel >> 24 & 0xff;
 						encodedOffset += 5;
 					}
 					else {

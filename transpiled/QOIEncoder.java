@@ -88,13 +88,12 @@ public class QOIEncoder
 					int r = pixel >> 16 & 255;
 					int g = pixel >> 8 & 255;
 					int b = pixel & 255;
-					int a = pixel >> 24 & 255;
 					if ((pixel ^ lastPixel) >> 24 != 0) {
 						encoded[encodedOffset] = (byte) 255;
 						encoded[encodedOffset + 1] = (byte) r;
 						encoded[encodedOffset + 2] = (byte) g;
 						encoded[encodedOffset + 3] = (byte) b;
-						encoded[encodedOffset + 4] = (byte) a;
+						encoded[encodedOffset + 4] = (byte) (pixel >> 24);
 						encodedOffset += 5;
 					}
 					else {
