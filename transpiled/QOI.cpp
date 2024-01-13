@@ -67,9 +67,9 @@ bool QOIEncoder::encode(int width, int height, int const * pixels, bool alpha, b
 					encodedOffset += 5;
 				}
 				else {
-					int dr = r - (lastPixel >> 16 & 255);
-					int dg = g - (lastPixel >> 8 & 255);
-					int db = b - (lastPixel & 255);
+					int dr = (((r - (lastPixel >> 16)) & 255) ^ 128) - 128;
+					int dg = (((g - (lastPixel >> 8)) & 255) ^ 128) - 128;
+					int db = (((b - lastPixel) & 255) ^ 128) - 128;
 					if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
 						encoded[encodedOffset++] = static_cast<uint8_t>(106 + (dr << 4) + (dg << 2) + db);
 					else {

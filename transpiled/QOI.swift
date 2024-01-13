@@ -99,9 +99,9 @@ public class QOIEncoder
 						encodedOffset += 5
 					}
 					else {
-						var dr : Int = r - lastPixel >> 16 & 255
-						let dg : Int = g - lastPixel >> 8 & 255
-						var db : Int = b - lastPixel & 255
+						var dr : Int = (r - lastPixel >> 16) & 255 ^ 128 - 128
+						let dg : Int = (g - lastPixel >> 8) & 255 ^ 128 - 128
+						var db : Int = (b - lastPixel) & 255 ^ 128 - 128
 						if dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1 {
 							encoded[encodedOffset] = UInt8(106 + dr << 4 + dg << 2 + db)
 							encodedOffset += 1

@@ -96,9 +96,9 @@ export class QOIEncoder
 						encodedOffset += 5;
 					}
 					else {
-						let dr = r - (lastPixel >> 16 & 255);
-						let dg = g - (lastPixel >> 8 & 255);
-						let db = b - (lastPixel & 255);
+						let dr = (((r - (lastPixel >> 16)) & 255) ^ 128) - 128;
+						let dg = (((g - (lastPixel >> 8)) & 255) ^ 128) - 128;
+						let db = (((b - lastPixel) & 255) ^ 128) - 128;
 						if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
 							encoded[encodedOffset++] = 106 + (dr << 4) + (dg << 2) + db;
 						else {

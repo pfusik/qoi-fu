@@ -94,9 +94,9 @@ class QOIEncoder:
 						encoded[encoded_offset + 4] = pixel >> 24 & 255
 						encoded_offset += 5
 					else:
-						dr: int = r - (last_pixel >> 16 & 255)
-						dg: int = g - (last_pixel >> 8 & 255)
-						db: int = b - (last_pixel & 255)
+						dr: int = (((r - (last_pixel >> 16)) & 255) ^ 128) - 128
+						dg: int = (((g - (last_pixel >> 8)) & 255) ^ 128) - 128
+						db: int = (((b - last_pixel) & 255) ^ 128) - 128
 						if dr >= -2 and dr <= 1 and dg >= -2 and dg <= 1 and db >= -2 and db <= 1:
 							encoded[encoded_offset] = 106 + (dr << 4) + (dg << 2) + db
 							encoded_offset += 1

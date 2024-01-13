@@ -121,9 +121,9 @@ public class QOIEncoder
 						encodedOffset += 5;
 					}
 					else {
-						int dr = r - (lastPixel >> 16 & 0xff);
-						int dg = g - (lastPixel >> 8 & 0xff);
-						int db = b - (lastPixel & 0xff);
+						int dr = (r - (lastPixel >> 16) & 0xff ^ 0x80) - 0x80;
+						int dg = (g - (lastPixel >> 8) & 0xff ^ 0x80) - 0x80;
+						int db = (b - lastPixel & 0xff ^ 0x80) - 0x80;
 						if (dr >= -2 && dr <= 1
 						 && dg >= -2 && dg <= 1
 						 && db >= -2 && db <= 1)
