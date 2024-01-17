@@ -10,7 +10,6 @@ Included are plugins for:
 - Finder - macOS
 - GNOME - Linux
 - [GIMP](https://www.gimp.org) - Windows/macOS/Linux
-- [Imagine](http://www.nyam.pe.kr/dev/imagine/) - Windows
 - [Paint.NET](https://www.getpaint.net) - Windows
 - [XnView](https://www.xnview.com) - Windows/macOS/Linux
 

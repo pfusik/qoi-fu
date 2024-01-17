@@ -109,21 +109,6 @@
 			<RegistrySearch Id="gimp.installdir" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GIMP-2_is1" Name="InstallLocation" Type="directory" />
 		</Property>
 
-		<Property Id="IMAGINE.DIR">
-			<!-- apparently there is no Wow6432Node for this key, hence no IMAGINE64.DIR -->
-			<RegistrySearch Id="imagine.dir" Root="HKCU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Imagine" Name="InstallLocation" Type="directory" />
-		</Property>
-		<Property Id="IMAGINE64.EXE">
-			<RegistrySearch Id="imagine64.exe" Root="HKCU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Imagine" Name="InstallLocation" Type="directory">
-				<FileSearch Name="Imagine64.exe" />
-			</RegistrySearch>
-		</Property>
-		<Property Id="IMAGINE.EXE">
-			<RegistrySearch Id="imagine.exe" Root="HKCU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Imagine" Name="InstallLocation" Type="directory">
-				<FileSearch Name="Imagine.exe" />
-			</RegistrySearch>
-		</Property>
-
 		<Property Id="PAINTDOTNET.DIR">
 			<RegistrySearch Id="paintdotnet.dir" Root="HKLM" Key="SOFTWARE\Paint.NET" Name="TARGETDIR" Type="directory" />
 		</Property>
@@ -201,19 +186,6 @@
 				</Directory>
 			</Directory>
 
-			<Directory Id="IMAGINE.DIR" Name="Imagine">
-				<Directory Id="IMAGINEPLUG.DIR" Name="Plugin">
-					<Component Id="QOI.plg64">
-						<File Source="win32/QOI.plg64" Checksum="yes" KeyPath="yes" />
-					</Component>
-				</Directory>
-				<Directory Id="IMAGINE32PLUG.DIR" Name="Plugin">
-					<Component Id="QOI.plg" Bitness="always32">
-						<File Source="win32/QOI.plg" Checksum="yes" KeyPath="yes" />
-					</Component>
-				</Directory>
-			</Directory>
-
 			<Directory Id="PAINTDOTNET.DIR" Name="Paint.NET">
 				<Directory Id="PAINTDOTNETFILETYPES.DIR" Name="FileTypes">
 					<Component Id="QOIPaintDotNet.dll">
@@ -246,14 +218,6 @@
 		<Feature Id="gimp" Title="GIMP plugin" Level="9" ConfigurableDirectory="GIMPQOI.DIR" Description="Plugin for GIMP." AllowAdvertise="no">
 			<Level Value="1" Condition="GIMP.DIR" />
 			<ComponentRef Id="fileqoi.exe" />
-		</Feature>
-		<Feature Id="imagine" Title="Imagine plugin" Level="9" ConfigurableDirectory="IMAGINEPLUG.DIR" Description="Plugin for Imagine." AllowAdvertise="no">
-			<Level Value="1" Condition="IMAGINE64.EXE" />
-			<ComponentRef Id="QOI.plg64" />
-		</Feature>
-		<Feature Id="imagine32" Title="Imagine 32-bit plugin" Level="9" ConfigurableDirectory="IMAGINE32PLUG.DIR" Description="Plugin for 32-bit Imagine." AllowAdvertise="no">
-			<Level Value="1" Condition="IMAGINE.EXE" />
-			<ComponentRef Id="QOI.plg" />
 		</Feature>
 		<Feature Id="paintdotnet" Title="Paint.NET plugin" Level="9" ConfigurableDirectory="PAINTDOTNETFILETYPES.DIR" Description="Plugin for Paint.NET" AllowAdvertise="no">
 			<Level Value="1" Condition="PAINTDOTNET.DIR" />
