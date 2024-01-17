@@ -45,12 +45,9 @@ install-xnview32: win32/Xqoi32.usr
 install-paint.net: win32/QOIPaintDotNet.dll
 	$(SUDO) cp $< "$(PAINT_NET_DIR)/FileTypes/QOIPaintDotNet.dll"
 
-../qoi-fu-$(VERSION)-win64.msi: win32/setup/qoi-fu.wixobj win32/setup/qoi.ico win32/setup/license.rtf win32/setup/dialog.jpg win32/setup/banner.jpg \
+../qoi-fu-$(VERSION)-win64.msi: win32/setup/qoi-fu.wxs win32/setup/qoi.ico win32/setup/license.rtf win32/setup/dialog.jpg win32/setup/banner.jpg \
 	png2qoi.exe file-qoi.exe win32/wicqoi64.dll win32/wicqoi32.dll win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr win32/signed
-	light -nologo -o $@ -spdb -ext WixUIExtension -sice:ICE69 -sice:ICE80 $<
-
-win32/setup/qoi-fu.wixobj: win32/setup/qoi-fu.wxs
-	candle -nologo -o $@ -dVERSION=$(VERSION) -arch x64 $<
+	wix build -o $@ -arch x64 -d VERSION=$(VERSION) -ext WixToolset.UI.wixext $<
 
 win32/setup/signed: ../qoi-fu-$(VERSION)-win64.msi
 	$(DO_SIGN)
@@ -81,6 +78,6 @@ mac:
 	ssh mac 'security unlock-keychain ~/Library/Keychains/login.keychain && rm -rf qoi-fu-$(VERSION) && tar xf qoi-fu-$(VERSION).tar.gz && PATH=/usr/local/bin:$$PATH make -C qoi-fu-$(VERSION) macos/qoi-fu-$(VERSION)-macos.dmg'
 	scp mac:qoi-fu-$(VERSION)/macos/qoi-fu-$(VERSION)-macos.dmg ..
 
-CLEAN += win32/wicqoi64.dll win32/wicqoi32.dll win32/QOI.o win32/QOI32.o win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll win32/setup/qoi-fu.wixobj win32/setup/signed win32/signed
+CLEAN += win32/wicqoi64.dll win32/wicqoi32.dll win32/QOI.o win32/QOI32.o win32/QOI.plg64 win32/QOI.plg win32/Xqoi32.usr win32/QOIPaintDotNet.dll win32/setup/signed win32/signed
 
 .PHONY: install-imagine install-imagine32 install-xnview32 install-paint.net deb64 rpm64 mac

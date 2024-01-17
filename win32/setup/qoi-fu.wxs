@@ -1,13 +1,7 @@
-<?xml version="1.0"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
-
-	<Product Id="*" Name="Quite OK Image plugins $(var.VERSION)" Language="1033"
-		Version="$(var.VERSION)" Manufacturer="Piotr Fusik" UpgradeCode="1A810837-9D9D-42ED-A5D3-AE9AC2CFF0FD">
-
-		<Package Description="Quite OK Image plugins" Manufacturer="Piotr Fusik" InstallerVersion="200" Compressed="yes" />
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Package Name="Quite OK Image plugins $(var.VERSION)" Language="1033" Version="$(var.VERSION)" Manufacturer="Piotr Fusik" UpgradeCode="1A810837-9D9D-42ED-A5D3-AE9AC2CFF0FD" InstallerVersion="200">
 		<MajorUpgrade DowngradeErrorMessage="Newer version of Quite OK Image plugins is already installed!" />
 		<Media Id="1" Cabinet="qoifu.cab" EmbedCab="yes" CompressionLevel="high" />
-
 		<Icon Id="qoi.ico" SourceFile="win32/setup/qoi.ico" />
 		<Property Id="ARPHELPLINK" Value="https://github.com/pfusik/qoi-fu" />
 		<Property Id="ARPPRODUCTICON" Value="qoi.ico" />
@@ -33,37 +27,33 @@
 			<DialogRef Id="ResumeDlg" />
 			<DialogRef Id="UserExit" />
 
-			<Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+			<Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999" />
 
-			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="MyLicenseAgreementDlg">1</Publish>
+			<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="MyLicenseAgreementDlg" />
 
-			<Publish Dialog="MyLicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
-			<Publish Dialog="MyLicenseAgreementDlg" Control="Next" Event="NewDialog" Value="MyCustomizeDlg">1</Publish>
+			<Publish Dialog="MyLicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
+			<Publish Dialog="MyLicenseAgreementDlg" Control="Next" Event="NewDialog" Value="MyCustomizeDlg" />
 
-			<Publish Dialog="MyCustomizeDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="1">Installed</Publish>
-			<Publish Dialog="MyCustomizeDlg" Control="Back" Event="NewDialog" Value="MyLicenseAgreementDlg" Order="2">NOT Installed</Publish>
-			<Publish Dialog="MyCustomizeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+			<Publish Dialog="MyCustomizeDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="1" Condition="Installed" />
+			<Publish Dialog="MyCustomizeDlg" Control="Back" Event="NewDialog" Value="MyLicenseAgreementDlg" Order="2" Condition="NOT Installed" />
+			<Publish Dialog="MyCustomizeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" />
 
-			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MyCustomizeDlg" Order="1">NOT Installed OR WixUI_InstallMode = "Change"</Publish>
-			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed</Publish>
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MyCustomizeDlg" Order="1" Condition="NOT Installed OR WixUI_InstallMode = &quot;Change&quot;" />
+			<Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2" Condition="Installed" />
 
-			<Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+			<Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg" />
 
-			<Publish Dialog="MaintenanceTypeDlg" Control="ChangeButton" Event="NewDialog" Value="MyCustomizeDlg">1</Publish>
-			<Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-			<Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-			<Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
+			<Publish Dialog="MaintenanceTypeDlg" Control="ChangeButton" Event="NewDialog" Value="MyCustomizeDlg" />
+			<Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg" />
+			<Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg" />
+			<Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg" />
 
 			<Dialog Id="MyLicenseAgreementDlg" Width="370" Height="270" Title="!(loc.LicenseAgreementDlg_Title)">
 				<!-- removed the checkbox and replaced the "Next" button with "I Accept" -->
-				<Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="I &amp;Accept">
-					<!-- http://www.joyofsetup.com/2010/05/20/its-time-to-experiment/
-					<Publish Event="SpawnWaitDialog" Value="WaitForCostingDlg">CostingComplete = 1</Publish>
-					-->
-				</Control>
+				<Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="I &amp;Accept" />
 				<Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
 				<Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
-					<Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+					<Publish Event="SpawnDialog" Value="CancelDlg" />
 				</Control>
 				<Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.LicenseAgreementDlgBannerBitmap)" />
 				<!-- higher license box because of the removed checkbox -->
@@ -80,10 +70,8 @@
 			<Dialog Id="MyCustomizeDlg" Width="370" Height="270" Title="!(loc.CustomizeDlg_Title)" TrackDiskSpace="yes">
 				<!-- wider and higher selection tree so it doesn't need scrollbars -->
 				<Control Id="Tree" Type="SelectionTree" X="10" Y="75" Width="190" Height="125" Property="_BrowseProperty" Sunken="yes" TabSkip="no" Text="!(loc.CustomizeDlgTree)" />
-				<Control Id="Browse" Type="PushButton" X="294" Y="210" Width="66" Height="17" Text="!(loc.CustomizeDlgBrowse)">
-					<Publish Event="SelectionBrowse" Value="BrowseDlg">1</Publish>
-					<Condition Action="hide">Installed</Condition>
-					<Condition Action="disable">Installed</Condition>
+				<Control Id="Browse" Type="PushButton" X="294" Y="210" Width="66" Height="17" Text="!(loc.CustomizeDlgBrowse)" HideCondition="Installed" DisableCondition="Installed">
+					<Publish Event="SelectionBrowse" Value="BrowseDlg" />
 				</Control>
 				<!-- removed the "Reset" and "Disk Cost" buttons, moved the "Back" and "Next" buttons to their position in other dialogs -->
 				<Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
@@ -91,7 +79,7 @@
 					<Subscribe Event="SelectionNoItems" Attribute="Enabled" />
 				</Control>
 				<Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
-					<Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+					<Publish Event="SpawnDialog" Value="CancelDlg" />
 				</Control>
 				<Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.CustomizeDlgBannerBitmap)" />
 				<Control Id="Text" Type="Text" X="25" Y="55" Width="320" Height="20" Text="!(loc.CustomizeDlgText)" />
@@ -106,14 +94,12 @@
 				<Control Id="ItemSize" Type="Text" X="215" Y="140" Width="131" Height="50" Text="!(loc.CustomizeDlgItemSize)">
 					<Subscribe Event="SelectionSize" Attribute="Text" />
 				</Control>
-				<Control Id="Location" Type="Text" X="90" Y="210" Width="200" Height="20" Text="!(loc.CustomizeDlgLocation)">
+				<Control Id="Location" Type="Text" X="90" Y="210" Width="200" Height="20" Text="!(loc.CustomizeDlgLocation)" HideCondition="Installed">
 					<Subscribe Event="SelectionPath" Attribute="Text" />
 					<Subscribe Event="SelectionPathOn" Attribute="Visible" />
-					<Condition Action="hide">Installed</Condition>
 				</Control>
-				<Control Id="LocationLabel" Type="Text" X="25" Y="210" Width="65" Height="10" Text="!(loc.CustomizeDlgLocationLabel)">
+				<Control Id="LocationLabel" Type="Text" X="25" Y="210" Width="65" Height="10" Text="!(loc.CustomizeDlgLocationLabel)" HideCondition="Installed">
 					<Subscribe Event="SelectionPathOn" Attribute="Visible" />
-					<Condition Action="hide">Installed</Condition>
 				</Control>
 			</Dialog>
 		</UI>
@@ -152,135 +138,133 @@
 		</Property>
 
 		<Property Id="XNVIEW.DIR">
-			<RegistrySearch Id="xnview.installdir" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\XnView_is1" Name="InstallLocation" Type="directory" Win64="no" />
+			<RegistrySearch Id="xnview.installdir" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\XnView_is1" Name="InstallLocation" Type="directory" Bitness="always32" />
 		</Property>
 		<Property Id="XNVIEW.EXE">
-			<RegistrySearch Id="xnview.exe" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\XnView_is1" Name="InstallLocation" Type="directory" Win64="no">
+			<RegistrySearch Id="xnview.exe" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\XnView_is1" Name="InstallLocation" Type="directory" Bitness="always32">
 				<FileSearch Name="xnview.exe" />
 			</RegistrySearch>
 		</Property>
 
-		<Directory Id="TARGETDIR" Name="SourceDir">
-			<Directory Id="ProgramFiles64Folder">
+		<StandardDirectory Id="ProgramFiles64Folder">
 
-				<Directory Id="QOI.DIR" Name="qoi-fu">
-					<Component Id="png2qoi.exe">
-						<File Source="png2qoi.exe" Checksum="yes" KeyPath="yes" />
-					</Component>
-					<Component Id="path" Guid="053F1EB2-D163-4236-A1C9-C112C029CDCB">
-						<Environment Id="path" Action="set" Name="Path" Part="last" Permanent="no" System="yes" Value="[QOI.DIR]" />
-						<CreateFolder />
-					</Component>
+			<Directory Id="QOI.DIR" Name="qoi-fu">
+				<Component Id="png2qoi.exe">
+					<File Source="png2qoi.exe" Checksum="yes" KeyPath="yes" />
+				</Component>
+				<Component Id="path" Guid="053F1EB2-D163-4236-A1C9-C112C029CDCB">
+					<Environment Id="path" Action="set" Name="Path" Part="last" Permanent="no" System="yes" Value="[QOI.DIR]" />
+					<CreateFolder />
+				</Component>
 
-					<Component Id="wicqoi64.dll">
-						<File Source="win32/wicqoi64.dll" Checksum="yes" KeyPath="yes">
-							<Class Id="{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Context="InprocServer32" Description="WIC QOI Decoder (64-bit)" ThreadingModel="both" />
-						</File>
-						<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Position" Value="0" Type="integer" />
-						<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Length" Value="4" Type="integer" />
-						<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Pattern" Value="716f6966" Type="binary" />
-						<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Mask" Value="ffffffff" Type="binary" />
-						<RegistryValue Root="HKCR" Key="CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Name="CLSID" Value="{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Type="string" />
-						<RegistryValue Root="HKCR" Key="CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Name="FriendlyName" Value="Quite OK Image Decoder" Type="string" />
-						<RegistryValue Root="HKCR" Key=".qoi\ShellEx\{e357fccd-a995-4576-b01f-234630154e96}" Value="{C7657C4A-9F68-40fa-A4DF-96BC08EB3551}" Type="string" />
-						<RegistryValue Root="HKCR" Key=".qoi" Name="PerceivedType" Value="image" Type="string" />
-					</Component>
-					<Component Id="wicqoi32.dll" Win64="no">
-						<File Source="win32/wicqoi32.dll" Checksum="yes" KeyPath="yes">
-							<Class Id="{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Context="InprocServer32" Description="WIC QOI Decoder (32-bit)" ThreadingModel="both" />
-						</File>
-						<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Position" Value="0" Type="integer" />
-						<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Length" Value="4" Type="integer" />
-						<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Pattern" Value="716f6966" Type="binary" />
-						<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Mask" Value="ffffffff" Type="binary" />
-						<RegistryValue Root="HKCR" Key="CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Name="CLSID" Value="{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Type="string" />
-						<RegistryValue Root="HKCR" Key="CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Name="FriendlyName" Value="Quite OK Image Decoder" Type="string" />
-						<RegistryValue Root="HKCR" Key=".qoi\ShellEx\{e357fccd-a995-4576-b01f-234630154e96}" Value="{C7657C4A-9F68-40fa-A4DF-96BC08EB3551}" Type="string" />
-						<RegistryValue Root="HKCR" Key=".qoi" Name="PerceivedType" Value="image" Type="string" />
-					</Component>
-				</Directory>
+				<Component Id="wicqoi64.dll">
+					<File Source="win32/wicqoi64.dll" Checksum="yes" KeyPath="yes">
+						<Class Id="{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Context="InprocServer32" Description="WIC QOI Decoder (64-bit)" ThreadingModel="both" />
+					</File>
+					<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Position" Value="0" Type="integer" />
+					<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Length" Value="4" Type="integer" />
+					<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Pattern" Value="716f6966" Type="binary" />
+					<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Mask" Value="ffffffff" Type="binary" />
+					<RegistryValue Root="HKCR" Key="CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Name="CLSID" Value="{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Type="string" />
+					<RegistryValue Root="HKCR" Key="CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Name="FriendlyName" Value="Quite OK Image Decoder" Type="string" />
+					<RegistryValue Root="HKCR" Key=".qoi\ShellEx\{e357fccd-a995-4576-b01f-234630154e96}" Value="{C7657C4A-9F68-40fa-A4DF-96BC08EB3551}" Type="string" />
+					<RegistryValue Root="HKCR" Key=".qoi" Name="PerceivedType" Value="image" Type="string" />
+				</Component>
+				<Component Id="wicqoi32.dll" Bitness="always32">
+					<File Source="win32/wicqoi32.dll" Checksum="yes" KeyPath="yes">
+						<Class Id="{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Context="InprocServer32" Description="WIC QOI Decoder (32-bit)" ThreadingModel="both" />
+					</File>
+					<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Position" Value="0" Type="integer" />
+					<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Length" Value="4" Type="integer" />
+					<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Pattern" Value="716f6966" Type="binary" />
+					<RegistryValue Root="HKCR" Key="CLSID\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}\Patterns\0" Name="Mask" Value="ffffffff" Type="binary" />
+					<RegistryValue Root="HKCR" Key="CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Name="CLSID" Value="{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Type="string" />
+					<RegistryValue Root="HKCR" Key="CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{3786FCFE-A8F4-4AEB-852C-C76CC74D1123}" Name="FriendlyName" Value="Quite OK Image Decoder" Type="string" />
+					<RegistryValue Root="HKCR" Key=".qoi\ShellEx\{e357fccd-a995-4576-b01f-234630154e96}" Value="{C7657C4A-9F68-40fa-A4DF-96BC08EB3551}" Type="string" />
+					<RegistryValue Root="HKCR" Key=".qoi" Name="PerceivedType" Value="image" Type="string" />
+				</Component>
+			</Directory>
 
-				<Directory Id="GIMP.DIR" Name="GIMP 2">
-					<Directory Id="GIMPLIB.DIR" Name="lib">
-						<Directory Id="GIMPGIMP.DIR" Name="gimp">
-							<Directory Id="GIMP20.DIR" Name="2.0">
-								<Directory Id="GIMPPLUG.DIR" Name="plug-ins">
-									<Directory Id="GIMPQOI.DIR" Name="file-qoi">
-										<Component Id="fileqoi.exe">
-											<File Source="file-qoi.exe" Checksum="yes" KeyPath="yes" />
-										</Component>
-									</Directory>
+			<Directory Id="GIMP.DIR" Name="GIMP 2">
+				<Directory Id="GIMPLIB.DIR" Name="lib">
+					<Directory Id="GIMPGIMP.DIR" Name="gimp">
+						<Directory Id="GIMP20.DIR" Name="2.0">
+							<Directory Id="GIMPPLUG.DIR" Name="plug-ins">
+								<Directory Id="GIMPQOI.DIR" Name="file-qoi">
+									<Component Id="fileqoi.exe">
+										<File Source="file-qoi.exe" Checksum="yes" KeyPath="yes" />
+									</Component>
 								</Directory>
 							</Directory>
 						</Directory>
 					</Directory>
 				</Directory>
+			</Directory>
 
-				<Directory Id="IMAGINE.DIR" Name="Imagine">
-					<Directory Id="IMAGINEPLUG.DIR" Name="Plugin">
-						<Component Id="QOI.plg64">
-							<File Source="win32/QOI.plg64" Checksum="yes" KeyPath="yes" />
-						</Component>
-					</Directory>
-					<Directory Id="IMAGINE32PLUG.DIR" Name="Plugin">
-						<Component Id="QOI.plg" Win64="no">
-							<File Source="win32/QOI.plg" Checksum="yes" KeyPath="yes" />
-						</Component>
-					</Directory>
+			<Directory Id="IMAGINE.DIR" Name="Imagine">
+				<Directory Id="IMAGINEPLUG.DIR" Name="Plugin">
+					<Component Id="QOI.plg64">
+						<File Source="win32/QOI.plg64" Checksum="yes" KeyPath="yes" />
+					</Component>
 				</Directory>
-
-				<Directory Id="PAINTDOTNET.DIR" Name="Paint.NET">
-					<Directory Id="PAINTDOTNETFILETYPES.DIR" Name="FileTypes">
-						<Component Id="QOIPaintDotNet.dll">
-							<File Source="win32/QOIPaintDotNet.dll" Checksum="yes" KeyPath="yes" />
-						</Component>
-					</Directory>
-				</Directory>
-
-				<Directory Id="XNVIEWMP.DIR" Name="XnViewMP">
-					<Directory Id="XNVIEWMPPLUG.DIR" Name="plugins">
-						<Component Id="Xqoi.usr">
-							<File Source="Xqoi.usr" Checksum="yes" KeyPath="yes" />
-						</Component>
-					</Directory>
-				</Directory>
-
-				<Directory Id="XNVIEW.DIR" Name="XnView">
-					<Directory Id="XNVIEWPLUG.DIR" Name="PlugIns">
-						<Component Id="Xqoi32.usr" Win64="no">
-							<File Source="win32/Xqoi32.usr" Checksum="yes" KeyPath="yes" />
-						</Component>
-					</Directory>
+				<Directory Id="IMAGINE32PLUG.DIR" Name="Plugin">
+					<Component Id="QOI.plg" Bitness="always32">
+						<File Source="win32/QOI.plg" Checksum="yes" KeyPath="yes" />
+					</Component>
 				</Directory>
 			</Directory>
-		</Directory>
+
+			<Directory Id="PAINTDOTNET.DIR" Name="Paint.NET">
+				<Directory Id="PAINTDOTNETFILETYPES.DIR" Name="FileTypes">
+					<Component Id="QOIPaintDotNet.dll">
+						<File Source="win32/QOIPaintDotNet.dll" Checksum="yes" KeyPath="yes" />
+					</Component>
+				</Directory>
+			</Directory>
+
+			<Directory Id="XNVIEWMP.DIR" Name="XnViewMP">
+				<Directory Id="XNVIEWMPPLUG.DIR" Name="plugins">
+					<Component Id="Xqoi.usr">
+						<File Source="Xqoi.usr" Checksum="yes" KeyPath="yes" />
+					</Component>
+				</Directory>
+			</Directory>
+
+			<Directory Id="XNVIEW.DIR" Name="XnView">
+				<Directory Id="XNVIEWPLUG.DIR" Name="PlugIns">
+					<Component Id="Xqoi32.usr" Bitness="always32">
+						<File Source="win32/Xqoi32.usr" Checksum="yes" KeyPath="yes" />
+					</Component>
+				</Directory>
+			</Directory>
+		</StandardDirectory>
 
 		<Feature Id="wic" Title="Windows Explorer plugin" Level="1" ConfigurableDirectory="QOI.DIR" Description="Plugin for Windows Explorer." AllowAdvertise="no">
 			<ComponentRef Id="wicqoi64.dll" />
 			<ComponentRef Id="wicqoi32.dll" />
 		</Feature>
 		<Feature Id="gimp" Title="GIMP plugin" Level="9" ConfigurableDirectory="GIMPQOI.DIR" Description="Plugin for GIMP." AllowAdvertise="no">
-			<Condition Level="1">GIMP.DIR</Condition>
+			<Level Value="1" Condition="GIMP.DIR" />
 			<ComponentRef Id="fileqoi.exe" />
 		</Feature>
 		<Feature Id="imagine" Title="Imagine plugin" Level="9" ConfigurableDirectory="IMAGINEPLUG.DIR" Description="Plugin for Imagine." AllowAdvertise="no">
-			<Condition Level="1">IMAGINE64.EXE</Condition>
+			<Level Value="1" Condition="IMAGINE64.EXE" />
 			<ComponentRef Id="QOI.plg64" />
 		</Feature>
 		<Feature Id="imagine32" Title="Imagine 32-bit plugin" Level="9" ConfigurableDirectory="IMAGINE32PLUG.DIR" Description="Plugin for 32-bit Imagine." AllowAdvertise="no">
-			<Condition Level="1">IMAGINE.EXE</Condition>
+			<Level Value="1" Condition="IMAGINE.EXE" />
 			<ComponentRef Id="QOI.plg" />
 		</Feature>
 		<Feature Id="paintdotnet" Title="Paint.NET plugin" Level="9" ConfigurableDirectory="PAINTDOTNETFILETYPES.DIR" Description="Plugin for Paint.NET" AllowAdvertise="no">
-			<Condition Level="1">PAINTDOTNET.DIR</Condition>
+			<Level Value="1" Condition="PAINTDOTNET.DIR" />
 			<ComponentRef Id="QOIPaintDotNet.dll" />
 		</Feature>
 		<Feature Id="xnviewmp" Title="XnViewMP plugin" Level="9" ConfigurableDirectory="XNVIEWMPPLUG.DIR" Description="Plugin for XnViewMP." AllowAdvertise="no">
-			<Condition Level="1">XNVIEWMP.DIR</Condition>
+			<Level Value="1" Condition="XNVIEWMP.DIR" />
 			<ComponentRef Id="Xqoi.usr" />
 		</Feature>
 		<Feature Id="xnview" Title="XnView Classic plugin" Level="9" ConfigurableDirectory="XNVIEWPLUG.DIR" Description="Plugin for XnView Classic." AllowAdvertise="no">
-			<Condition Level="1">XNVIEW.DIR</Condition>
+			<Level Value="1" Condition="XNVIEW.DIR" />
 			<ComponentRef Id="Xqoi32.usr" />
 		</Feature>
 		<Feature Id="png2qoi" Title="png2qoi" Level="1" ConfigurableDirectory="QOI.DIR" Description="Command-line converter between PNG and QOI formats." AllowAdvertise="no">
@@ -289,5 +273,5 @@
 				<ComponentRef Id="path" />
 			</Feature>
 		</Feature>
-	</Product>
+	</Package>
 </Wix>
