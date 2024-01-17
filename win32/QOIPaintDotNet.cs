@@ -1,6 +1,6 @@
 ﻿// QOIPaintDotNet.cs - QOI Paint.NET plugin
 //
-// Copyright (C) 2021-2022 Piotr Fusik
+// Copyright (C) 2021-2024 Piotr Fusik
 //
 // MIT License:
 //
@@ -31,7 +31,7 @@ using PaintDotNet.Rendering;
 
 [assembly: AssemblyTitle("Paint.NET Quite OK Image (QOI) plugin")]
 [assembly: AssemblyCompany("Piotr Fusik")]
-[assembly: AssemblyCopyright("Copyright © 2021-2022")]
+[assembly: AssemblyCopyright("Copyright © 2021-2024")]
 [assembly: AssemblyVersion("2.0.0.0")]
 [assembly: AssemblyFileVersion("2.0.0.0")]
 
