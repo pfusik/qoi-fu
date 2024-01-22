@@ -25,9 +25,9 @@
 		<key>CFBundleName</key>
 		<string>qoi-fu</string>
 		<key>CFBundleShortVersionString</key>
-		<string>2.0.0</string>
+		<string>3.0.0</string>
 		<key>CFBundleVersion</key>
-		<string>2.0.0</string>
+		<string>3.0.0</string>
 		<key>CFPlugInDynamicRegisterFunction</key>
 		<string/>
 		<key>CFPlugInDynamicRegistration</key>

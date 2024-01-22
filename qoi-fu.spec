@@ -1,5 +1,5 @@
 Name: qoi-fu
-Version: 2.0.0
+Version: 3.0.0
 Release: 1
 Summary: Quite OK Image (QOI) encoder/decoder
 License: MIT
@@ -54,6 +54,9 @@ make PREFIX=%{buildroot}%{_prefix} GDK_PIXBUF_LOADERS_DIR=%{buildroot}%{_libdir}
 %{_libdir}/gimp/2.0/plug-ins/file-qoi/file-qoi
 
 %changelog
+* Mon Jan 22 2024 Piotr Fusik <piotr@fusion-lang.org>
+- 3.0.0-1
+
 * Mon Sep 12 2022 Piotr Fusik <fox@scene.pl>
 - 2.0.0-1
 

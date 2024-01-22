@@ -1,6 +1,6 @@
 // png2qoi.c - command-line converter between PNG and QOI formats
 //
-// Copyright (C) 2021-2022 Piotr Fusik
+// Copyright (C) 2021-2024 Piotr Fusik
 //
 // MIT License:
 //
@@ -170,7 +170,7 @@ int main(int argc, char **argv)
 		else if ((arg[1] == 'h' && arg[2] == '\0') || strcmp(arg, "--help") == 0)
 			usage();
 		else if ((arg[1] == 'v' && arg[2] == '\0') || strcmp(arg, "--version") == 0)
-			puts("png2qoi 2.0.0");
+			puts("png2qoi 3.0.0");
 		else {
 			fprintf(stderr, "png2qoi: unknown option: %s\n", arg);
 			return 1;
