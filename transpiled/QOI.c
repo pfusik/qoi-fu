@@ -292,6 +292,8 @@ bool QOIDecoder_Decode(QOIDecoder *self, uint8_t const *encoded, int encodedSize
 					FuShared_Release(pixels);
 					return false;
 				}
+				if (pixelsOffset == 0)
+					index[53] = pixel;
 				for (int _i = 0; _i < e; _i++)
 					pixels[pixelsOffset + _i] = pixel;
 				pixelsOffset += e;

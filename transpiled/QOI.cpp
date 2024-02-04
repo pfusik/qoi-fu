@@ -170,6 +170,8 @@ bool QOIDecoder::decode(uint8_t const * encoded, int encodedSize)
 				e -= 191;
 				if (pixelsOffset + e > pixelsSize)
 					return false;
+				if (pixelsOffset == 0)
+					index[53] = pixel;
 				std::fill_n(pixels.get() + pixelsOffset, e, pixel);
 				pixelsOffset += e;
 				continue;

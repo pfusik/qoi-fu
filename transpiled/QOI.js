@@ -228,6 +228,8 @@ export class QOIDecoder
 					e -= 191;
 					if (pixelsOffset + e > pixelsSize)
 						return false;
+					if (pixelsOffset == 0)
+						index[53] = pixel;
 					pixels.fill(pixel, pixelsOffset, pixelsOffset + e);
 					pixelsOffset += e;
 					continue;

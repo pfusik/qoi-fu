@@ -238,6 +238,9 @@ public class QOIDecoder
 					if pixelsOffset + e > pixelsSize {
 						return false
 					}
+					if pixelsOffset == 0 {
+						index[53] = pixel
+					}
 					pixels.fill(pixel, pixelsOffset, e)
 					pixelsOffset += e
 					continue

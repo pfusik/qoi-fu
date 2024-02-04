@@ -202,6 +202,8 @@ class QOIDecoder:
 						e -= 191
 						if pixels_offset + e > pixels_size:
 							return False
+						if pixels_offset == 0:
+							index[53] = pixel
 						pixels[pixels_offset:pixels_offset + e] = array.array("i", [ pixel ]) * e
 						pixels_offset += e
 						continue

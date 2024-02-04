@@ -80,6 +80,8 @@ public class QOIDecoder
 					e -= 191;
 					if (pixelsOffset + e > pixelsSize)
 						return false;
+					if (pixelsOffset == 0)
+						index[53] = pixel;
 					Arrays.fill(pixels, pixelsOffset, pixelsOffset + e, pixel);
 					pixelsOffset += e;
 					continue;

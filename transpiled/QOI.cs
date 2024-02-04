@@ -209,6 +209,8 @@ public class QOIDecoder
 					e -= 191;
 					if (pixelsOffset + e > pixelsSize)
 						return false;
+					if (pixelsOffset == 0)
+						index[53] = pixel;
 					Array.Fill(pixels, pixel, pixelsOffset, e);
 					pixelsOffset += e;
 					continue;

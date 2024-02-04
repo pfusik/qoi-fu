@@ -253,7 +253,9 @@ public class QOIDecoder
 					// 11rrrrrr
 					e -= 0xc0 - 1;
 					if (pixelsOffset + e > pixelsSize)
-							return false;
+						return false;
+					if (pixelsOffset == 0)
+						index[0xff * 11 & 0x3f] = pixel;
 					pixels.Fill(pixel, pixelsOffset, e);
 					pixelsOffset += e;
 					continue;
