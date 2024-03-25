@@ -19,9 +19,9 @@ public class QOIEncoder
 	private var encodedSize : Int = 0
 
 	/// Determines if an image of given size can be encoded.
-	/// - parameter width Image width in pixels.
-	/// - parameter height Image height in pixels.
-	/// - parameter alpha Whether the image has the alpha channel (transparency).
+	/// - Parameter width: Image width in pixels.
+	/// - Parameter height: Image height in pixels.
+	/// - Parameter alpha: Whether the image has the alpha channel (transparency).
 	public static func canEncode(_ width : Int, _ height : Int, _ alpha : Bool) -> Bool
 	{
 		return width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? 5 : 4)
@@ -29,11 +29,11 @@ public class QOIEncoder
 
 	/// Encodes the given image.
 	/// Returns `true` if encoded successfully.
-	/// - parameter width Image width in pixels.
-	/// - parameter height Image height in pixels.
-	/// - parameter pixels Pixels of the image, top-down, left-to-right.
-	/// - parameter alpha `false` specifies that all pixels are opaque. High bytes of `pixels` elements are ignored then.
-	/// - parameter linearColorspace Specifies the color space.
+	/// - Parameter width: Image width in pixels.
+	/// - Parameter height: Image height in pixels.
+	/// - Parameter pixels: Pixels of the image, top-down, left-to-right.
+	/// - Parameter alpha: `false` specifies that all pixels are opaque. High bytes of `pixels` elements are ignored then.
+	/// - Parameter linearColorspace: Specifies the color space.
 	public func encode(_ width : Int, _ height : Int, _ pixels : ArrayRef<Int>, _ alpha : Bool, _ linearColorspace : Bool) -> Bool
 	{
 		if !QOIEncoder.canEncode(width, height, alpha) {
@@ -171,8 +171,8 @@ public class QOIDecoder
 
 	/// Decodes the given QOI file contents.
 	/// Returns `true` if decoded successfully.
-	/// - parameter encoded QOI file contents. Only the first `encodedSize` bytes are accessed.
-	/// - parameter encodedSize QOI file length.
+	/// - Parameter encoded: QOI file contents. Only the first `encodedSize` bytes are accessed.
+	/// - Parameter encodedSize: QOI file length.
 	public func decode(_ encoded : ArrayRef<UInt8>, _ fuParamEncodedSize : Int) -> Bool
 	{
 		var encodedSize : Int = fuParamEncodedSize
