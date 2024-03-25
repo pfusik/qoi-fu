@@ -43,8 +43,8 @@ win32/signed: png2qoi.exe win32/wicqoi64.dll win32/wicqoi32.dll file-qoi.exe win
 
 deb64:
 	/usr/bin/tar czf ../qoi-fu-$(VERSION).tar.gz --numeric-owner --owner=0 --group=0 --mode=644 --transform=s,,qoi-fu-$(VERSION)/, `git ls-files`
-	scp ../qoi-fu-$(VERSION).tar.gz vm:qoi-fu-$(VERSION).tar
-	ssh vm 'rm -rf qoi-fu-$(VERSION) && tar xf qoi-fu-$(VERSION).tar && make -C qoi-fu-$(VERSION) deb'
+	scp ../qoi-fu-$(VERSION).tar.gz vm:.
+	ssh vm 'rm -rf qoi-fu-$(VERSION) && tar xf qoi-fu-$(VERSION).tar.gz && make -C qoi-fu-$(VERSION) deb'
 	scp vm:qoi-fu-2png_$(VERSION)-1_amd64.deb ..
 	scp vm:qoi-fu-gdk-pixbuf_$(VERSION)-1_amd64.deb ..
 	scp vm:qoi-fu-gimp_$(VERSION)-1_amd64.deb ..
