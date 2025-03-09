@@ -4,14 +4,11 @@ PREFIX = /usr/local
 CFLAGS = -O2 -Wall
 GDK_PIXBUF_LOADERS_DIR = `pkg-config --variable=gdk_pixbuf_moduledir gdk-pixbuf-2.0`
 GIMP_LDFLAGS = `gimptool-2.0 --libs`
-GIMP_MACOS_LIBDIR = /Applications/GIMP-2.10.app/Contents/Resources/lib
 ifeq ($(OS),Windows_NT)
 EXEEXT = .exe
 GIMP_LDFLAGS += -Wl,-subsystem,windows
 XNVIEW_DIR = C:/Program Files/XnViewMP
 SUDO = elevate
-else ifneq ($(wildcard $(GIMP_MACOS_LIBDIR)),)
-GIMP_LDFLAGS = -mmacosx-version-min=10.9 -rpath @executable_path/../../../ -L $(GIMP_MACOS_LIBDIR) -lgimpui-2.0.0 -lgimp-2.0.0 -lgegl-0.4.0 -lbabl-0.1.0 -lgobject-2.0.0
 else
 XNVIEW_DIR = /opt/XnView
 endif
@@ -50,8 +47,6 @@ ifeq ($(OS),Windows_NT)
 	install -D $< `gimptool-2.0 --gimpplugindir`/plug-ins/file-qoi.exe
 else ifdef BUILDING_PACKAGE
 	install -D $< $(libdir)/gimp/2.0/plug-ins/file-qoi/file-qoi
-else ifneq ($(wildcard $(GIMP_MACOS_LIBDIR)),)
-	cp $< $(GIMP_MACOS_LIBDIR)/gimp/2.0/plug-ins/file-qoi
 else
 	gimptool-2.0 --install-admin-bin $<
 endif
