@@ -1,6 +1,5 @@
-png2qoi
-file-qoi
-Xqoi.usr
-*.dll
+/png2qoi
+/libpixbufloader-qoi.so
+/file-qoi
+/Xqoi.usr
 *.exe
-*.so
