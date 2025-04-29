@@ -45,9 +45,10 @@ public:
 	 * Returns the encoded file length.
 	 */
 	int getEncodedSize() const;
-public:
+private: // internal
 	static constexpr int headerSize = 14;
 	static constexpr int paddingSize = 8;
+	friend QOIDecoder;
 private:
 	std::shared_ptr<uint8_t[]> encoded;
 	int encodedSize;
