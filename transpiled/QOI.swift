@@ -34,7 +34,7 @@ public class QOIEncoder
 	/// - Parameter pixels: Pixels of the image, top-down, left-to-right.
 	/// - Parameter alpha: `false` specifies that all pixels are opaque. High bytes of `pixels` elements are ignored then.
 	/// - Parameter linearColorspace: Specifies the color space.
-	public func encode(_ width : Int, _ height : Int, _ pixels : ArrayRef<Int>, _ alpha : Bool, _ linearColorspace : Bool) -> Bool
+	public func encode(_ width : Int, _ height : Int, _ pixels : ArrayRef<Int32>, _ alpha : Bool, _ linearColorspace : Bool) -> Bool
 	{
 		if !QOIEncoder.canEncode(width, height, alpha) {
 			return false
@@ -55,13 +55,13 @@ public class QOIEncoder
 		encoded[11] = UInt8(height & 255)
 		encoded[12] = alpha ? 4 : 3
 		encoded[13] = linearColorspace ? 1 : 0
-		var index = [Int](repeating: 0, count: 64)
+		var index = [Int32](repeating: 0, count: 64)
 		var encodedOffset : Int = 14
 		var lastPixel : Int = -16777216
 		var run : Int = 0
 		var pixelsOffset : Int = 0
 		while pixelsOffset < pixelsSize {
-			var pixel : Int = pixels[pixelsOffset]
+			var pixel : Int = Int(pixels[pixelsOffset])
 			pixelsOffset += 1
 			if !alpha {
 				pixel |= -16777216
@@ -86,7 +86,7 @@ public class QOIEncoder
 					encodedOffset += 1
 				}
 				else {
-					index[indexOffset] = pixel
+					index[indexOffset] = Int32(pixel)
 					let r : Int = pixel >> 16 & 255
 					let g : Int = pixel >> 8 & 255
 					let b : Int = pixel & 255
@@ -163,7 +163,7 @@ public class QOIDecoder
 
 	private var height : Int = 0
 
-	private var pixels : ArrayRef<Int>?
+	private var pixels : ArrayRef<Int32>?
 
 	private var alpha : Bool = false
 
@@ -205,10 +205,10 @@ public class QOIDecoder
 			return false
 		}
 		let pixelsSize : Int = width * height
-		let pixels : ArrayRef<Int> = ArrayRef<Int>(repeating: 0, count: pixelsSize)
+		let pixels : ArrayRef<Int32> = ArrayRef<Int32>(repeating: 0, count: pixelsSize)
 		encodedSize -= 8
 		var encodedOffset : Int = 14
-		var index = [Int](repeating: 0, count: 64)
+		var index = [Int32](repeating: 0, count: 64)
 		var pixel : Int = -16777216
 		var pixelsOffset : Int = 0
 		while pixelsOffset < pixelsSize {
@@ -219,8 +219,8 @@ public class QOIDecoder
 			encodedOffset += 1
 			switch e >> 6 {
 			case 0:
-				pixel = index[e]
-				pixels[pixelsOffset] = pixel
+				pixel = Int(index[e])
+				pixels[pixelsOffset] = Int32(pixel)
 				pixelsOffset += 1
 				continue
 			case 1:
@@ -239,9 +239,9 @@ public class QOIDecoder
 						return false
 					}
 					if pixelsOffset == 0 {
-						index[53] = pixel
+						index[53] = Int32(pixel)
 					}
-					pixels.fill(pixel, pixelsOffset, e)
+					pixels.fill(Int32(pixel), pixelsOffset, e)
 					pixelsOffset += e
 					continue
 				}
@@ -255,7 +255,7 @@ public class QOIDecoder
 				}
 				break
 			}
-			index[(pixel >> 16 * 3 + pixel >> 8 * 5 + pixel & 63 * 7 + pixel >> 24 * 11) & 63] = pixel
+			index[(pixel >> 16 * 3 + pixel >> 8 * 5 + pixel & 63 * 7 + pixel >> 24 * 11) & 63] = Int32(pixel)
 			pixels[pixelsOffset] = index[(pixel >> 16 * 3 + pixel >> 8 * 5 + pixel & 63 * 7 + pixel >> 24 * 11) & 63]
 			pixelsOffset += 1
 		}
@@ -282,7 +282,7 @@ public class QOIDecoder
 
 	/// Returns the pixels of the decoded image, top-down, left-to-right.
 	/// Each pixel is a 32-bit integer 0xAARRGGBB.
-	public func getPixels() -> ArrayRef<Int>
+	public func getPixels() -> ArrayRef<Int32>
 	{
 		return self.pixels!
 	}
