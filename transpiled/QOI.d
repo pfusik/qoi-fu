@@ -22,7 +22,7 @@ class QOIEncoder
 	/// width = Image width in pixels.
 	/// height = Image height in pixels.
 	/// alpha = Whether the image has the alpha channel (transparency).
-	static bool canEncode(int width, int height, bool alpha) => width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? cast(ubyte)(5) : cast(ubyte)(4));
+	static bool canEncode(int width, int height, bool alpha) => width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? cast(ubyte) 5 : cast(ubyte) 4);
 
 	/// Encodes the given image.
 	/// Returns `true` if encoded successfully.
@@ -37,21 +37,21 @@ class QOIEncoder
 		if (!canEncode(width, height, alpha))
 			return false;
 		int pixelsSize = width * height;
-		ubyte[] encoded = new ubyte[14 + pixelsSize * (alpha ? cast(ubyte)(5) : cast(ubyte)(4)) + 8];
+		ubyte[] encoded = new ubyte[14 + pixelsSize * (alpha ? cast(ubyte) 5 : cast(ubyte) 4) + 8];
 		encoded[0] = 'q';
 		encoded[1] = 'o';
 		encoded[2] = 'i';
 		encoded[3] = 'f';
-		encoded[4] = cast(ubyte)(width >> 24);
-		encoded[5] = cast(ubyte)(width >> 16);
-		encoded[6] = cast(ubyte)(width >> 8);
-		encoded[7] = cast(ubyte)(width);
-		encoded[8] = cast(ubyte)(height >> 24);
-		encoded[9] = cast(ubyte)(height >> 16);
-		encoded[10] = cast(ubyte)(height >> 8);
-		encoded[11] = cast(ubyte)(height);
-		encoded[12] = cast(ubyte)(alpha ? cast(ubyte)(4) : cast(ubyte)(3));
-		encoded[13] = cast(ubyte)(linearColorspace ? cast(ubyte)(1) : cast(ubyte)(0));
+		encoded[4] = cast(ubyte) (width >> 24);
+		encoded[5] = cast(ubyte) (width >> 16);
+		encoded[6] = cast(ubyte) (width >> 8);
+		encoded[7] = cast(ubyte) width;
+		encoded[8] = cast(ubyte) (height >> 24);
+		encoded[9] = cast(ubyte) (height >> 16);
+		encoded[10] = cast(ubyte) (height >> 8);
+		encoded[11] = cast(ubyte) height;
+		encoded[12] = cast(ubyte) (alpha ? cast(ubyte) 4 : cast(ubyte) 3);
+		encoded[13] = cast(ubyte) (linearColorspace ? cast(ubyte) 1 : cast(ubyte) 0);
 		int[64] index;
 		int encodedOffset = 14;
 		int lastPixel = -16777216;
@@ -62,18 +62,18 @@ class QOIEncoder
 				pixel |= -16777216;
 			if (pixel == lastPixel) {
 				if (++run == 62 || pixelsOffset >= pixelsSize) {
-					encoded[encodedOffset++] = cast(ubyte)(191 + run);
+					encoded[encodedOffset++] = cast(ubyte) (191 + run);
 					run = 0;
 				}
 			}
 			else {
 				if (run > 0) {
-					encoded[encodedOffset++] = cast(ubyte)(191 + run);
+					encoded[encodedOffset++] = cast(ubyte) (191 + run);
 					run = 0;
 				}
 				int indexOffset = ((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63;
 				if (pixel == index[indexOffset])
-					encoded[encodedOffset++] = cast(ubyte)(indexOffset);
+					encoded[encodedOffset++] = cast(ubyte) indexOffset;
 				else {
 					index[indexOffset] = pixel;
 					int r = pixel >> 16 & 255;
@@ -81,10 +81,10 @@ class QOIEncoder
 					int b = pixel & 255;
 					if ((pixel ^ lastPixel) >> 24 != 0) {
 						encoded[encodedOffset] = 255;
-						encoded[encodedOffset + 1] = cast(ubyte)(r);
-						encoded[encodedOffset + 2] = cast(ubyte)(g);
-						encoded[encodedOffset + 3] = cast(ubyte)(b);
-						encoded[encodedOffset + 4] = cast(ubyte)(pixel >> 24);
+						encoded[encodedOffset + 1] = cast(ubyte) r;
+						encoded[encodedOffset + 2] = cast(ubyte) g;
+						encoded[encodedOffset + 3] = cast(ubyte) b;
+						encoded[encodedOffset + 4] = cast(ubyte) (pixel >> 24);
 						encodedOffset += 5;
 					}
 					else {
@@ -92,20 +92,20 @@ class QOIEncoder
 						int dg = (((g - (lastPixel >> 8)) & 255) ^ 128) - 128;
 						int db = (((b - lastPixel) & 255) ^ 128) - 128;
 						if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
-							encoded[encodedOffset++] = cast(ubyte)(106 + (dr << 4) + (dg << 2) + db);
+							encoded[encodedOffset++] = cast(ubyte) (106 + (dr << 4) + (dg << 2) + db);
 						else {
 							dr -= dg;
 							db -= dg;
 							if (dr >= -8 && dr <= 7 && dg >= -32 && dg <= 31 && db >= -8 && db <= 7) {
-								encoded[encodedOffset] = cast(ubyte)(160 + dg);
-								encoded[encodedOffset + 1] = cast(ubyte)(136 + (dr << 4) + db);
+								encoded[encodedOffset] = cast(ubyte) (160 + dg);
+								encoded[encodedOffset + 1] = cast(ubyte) (136 + (dr << 4) + db);
 								encodedOffset += 2;
 							}
 							else {
 								encoded[encodedOffset] = 254;
-								encoded[encodedOffset + 1] = cast(ubyte)(r);
-								encoded[encodedOffset + 2] = cast(ubyte)(g);
-								encoded[encodedOffset + 3] = cast(ubyte)(b);
+								encoded[encodedOffset + 1] = cast(ubyte) r;
+								encoded[encodedOffset + 2] = cast(ubyte) g;
+								encoded[encodedOffset + 3] = cast(ubyte) b;
 								encodedOffset += 4;
 							}
 						}
@@ -114,7 +114,7 @@ class QOIEncoder
 				lastPixel = pixel;
 			}
 		}
-		encoded[encodedOffset .. $][0 .. 7].fill(cast(ubyte)(0));
+		encoded[encodedOffset .. $][0 .. 7].fill(cast(ubyte) 0);
 		encoded[encodedOffset + 8 - 1] = 1;
 		this.encoded = encoded;
 		this.encodedSize = encodedOffset + 8;
