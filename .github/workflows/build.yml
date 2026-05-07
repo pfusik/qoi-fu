@@ -10,4 +10,6 @@ jobs:
       - run: wget https://github.com/fusionlanguage/fut/releases/download/fut-3.3.1/fut_3.3.1-1_amd64.deb
       - run: sudo apt install libpng-dev
       - uses: actions/checkout@main
+      - run: rm transpiled/*
       - run: make -j4
+      - run: git diff
