@@ -1,0 +1,12 @@
+name: build
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+jobs:
+  make:
+    runs-on: ubuntu-24.04
+    steps:
+      - run: wget https://github.com/fusionlanguage/fut/releases/download/fut-3.3.1/fut_3.3.1-1_amd64.deb
+      - uses: actions/checkout@main
+      - run: make -j4
