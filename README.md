@@ -1,3 +1,5 @@
+[![GitHub Actions](https://github.com/pfusik/qoi-fu/actions/workflows/build.yml/badge.svg)](https://github.com/pfusik/qoi-fu/actions/workflows/build.yml)
+
 This project implements encoding and decoding
 the ["Quite OK Image" (QOI)](https://github.com/phoboslab/qoi) format
 in the [Fusion programming language](https://fusion-lang.org).
@@ -18,4 +20,4 @@ License
 
 This code is licensed under the standard MIT license.
 
-Copyright (C) 2021-2024 Piotr Fusik
+Copyright (C) 2021-2026 Piotr Fusik
