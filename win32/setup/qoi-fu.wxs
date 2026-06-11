@@ -109,10 +109,6 @@
 		</UI>
 		<UIRef Id="WixUI_Common" />
 
-		<Property Id="GIMP.DIR">
-			<RegistrySearch Id="gimp.installdir" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\GIMP-2_is1" Name="InstallLocation" Type="directory" />
-		</Property>
-
 		<Property Id="PAINTDOTNET.DIR">
 			<RegistrySearch Id="paintdotnet.dir" Root="HKLM" Key="SOFTWARE\Paint.NET" Name="TARGETDIR" Type="directory" />
 		</Property>
@@ -174,22 +170,6 @@
 				</Component>
 			</Directory>
 
-			<Directory Id="GIMP.DIR" Name="GIMP 2">
-				<Directory Id="GIMPLIB.DIR" Name="lib">
-					<Directory Id="GIMPGIMP.DIR" Name="gimp">
-						<Directory Id="GIMP20.DIR" Name="2.0">
-							<Directory Id="GIMPPLUG.DIR" Name="plug-ins">
-								<Directory Id="GIMPQOI.DIR" Name="file-qoi">
-									<Component Id="fileqoi.exe">
-										<File Source="file-qoi.exe" Checksum="yes" KeyPath="yes" />
-									</Component>
-								</Directory>
-							</Directory>
-						</Directory>
-					</Directory>
-				</Directory>
-			</Directory>
-
 			<Directory Id="PAINTDOTNET.DIR" Name="Paint.NET">
 				<Directory Id="PAINTDOTNETFILETYPES.DIR" Name="FileTypes">
 					<Component Id="QOIPaintDotNet.dll">
@@ -218,10 +198,6 @@
 		<Feature Id="wic" Title="Windows Explorer plugin" Level="1" ConfigurableDirectory="QOI.DIR" Description="Plugin for Windows Explorer." AllowAdvertise="no">
 			<ComponentRef Id="wicqoi64.dll" />
 			<ComponentRef Id="wicqoi32.dll" />
-		</Feature>
-		<Feature Id="gimp" Title="GIMP plugin" Level="9" ConfigurableDirectory="GIMPQOI.DIR" Description="Plugin for GIMP." AllowAdvertise="no">
-			<Level Value="1" Condition="GIMP.DIR" />
-			<ComponentRef Id="fileqoi.exe" />
 		</Feature>
 		<Feature Id="paintdotnet" Title="Paint.NET plugin" Level="9" ConfigurableDirectory="PAINTDOTNETFILETYPES.DIR" Description="Plugin for Paint.NET" AllowAdvertise="no">
 			<Level Value="1" Condition="PAINTDOTNET.DIR" />

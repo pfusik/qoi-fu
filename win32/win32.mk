@@ -32,13 +32,13 @@ install-paint.net: win32/QOIPaintDotNet.dll
 	$(SUDO) cp $< "$(PAINT_NET_DIR)/FileTypes/QOIPaintDotNet.dll"
 
 ../qoi-fu-$(VERSION)-win64.msi: win32/setup/qoi-fu.wxs win32/setup/qoi.ico win32/setup/license.rtf win32/setup/dialog.jpg win32/setup/banner.jpg \
-	png2qoi.exe file-qoi.exe win32/wicqoi64.dll win32/wicqoi32.dll win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr win32/signed
+	png2qoi.exe win32/wicqoi64.dll win32/wicqoi32.dll win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr win32/signed
 	wix build -o $@ -arch x64 -d VERSION=$(VERSION) -ext WixToolset.UI.wixext $<
 
 win32/setup/signed: ../qoi-fu-$(VERSION)-win64.msi
 	$(DO_SIGN)
 
-win32/signed: png2qoi.exe win32/wicqoi64.dll win32/wicqoi32.dll file-qoi.exe win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr
+win32/signed: png2qoi.exe win32/wicqoi64.dll win32/wicqoi32.dll win32/Xqoi32.usr win32/QOIPaintDotNet.dll Xqoi.usr
 	$(DO_SIGN)
 
 deb64:
