@@ -14,7 +14,7 @@ public class QOIEncoder
 
 	fileprivate static let paddingSize = 8
 
-	private var encoded: ArrayRef<UInt8>?
+	private var encoded: ArrayRef<UInt8>!
 
 	private var encodedSize: Int = 0
 
@@ -140,7 +140,7 @@ public class QOIEncoder
 	/// Call `GetEncodedSize` to retrieve the number of leading bytes that are significant.
 	public func getEncoded() -> ArrayRef<UInt8>
 	{
-		return self.encoded!
+		return self.encoded
 	}
 
 	/// Returns the encoded file length.
@@ -163,7 +163,7 @@ public class QOIDecoder
 
 	private var height: Int = 0
 
-	private var pixels: ArrayRef<Int32>?
+	private var pixels: ArrayRef<Int32>!
 
 	private var alpha: Bool = false
 
@@ -284,7 +284,7 @@ public class QOIDecoder
 	/// Each pixel is a 32-bit integer 0xAARRGGBB.
 	public func getPixels() -> ArrayRef<Int32>
 	{
-		return self.pixels!
+		return self.pixels
 	}
 
 	/// Returns the information about the alpha channel from the file header.

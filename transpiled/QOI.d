@@ -22,7 +22,7 @@ class QOIEncoder
 	/// width = Image width in pixels.
 	/// height = Image height in pixels.
 	/// alpha = Whether the image has the alpha channel (transparency).
-	static bool canEncode(int width, int height, bool alpha) => width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? cast(ubyte) 5 : cast(ubyte) 4);
+	static pure bool canEncode(int width, int height, bool alpha) => width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? cast(ubyte) 5 : cast(ubyte) 4);
 
 	/// Encodes the given image.
 	/// Returns `true` if encoded successfully.

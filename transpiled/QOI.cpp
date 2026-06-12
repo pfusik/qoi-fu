@@ -6,11 +6,6 @@ QOIEncoder::QOIEncoder()
 {
 }
 
-bool QOIEncoder::canEncode(int width, int height, bool alpha)
-{
-	return width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? 5 : 4);
-}
-
 bool QOIEncoder::encode(int width, int height, int const * pixels, bool alpha, bool linearColorspace)
 {
 	if (!canEncode(width, height, alpha))

@@ -23,7 +23,7 @@ win32/Xqoi32.usr: Xqoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 	$(CC32) $(CFLAGS) -I transpiled -o $@ $^ -shared -Wl,--kill-at
 
 win32/QOIPaintDotNet.dll: win32/QOIPaintDotNet.cs transpiled/QOI.cs
-	$(CSC) -o+ -out:$@ -t:library $^ -nostdlib -r:"$(PAINT_NET_DIR)/PaintDotNet.ComponentModel.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Core.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Data.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Primitives.dll" -r:"$(DOTNET_REF_DIR)/System.Runtime.dll"
+	$(CSC) -nullable:enable -o+ -out:$@ -t:library $^ -nostdlib -r:"$(PAINT_NET_DIR)/PaintDotNet.ComponentModel.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Core.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Data.dll" -r:"$(PAINT_NET_DIR)/PaintDotNet.Primitives.dll" -r:"$(DOTNET_REF_DIR)/System.Runtime.dll"
 
 install-xnview32: win32/Xqoi32.usr
 	$(SUDO) cp $< "$(XNVIEW32_DIR)/PlugIns/Xqoi32.usr"

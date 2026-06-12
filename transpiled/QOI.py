@@ -14,7 +14,7 @@ class QOIEncoder:
 	_HEADER_SIZE = 14
 
 	_PADDING_SIZE = 8
-	_encoded: bytearray | None
+	_encoded: bytearray
 	_encoded_size: int
 
 	@staticmethod
@@ -141,7 +141,7 @@ class QOIDecoder:
 		The decoder can be used for several images, one after another."""
 	_width: int
 	_height: int
-	_pixels: array.array | None
+	_pixels: array.array
 	_alpha: bool
 	_linear_colorspace: bool
 

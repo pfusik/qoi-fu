@@ -23,7 +23,10 @@ public:
 	 * @param height Image height in pixels.
 	 * @param alpha Whether the image has the alpha channel (transparency).
 	 */
-	static bool canEncode(int width, int height, bool alpha);
+	static constexpr bool canEncode(int width, int height, bool alpha)
+	{
+		return width > 0 && height > 0 && height <= 2147483625 / width / (alpha ? 5 : 4);
+	}
 	/**
 	 * Encodes the given image.
 	 * Returns <code>true</code> if encoded successfully.

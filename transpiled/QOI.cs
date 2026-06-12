@@ -1,4 +1,5 @@
 // Generated automatically with "fut". Do not edit.
+#nullable enable
 using System;
 
 /// <summary>Encoder of the "Quite OK Image" (QOI) format.</summary>
@@ -15,7 +16,7 @@ public class QOIEncoder
 
 	internal const int PaddingSize = 8;
 
-	byte[] Encoded;
+	byte[] Encoded = null!;
 
 	int EncodedSize;
 
@@ -144,7 +145,7 @@ public class QOIDecoder
 
 	int Height;
 
-	int[] Pixels;
+	int[] Pixels = null!;
 
 	bool Alpha;
 

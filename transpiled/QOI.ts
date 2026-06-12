@@ -17,8 +17,8 @@ export class QOIEncoder
 	static readonly HEADER_SIZE: number = 14;
 
 	static readonly PADDING_SIZE: number = 8;
-	#encoded: Uint8Array | null;
-	#encodedSize: number;
+	#encoded!: Uint8Array;
+	#encodedSize!: number;
 
 	/**
 	 * Determines if an image of given size can be encoded.
@@ -161,11 +161,11 @@ export class QOIDecoder
 	public constructor()
 	{
 	}
-	#width: number;
-	#height: number;
-	#pixels: Int32Array | null;
-	#alpha: boolean;
-	#linearColorspace: boolean;
+	#width!: number;
+	#height!: number;
+	#pixels!: Int32Array;
+	#alpha!: boolean;
+	#linearColorspace!: boolean;
 
 	/**
 	 * Decodes the given QOI file contents.
