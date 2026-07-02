@@ -1,6 +1,6 @@
 // Xqoi.c - QOI XnView plugin
 //
-// Copyright (C) 2021 Piotr Fusik
+// Copyright (C) 2021-2026 Piotr Fusik
 //
 // MIT License:
 //
@@ -164,7 +164,7 @@ DLL_EXPORT void * API gfpSavePictureInit(
 	FILE *f = fopen(filename, "wb");
 	if (f == NULL)
 		return NULL;
-	QOIWriter *w = (QOIWriter *) malloc(sizeof(QOIWriter) + width * height * sizeof(int));
+	QOIWriter *w = (QOIWriter *) malloc(sizeof(QOIWriter) + (size_t) width * height * sizeof(int));
 	if (w == NULL) {
 		fclose(f);
 		return NULL;
