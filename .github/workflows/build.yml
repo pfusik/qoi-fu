@@ -7,8 +7,8 @@ jobs:
   make:
     runs-on: ubuntu-24.04
     steps:
-      - run: wget https://github.com/fusionlanguage/fut/releases/download/fut-3.3.4/fut_3.3.4-1_amd64.deb
-      - run: sudo dpkg -i fut_3.3.4-1_amd64.deb
+      - run: wget https://github.com/fusionlanguage/fut/releases/download/fut-3.3.6/fut_3.3.6-1_amd64.deb
+      - run: sudo dpkg -i fut_3.3.6-1_amd64.deb
       - run: sudo apt install libpng-dev
       - uses: actions/checkout@main
       - run: rm transpiled/*
