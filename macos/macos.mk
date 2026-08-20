@@ -50,6 +50,6 @@ macos/bin/Applications:
 
 macos/qoi-fu-$(VERSION)-macos.dmg: macos/bin/png2qoi macos/bin/bin $(QLAPP)/Contents/_CodeSignature/CodeResources macos/bin/Applications
 	hdiutil create -volname qoi-fu-$(VERSION)-macos -srcfolder macos/bin -format UDBZ -fs HFS+ -imagekey bzip2-level=3 -ov $@
-	/Applications/Xcode.app/Contents/Developer/usr/bin/notarytool submit --keychain-profile foxnotary $@
+	/Applications/Xcode.app/Contents/Developer/usr/bin/notarytool submit --wait --keychain-profile foxnotary $@
 
 CLEAN += macos/bin/png2qoi macos/bin/bin macos/bin/Applications
