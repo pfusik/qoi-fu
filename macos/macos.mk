@@ -1,6 +1,6 @@
 OBJC = clang
 OBJCFLAGS = -O2 -Wall -fobjc-arc -mmacos-version-min=12.0 -arch x86_64 -arch arm64
-QLAPP = macos/bin/qoi-fu.app
+QLAPP = macos/bin/QOI-QuickLook.app
 
 macos/bin/png2qoi: png2qoi.c QOI-stdio.c QOI-stdio.h transpiled/QOI.c
 	mkdir -p $(@D) && clang -o $@ -O2 -Wall -mmacosx-version-min=10.6 -arch x86_64 -arch arm64 -I transpiled png2qoi.c QOI-stdio.c transpiled/QOI.c /usr/local/lib/libpng.a -lz
