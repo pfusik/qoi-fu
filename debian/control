@@ -23,7 +23,7 @@ Package: qoi-fu-gimp
 Replaces: qoi-ci-gimp
 Breaks: qoi-ci-gimp
 Architecture: any
-Depends: gimp, ${shlibs:Depends}
+Depends: gimp (<< 3~), ${shlibs:Depends}
 Description: GIMP plugin for the Quite OK Image (QOI) format.
 
 Package: qoi-fu-xnview

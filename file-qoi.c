@@ -1,4 +1,4 @@
-// file-qoi.c - QOI GIMP plugin
+// file-qoi.c - QOI GIMP 2 plugin
 //
 // Copyright (C) 2021 Piotr Fusik
 //
@@ -29,7 +29,7 @@
 
 #include "QOI-stdio.h"
 
-#define AUTHOR "Piotr Fusik <fox@scene.pl>"
+#define AUTHOR "Piotr Fusik <piotr@fusion-lang.org>"
 #define DATE "2021"
 #define PLUG_IN_BINARY "file-qoi"
 #define LOAD_PROC "file-qoi-load"
