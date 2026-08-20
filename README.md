@@ -11,7 +11,6 @@ Included are plugins for:
 - Windows Explorer
 - Finder - macOS
 - GNOME - Linux
-- [GIMP](https://www.gimp.org) - Windows/macOS/Linux
 - [Paint.NET](https://www.getpaint.net) - Windows
 - [XnView](https://www.xnview.com) - Windows/macOS/Linux
 

@@ -25,22 +25,14 @@ BuildRequires: gdk-pixbuf2-devel
 %description gdk-pixbuf
 GdkPixbuf loader for the Quite OK Image (QOI) format.
 
-%package gimp
-Summary: QOI plugin for GIMP
-Requires: gimp
-BuildRequires: gimp-devel
-
-%description gimp
-GIMP plugin for loading and exporting the Quite OK Image (QOI) format.
-
 %prep
 %setup -q
 
 %build
-make CFLAGS="%{build_cflags}" png2qoi libpixbufloader-qoi.so file-qoi
+make CFLAGS="%{build_cflags}" png2qoi libpixbufloader-qoi.so
 
 %install
-make PREFIX=%{buildroot}%{_prefix} GDK_PIXBUF_LOADERS_DIR=%{buildroot}%{_libdir}/gdk-pixbuf-2.0/2.10.0/loaders libdir=%{buildroot}%{_libdir} BUILDING_PACKAGE=1 install-png2qoi install-gdk-pixbuf install-gimp
+make PREFIX=%{buildroot}%{_prefix} GDK_PIXBUF_LOADERS_DIR=%{buildroot}%{_libdir}/gdk-pixbuf-2.0/2.10.0/loaders libdir=%{buildroot}%{_libdir} BUILDING_PACKAGE=1 install-png2qoi install-gdk-pixbuf
 
 %files 2png
 %{_bindir}/png2qoi
@@ -50,10 +42,10 @@ make PREFIX=%{buildroot}%{_prefix} GDK_PIXBUF_LOADERS_DIR=%{buildroot}%{_libdir}
 %{_datadir}/mime/packages/qoi-mime.xml
 %{_datadir}/thumbnailers/qoi.thumbnailer
 
-%files gimp
-%{_libdir}/gimp/2.0/plug-ins/file-qoi/file-qoi
-
 %changelog
+* Thu Aug 20 2026 Piotr Fusik <piotr@fusion-lang.org>
+- Removed the GIMP 2 plugin
+
 * Mon Jan 22 2024 Piotr Fusik <piotr@fusion-lang.org>
 - 3.0.0-1
 

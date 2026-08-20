@@ -56,7 +56,6 @@ rpm64:
 	ssh vm 'rpmbuild -tb qoi-fu-$(VERSION).tar.gz'
 	scp vm:rpmbuild/RPMS/x86_64/qoi-fu-2png-$(VERSION)-1.x86_64.rpm ..
 	scp vm:rpmbuild/RPMS/x86_64/qoi-fu-gdk-pixbuf-$(VERSION)-1.x86_64.rpm ..
-	scp vm:rpmbuild/RPMS/x86_64/qoi-fu-gimp-$(VERSION)-1.x86_64.rpm ..
 
 mac:
 	/usr/bin/tar czf ../qoi-fu-$(VERSION).tar.gz --numeric-owner --owner=0 --group=0 --mode=644 --transform=s,,qoi-fu-$(VERSION)/, `git ls-files`
