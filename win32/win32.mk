@@ -59,9 +59,9 @@ rpm64:
 
 mac:
 	/usr/bin/tar czf ../qoi-fu-$(VERSION).tar.gz --numeric-owner --owner=0 --group=0 --mode=644 --transform=s,,qoi-fu-$(VERSION)/, `git ls-files`
-	scp ../qoi-fu-$(VERSION).tar.gz mac:.
-	ssh mac 'security unlock-keychain ~/Library/Keychains/login.keychain && rm -rf qoi-fu-$(VERSION) && tar xf qoi-fu-$(VERSION).tar.gz && PATH=/usr/local/bin:$$PATH make -C qoi-fu-$(VERSION) macos/qoi-fu-$(VERSION)-macos.dmg'
-	scp mac:qoi-fu-$(VERSION)/macos/qoi-fu-$(VERSION)-macos.dmg ..
+	scp ../qoi-fu-$(VERSION).tar.gz wiesmac:.
+	ssh wiesmac 'security unlock-keychain ~/Library/Keychains/login.keychain && rm -rf qoi-fu-$(VERSION) && tar xf qoi-fu-$(VERSION).tar.gz && make -C qoi-fu-$(VERSION) macos/qoi-fu-$(VERSION)-macos.dmg'
+	scp wiesmac:qoi-fu-$(VERSION)/macos/qoi-fu-$(VERSION)-macos.dmg ..
 
 CLEAN += win32/wicqoi64.dll win32/wicqoi32.dll win32/QOI.o win32/QOI32.o win32/Xqoi32.usr win32/QOIPaintDotNet.dll win32/setup/signed win32/signed
 
