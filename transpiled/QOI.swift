@@ -46,13 +46,13 @@ public class QOIEncoder
 		encoded[2] = 105
 		encoded[3] = 102
 		encoded[4] = UInt8(width >> 24)
-		encoded[5] = UInt8(width >> 16 & 255)
-		encoded[6] = UInt8(width >> 8 & 255)
-		encoded[7] = UInt8(width & 255)
+		encoded[5] = UInt8(width >> 16 & 0xff)
+		encoded[6] = UInt8(width >> 8 & 0xff)
+		encoded[7] = UInt8(width & 0xff)
 		encoded[8] = UInt8(height >> 24)
-		encoded[9] = UInt8(height >> 16 & 255)
-		encoded[10] = UInt8(height >> 8 & 255)
-		encoded[11] = UInt8(height & 255)
+		encoded[9] = UInt8(height >> 16 & 0xff)
+		encoded[10] = UInt8(height >> 8 & 0xff)
+		encoded[11] = UInt8(height & 0xff)
 		encoded[12] = alpha ? 4 : 3
 		encoded[13] = linearColorspace ? 1 : 0
 		var index = [Int32](repeating: 0, count: 64)
@@ -80,28 +80,28 @@ public class QOIEncoder
 					encodedOffset += 1
 					run = 0
 				}
-				let indexOffset: Int = (pixel >> 16 * 3 + pixel >> 8 * 5 + pixel & 63 * 7 + pixel >> 24 * 11) & 63
+				let indexOffset: Int = (pixel >> 16 * 3 + pixel >> 8 * 5 + pixel & 0x3f * 7 + pixel >> 24 * 11) & 0x3f
 				if pixel == index[indexOffset] {
 					encoded[encodedOffset] = UInt8(indexOffset)
 					encodedOffset += 1
 				}
 				else {
 					index[indexOffset] = Int32(pixel)
-					let r: Int = pixel >> 16 & 255
-					let g: Int = pixel >> 8 & 255
-					let b: Int = pixel & 255
+					let r: Int = pixel >> 16 & 0xff
+					let g: Int = pixel >> 8 & 0xff
+					let b: Int = pixel & 0xff
 					if (pixel ^ lastPixel) >> 24 != 0 {
-						encoded[encodedOffset] = 255
+						encoded[encodedOffset] = 0xff
 						encoded[encodedOffset + 1] = UInt8(r)
 						encoded[encodedOffset + 2] = UInt8(g)
 						encoded[encodedOffset + 3] = UInt8(b)
-						encoded[encodedOffset + 4] = UInt8(pixel >> 24 & 255)
+						encoded[encodedOffset + 4] = UInt8(pixel >> 24 & 0xff)
 						encodedOffset += 5
 					}
 					else {
-						var dr: Int = (r - lastPixel >> 16) & 255 ^ 128 - 128
-						let dg: Int = (g - lastPixel >> 8) & 255 ^ 128 - 128
-						var db: Int = (b - lastPixel) & 255 ^ 128 - 128
+						var dr: Int = (r - lastPixel >> 16) & 0xff ^ 0x80 - 0x80
+						let dg: Int = (g - lastPixel >> 8) & 0xff ^ 0x80 - 0x80
+						var db: Int = (b - lastPixel) & 0xff ^ 0x80 - 0x80
 						if dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1 {
 							encoded[encodedOffset] = UInt8(106 + dr << 4 + dg << 2 + db)
 							encodedOffset += 1
@@ -111,11 +111,11 @@ public class QOIEncoder
 							db -= dg
 							if dr >= -8 && dr <= 7 && dg >= -32 && dg <= 31 && db >= -8 && db <= 7 {
 								encoded[encodedOffset] = UInt8(160 + dg)
-								encoded[encodedOffset + 1] = UInt8(136 + dr << 4 + db)
+								encoded[encodedOffset + 1] = UInt8(0x88 + dr << 4 + db)
 								encodedOffset += 2
 							}
 							else {
-								encoded[encodedOffset] = 254
+								encoded[encodedOffset] = 0xfe
 								encoded[encodedOffset + 1] = UInt8(r)
 								encoded[encodedOffset + 2] = UInt8(g)
 								encoded[encodedOffset + 3] = UInt8(b)
@@ -224,16 +224,16 @@ public class QOIDecoder
 				pixelsOffset += 1
 				continue
 			case 1:
-				pixel = pixel & -16777216 | (pixel + (e >> 4 - 4 - 2) << 16) & 16711680 | (pixel + (e >> 2 & 3 - 2) << 8) & 65280 | (pixel + e & 3 - 2) & 255
+				pixel = pixel & -16777216 | (pixel + (e >> 4 - 4 - 2) << 16) & 16711680 | (pixel + (e >> 2 & 3 - 2) << 8) & 65280 | (pixel + e & 3 - 2) & 0xff
 				break
 			case 2:
 				e -= 160
 				let rb: Int = Int(encoded[encodedOffset])
 				encodedOffset += 1
-				pixel = pixel & -16777216 | (pixel + (e + rb >> 4 - 8) << 16) & 16711680 | (pixel + e << 8) & 65280 | (pixel + e + rb & 15 - 8) & 255
+				pixel = pixel & -16777216 | (pixel + (e + rb >> 4 - 8) << 16) & 16711680 | (pixel + e << 8) & 65280 | (pixel + e + rb & 0xf - 8) & 0xff
 				break
 			default:
-				if e < 254 {
+				if e < 0xfe {
 					e -= 191
 					if pixelsOffset + e > pixelsSize {
 						return false
@@ -245,7 +245,7 @@ public class QOIDecoder
 					pixelsOffset += e
 					continue
 				}
-				if e == 254 {
+				if e == 0xfe {
 					pixel = pixel & -16777216 | Int(encoded[encodedOffset]) << 16 | Int(encoded[encodedOffset + 1]) << 8 | Int(encoded[encodedOffset + 2])
 					encodedOffset += 3
 				}
@@ -255,8 +255,8 @@ public class QOIDecoder
 				}
 				break
 			}
-			index[(pixel >> 16 * 3 + pixel >> 8 * 5 + pixel & 63 * 7 + pixel >> 24 * 11) & 63] = Int32(pixel)
-			pixels[pixelsOffset] = index[(pixel >> 16 * 3 + pixel >> 8 * 5 + pixel & 63 * 7 + pixel >> 24 * 11) & 63]
+			index[(pixel >> 16 * 3 + pixel >> 8 * 5 + pixel & 0x3f * 7 + pixel >> 24 * 11) & 0x3f] = Int32(pixel)
+			pixels[pixelsOffset] = index[(pixel >> 16 * 3 + pixel >> 8 * 5 + pixel & 0x3f * 7 + pixel >> 24 * 11) & 0x3f]
 			pixelsOffset += 1
 		}
 		if encodedOffset != encodedSize {

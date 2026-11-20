@@ -80,16 +80,16 @@ public class QOIEncoder
 					encoded[encodedOffset++] = (byte) (191 + run);
 					run = 0;
 				}
-				int indexOffset = ((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63;
+				int indexOffset = ((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 0x3f) * 7 + (pixel >> 24) * 11) & 0x3f;
 				if (pixel == index[indexOffset])
 					encoded[encodedOffset++] = (byte) indexOffset;
 				else {
 					index[indexOffset] = pixel;
-					int r = pixel >> 16 & 255;
-					int g = pixel >> 8 & 255;
-					int b = pixel & 255;
+					int r = pixel >> 16 & 0xff;
+					int g = pixel >> 8 & 0xff;
+					int b = pixel & 0xff;
 					if ((pixel ^ lastPixel) >> 24 != 0) {
-						encoded[encodedOffset] = (byte) 255;
+						encoded[encodedOffset] = (byte) 0xff;
 						encoded[encodedOffset + 1] = (byte) r;
 						encoded[encodedOffset + 2] = (byte) g;
 						encoded[encodedOffset + 3] = (byte) b;
@@ -97,9 +97,9 @@ public class QOIEncoder
 						encodedOffset += 5;
 					}
 					else {
-						int dr = (((r - (lastPixel >> 16)) & 255) ^ 128) - 128;
-						int dg = (((g - (lastPixel >> 8)) & 255) ^ 128) - 128;
-						int db = (((b - lastPixel) & 255) ^ 128) - 128;
+						int dr = (((r - (lastPixel >> 16)) & 0xff) ^ 0x80) - 0x80;
+						int dg = (((g - (lastPixel >> 8)) & 0xff) ^ 0x80) - 0x80;
+						int db = (((b - lastPixel) & 0xff) ^ 0x80) - 0x80;
 						if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
 							encoded[encodedOffset++] = (byte) (106 + (dr << 4) + (dg << 2) + db);
 						else {
@@ -107,11 +107,11 @@ public class QOIEncoder
 							db -= dg;
 							if (dr >= -8 && dr <= 7 && dg >= -32 && dg <= 31 && db >= -8 && db <= 7) {
 								encoded[encodedOffset] = (byte) (160 + dg);
-								encoded[encodedOffset + 1] = (byte) (136 + (dr << 4) + db);
+								encoded[encodedOffset + 1] = (byte) (0x88 + (dr << 4) + db);
 								encodedOffset += 2;
 							}
 							else {
-								encoded[encodedOffset] = (byte) 254;
+								encoded[encodedOffset] = (byte) 0xfe;
 								encoded[encodedOffset + 1] = (byte) r;
 								encoded[encodedOffset + 2] = (byte) g;
 								encoded[encodedOffset + 3] = (byte) b;

@@ -72,16 +72,16 @@ public class QOIEncoder
 					encoded[encodedOffset++] = (byte) (191 + run);
 					run = 0;
 				}
-				int indexOffset = ((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63;
+				int indexOffset = ((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 0x3f) * 7 + (pixel >> 24) * 11) & 0x3f;
 				if (pixel == index[indexOffset])
 					encoded[encodedOffset++] = (byte) indexOffset;
 				else {
 					index[indexOffset] = pixel;
-					int r = pixel >> 16 & 255;
-					int g = pixel >> 8 & 255;
-					int b = pixel & 255;
+					int r = pixel >> 16 & 0xff;
+					int g = pixel >> 8 & 0xff;
+					int b = pixel & 0xff;
 					if ((pixel ^ lastPixel) >> 24 != 0) {
-						encoded[encodedOffset] = 255;
+						encoded[encodedOffset] = 0xff;
 						encoded[encodedOffset + 1] = (byte) r;
 						encoded[encodedOffset + 2] = (byte) g;
 						encoded[encodedOffset + 3] = (byte) b;
@@ -89,9 +89,9 @@ public class QOIEncoder
 						encodedOffset += 5;
 					}
 					else {
-						int dr = (((r - (lastPixel >> 16)) & 255) ^ 128) - 128;
-						int dg = (((g - (lastPixel >> 8)) & 255) ^ 128) - 128;
-						int db = (((b - lastPixel) & 255) ^ 128) - 128;
+						int dr = (((r - (lastPixel >> 16)) & 0xff) ^ 0x80) - 0x80;
+						int dg = (((g - (lastPixel >> 8)) & 0xff) ^ 0x80) - 0x80;
+						int db = (((b - lastPixel) & 0xff) ^ 0x80) - 0x80;
 						if (dr >= -2 && dr <= 1 && dg >= -2 && dg <= 1 && db >= -2 && db <= 1)
 							encoded[encodedOffset++] = (byte) (106 + (dr << 4) + (dg << 2) + db);
 						else {
@@ -99,11 +99,11 @@ public class QOIEncoder
 							db -= dg;
 							if (dr >= -8 && dr <= 7 && dg >= -32 && dg <= 31 && db >= -8 && db <= 7) {
 								encoded[encodedOffset] = (byte) (160 + dg);
-								encoded[encodedOffset + 1] = (byte) (136 + (dr << 4) + db);
+								encoded[encodedOffset + 1] = (byte) (0x88 + (dr << 4) + db);
 								encodedOffset += 2;
 							}
 							else {
-								encoded[encodedOffset] = 254;
+								encoded[encodedOffset] = 0xfe;
 								encoded[encodedOffset + 1] = (byte) r;
 								encoded[encodedOffset + 2] = (byte) g;
 								encoded[encodedOffset + 3] = (byte) b;
@@ -198,15 +198,15 @@ public class QOIDecoder
 				pixels[pixelsOffset++] = pixel = index[e];
 				continue;
 			case 1:
-				pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 4 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255);
+				pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 4 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 0xff);
 				break;
 			case 2:
 				e -= 160;
 				int rb = encoded[encodedOffset++];
-				pixel = (pixel & -16777216) | ((pixel + ((e + (rb >> 4) - 8) << 16)) & 16711680) | ((pixel + (e << 8)) & 65280) | ((pixel + e + (rb & 15) - 8) & 255);
+				pixel = (pixel & -16777216) | ((pixel + ((e + (rb >> 4) - 8) << 16)) & 16711680) | ((pixel + (e << 8)) & 65280) | ((pixel + e + (rb & 0xf) - 8) & 0xff);
 				break;
 			default:
-				if (e < 254) {
+				if (e < 0xfe) {
 					e -= 191;
 					if (pixelsOffset + e > pixelsSize)
 						return false;
@@ -216,7 +216,7 @@ public class QOIDecoder
 					pixelsOffset += e;
 					continue;
 				}
-				if (e == 254) {
+				if (e == 0xfe) {
 					pixel = (pixel & -16777216) | encoded[encodedOffset] << 16 | encoded[encodedOffset + 1] << 8 | encoded[encodedOffset + 2];
 					encodedOffset += 3;
 				}
@@ -226,7 +226,7 @@ public class QOIDecoder
 				}
 				break;
 			}
-			pixels[pixelsOffset++] = index[((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63] = pixel;
+			pixels[pixelsOffset++] = index[((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 0x3f) * 7 + (pixel >> 24) * 11) & 0x3f] = pixel;
 		}
 		if (encodedOffset != encodedSize)
 			return false;

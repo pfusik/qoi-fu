@@ -47,13 +47,13 @@ class QOIEncoder:
 		encoded[2] = 105
 		encoded[3] = 102
 		encoded[4] = width >> 24
-		encoded[5] = width >> 16 & 255
-		encoded[6] = width >> 8 & 255
-		encoded[7] = width & 255
+		encoded[5] = width >> 16 & 0xff
+		encoded[6] = width >> 8 & 0xff
+		encoded[7] = width & 0xff
 		encoded[8] = height >> 24
-		encoded[9] = height >> 16 & 255
-		encoded[10] = height >> 8 & 255
-		encoded[11] = height & 255
+		encoded[9] = height >> 16 & 0xff
+		encoded[10] = height >> 8 & 0xff
+		encoded[11] = height & 0xff
 		encoded[12] = 4 if alpha else 3
 		encoded[13] = 1 if linear_colorspace else 0
 		index: array.array = array.array("i", [ 0 ]) * 64
@@ -77,26 +77,26 @@ class QOIEncoder:
 					encoded[encoded_offset] = 191 + run
 					encoded_offset += 1
 					run = 0
-				index_offset: int = ((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63
+				index_offset: int = ((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 0x3f) * 7 + (pixel >> 24) * 11) & 0x3f
 				if pixel == index[index_offset]:
 					encoded[encoded_offset] = index_offset
 					encoded_offset += 1
 				else:
 					index[index_offset] = pixel
-					r: int = pixel >> 16 & 255
-					g: int = pixel >> 8 & 255
-					b: int = pixel & 255
+					r: int = pixel >> 16 & 0xff
+					g: int = pixel >> 8 & 0xff
+					b: int = pixel & 0xff
 					if (pixel ^ last_pixel) >> 24 != 0:
-						encoded[encoded_offset] = 255
+						encoded[encoded_offset] = 0xff
 						encoded[encoded_offset + 1] = r
 						encoded[encoded_offset + 2] = g
 						encoded[encoded_offset + 3] = b
-						encoded[encoded_offset + 4] = pixel >> 24 & 255
+						encoded[encoded_offset + 4] = pixel >> 24 & 0xff
 						encoded_offset += 5
 					else:
-						dr: int = (((r - (last_pixel >> 16)) & 255) ^ 128) - 128
-						dg: int = (((g - (last_pixel >> 8)) & 255) ^ 128) - 128
-						db: int = (((b - last_pixel) & 255) ^ 128) - 128
+						dr: int = (((r - (last_pixel >> 16)) & 0xff) ^ 0x80) - 0x80
+						dg: int = (((g - (last_pixel >> 8)) & 0xff) ^ 0x80) - 0x80
+						db: int = (((b - last_pixel) & 0xff) ^ 0x80) - 0x80
 						if dr >= -2 and dr <= 1 and dg >= -2 and dg <= 1 and db >= -2 and db <= 1:
 							encoded[encoded_offset] = 106 + (dr << 4) + (dg << 2) + db
 							encoded_offset += 1
@@ -105,10 +105,10 @@ class QOIEncoder:
 							db -= dg
 							if dr >= -8 and dr <= 7 and dg >= -32 and dg <= 31 and db >= -8 and db <= 7:
 								encoded[encoded_offset] = 160 + dg
-								encoded[encoded_offset + 1] = 136 + (dr << 4) + db
+								encoded[encoded_offset + 1] = 0x88 + (dr << 4) + db
 								encoded_offset += 2
 							else:
-								encoded[encoded_offset] = 254
+								encoded[encoded_offset] = 0xfe
 								encoded[encoded_offset + 1] = r
 								encoded[encoded_offset + 2] = g
 								encoded[encoded_offset + 3] = b
@@ -191,14 +191,14 @@ class QOIDecoder:
 					pixels_offset += 1
 					continue
 				case 1:
-					pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 4 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 255)
+					pixel = (pixel & -16777216) | ((pixel + (((e >> 4) - 4 - 2) << 16)) & 16711680) | ((pixel + (((e >> 2 & 3) - 2) << 8)) & 65280) | ((pixel + (e & 3) - 2) & 0xff)
 				case 2:
 					e -= 160
 					rb: int = encoded[encoded_offset]
 					encoded_offset += 1
-					pixel = (pixel & -16777216) | ((pixel + ((e + (rb >> 4) - 8) << 16)) & 16711680) | ((pixel + (e << 8)) & 65280) | ((pixel + e + (rb & 15) - 8) & 255)
+					pixel = (pixel & -16777216) | ((pixel + ((e + (rb >> 4) - 8) << 16)) & 16711680) | ((pixel + (e << 8)) & 65280) | ((pixel + e + (rb & 0xf) - 8) & 0xff)
 				case _:
-					if e < 254:
+					if e < 0xfe:
 						e -= 191
 						if pixels_offset + e > pixels_size:
 							return False
@@ -207,13 +207,13 @@ class QOIDecoder:
 						pixels[pixels_offset:pixels_offset + e] = array.array("i", [ pixel ]) * e
 						pixels_offset += e
 						continue
-					if e == 254:
+					if e == 0xfe:
 						pixel = (pixel & -16777216) | encoded[encoded_offset] << 16 | encoded[encoded_offset + 1] << 8 | encoded[encoded_offset + 2]
 						encoded_offset += 3
 					else:
 						pixel = encoded[encoded_offset + 3] << 24 | encoded[encoded_offset] << 16 | encoded[encoded_offset + 1] << 8 | encoded[encoded_offset + 2]
 						encoded_offset += 4
-			pixels[pixels_offset] = index[((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 63) * 7 + (pixel >> 24) * 11) & 63] = pixel
+			pixels[pixels_offset] = index[((pixel >> 16) * 3 + (pixel >> 8) * 5 + (pixel & 0x3f) * 7 + (pixel >> 24) * 11) & 0x3f] = pixel
 			pixels_offset += 1
 		if encoded_offset != encoded_size:
 			return False
